@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="sr-ME">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e0f12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>AR kocka – Gusinjska kulturna baština</title>
+<meta name="description" content="Hold the printed AR cube in front of your phone and see the building models on it.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='5' fill='%23f4f2ee'/%3E%3Crect x='7' y='7' width='8' height='8' fill='%2315161a'/%3E%3Crect x='17' y='7' width='8' height='8' fill='%2315161a'/%3E%3Crect x='7' y='17' width='8' height='8' fill='%2315161a'/%3E%3Crect x='17' y='17' width='8' height='8' fill='%2315161a'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/kocka.css">
+<script type="importmap">{"imports":{"three":"./js/vendor/three/three.module.min.js","three/addons/":"./js/vendor/three/addons/"}}</script>
+<script type="module" src="js/kocka.js"></script>
+</head>
+<body>
+<video id="cam" playsinline muted autoplay></video>
+<canvas id="gl"></canvas>
+<canvas id="dbg"></canvas>
+
+<section id="start">
+  <div class="cube3d" aria-hidden="true"><div class="c">
+    <div class="f f1"><i></i><i></i><i></i><i></i></div><div class="f f2"><i></i><i></i><i></i><i></i></div>
+    <div class="f f3"><i></i><i></i><i></i><i></i></div><div class="f f4"><i></i><i></i><i></i><i></i></div>
+    <div class="f f5"><i></i><i></i><i></i><i></i></div><div class="f f6"><i></i><i></i><i></i><i></i></div>
+  </div></div>
+  <h1 data-t="c_title">AR kocka</h1>
+  <p class="lead" data-t="c_lead"></p>
+  <button class="btn primary" id="go" data-t="c_start"></button>
+  <div id="err" role="alert"></div>
+  <div class="start-links">
+    <a href="print/AR_cube_paper_test.pdf" target="_blank" rel="noopener" data-t="c_pdf"></a>
+    <a href="print/AR_cube_70mm_2colour.3mf" download data-t="c_3mf"></a>
+    <a href="print/AR_cube_70mm_STL.zip" download data-t="c_stl"></a>
+  </div>
+  <p class="start-note" data-t="c_note"></p>
+  <p class="start-note"><a href="index.html" data-t="c_museum"></a></p>
+</section>
+
+<header id="hud" hidden>
+  <div class="pill" id="status" aria-live="polite"><i class="dot"></i><span id="statusText"></span></div>
+  <div class="icons">
+    <button class="ibtn" id="btnHelp" aria-label="Help">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1.1.9-1.1 1.6v.5"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg>
+    </button>
+    <button class="ibtn" id="btnSettings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+    </button>
+  </div>
+</header>
+
+<div id="hint" class="off" hidden><div class="frame"></div><div id="hintText" data-t="c_hint"></div></div>
+
+<footer id="dock" hidden>
+  <div class="actions">
+    <a class="btn" id="btnMuseum" href="index.html" data-t="c_back"></a>
+    <button class="btn" id="btnTurn" data-t="c_turn"></button>
+    <button class="btn" id="btnFace" data-t="c_face"></button>
+    <button class="btn" id="btnInfo" data-t="c_about"></button>
+  </div>
+  <nav id="models" aria-label="Models"></nav>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+
+<section class="sheet" id="sheetSettings" aria-label="Settings">
+  <div class="grab"></div>
+  <h2 data-t="c_settings"></h2>
+  <div class="row"><label><span data-t="c_base"></span><small data-t="c_base2"></small></label>
+    <div class="seg" id="segPlinth"><button data-v="stone" data-t="c_stone"></button><button data-v="grass" data-t="c_grass"></button><button data-v="none" data-t="c_off"></button></div></div>
+  <div class="row"><label><span data-t="c_view"></span><small data-t="c_view2"></small></label>
+    <div class="seg" id="segView"><button data-v="auto" data-t="c_auto"></button><button data-v="fit" data-t="c_whole"></button><button data-v="fill" data-t="c_fill"></button></div></div>
+  <div class="row"><label for="rngSize"><span data-t="c_size"></span><small id="sizeVal">1.0×</small></label><input type="range" id="rngSize" min="0.5" max="3" step="0.1"></div>
+  <div class="row"><label for="chkUpright"><span data-t="c_upright"></span><small data-t="c_upright2"></small></label>
+    <span class="switch"><input type="checkbox" id="chkUpright"><span></span></span></div>
+  <div class="row"><label for="chkShadow" data-t="c_shadows"></label><span class="switch"><input type="checkbox" id="chkShadow"><span></span></span></div>
+  <div class="row"><label for="rngFov"><span data-t="c_fov"></span><small id="fovVal">66°</small></label><input type="range" id="rngFov" min="50" max="85" step="1"></div>
+  <div class="row"><label for="chkDebug"><span data-t="c_debug"></span><small data-t="c_debug2"></small></label>
+    <span class="switch"><input type="checkbox" id="chkDebug"><span></span></span></div>
+</section>
+
+<section class="sheet" id="sheetInfo" aria-label="About this model">
+  <div class="grab"></div>
+  <h2 id="infoTitle">Model</h2>
+  <p class="mdesc" id="infoDesc"></p>
+  <dl class="kv" id="infoKv"></dl>
+</section>
+
+<section class="sheet help" id="sheetHelp" aria-label="Help">
+  <div class="grab"></div>
+  <h2 data-t="c_how"></h2>
+  <ol>
+    <li data-t="c_h1"></li>
+    <li data-t="c_h2"></li>
+    <li data-t="c_h3"></li>
+    <li data-t="c_h4"></li>
+  </ol>
+  <p class="start-note" style="text-align:left"><span data-t="c_private"></span> v<span id="ver"></span></p>
+</section>
+
+<div class="toast" id="toast"></div>
+</body>
+</html>

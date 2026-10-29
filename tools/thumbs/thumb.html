@@ -1,0 +1,32 @@
+<!doctype html><html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"../../js/vendor/three/three.module.min.js","three/addons/":"../../js/vendor/three/addons/"}}</script>
+<style>html,body{margin:0;background:transparent}</style></head><body>
+<script type="module">
+// Renders one model as a transparent 512x512 thumbnail: ?m=models/x.glb
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+const N = 512, r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+r.setSize(N, N); r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.NeutralToneMapping; r.shadowMap.enabled = true;
+document.body.appendChild(r.domElement);
+const s = new THREE.Scene();
+s.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture; s.environmentIntensity = 0.8;
+const sun = new THREE.DirectionalLight(0xfff3e2, 1.6); sun.position.set(-1.2, 2.4, 1.6); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024); s.add(sun);
+s.add(new THREE.HemisphereLight(0xffffff, 0x8a7d6a, 0.5));
+const l = new GLTFLoader(); l.setMeshoptDecoder(MeshoptDecoder);
+const g = await l.loadAsync('../../' + new URLSearchParams(location.search).get('m'));
+const o = g.scene; o.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+const b = new THREE.Box3().setFromObject(o), sz = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
+o.position.set(-c.x, -b.min.y, -c.z);
+const k = 1 / Math.max(sz.x, sz.y, sz.z); const w = new THREE.Group(); w.add(o); w.scale.setScalar(k); s.add(w);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(Math.max(sz.x, sz.z) * k * 0.9, 64), new THREE.ShadowMaterial({ opacity: 0.2 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; s.add(ground);
+const h = sz.y * k, rad = 0.5 * Math.hypot(sz.x, sz.y, sz.z) * k;
+const cam = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+const d = rad / Math.sin(THREE.MathUtils.degToRad(15)) * 1.0;
+cam.position.set(d * 0.55, h * 0.45 + d * 0.3, d * 0.78); cam.lookAt(0, h * 0.45, 0);
+Object.assign(sun.shadow.camera, { left: -1, right: 1, top: 1, bottom: -1 });
+r.render(s, cam);
+document.title = 'done';
+</script></body></html>

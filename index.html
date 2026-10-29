@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="sr-ME">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gusinjska kulturna baština</title>
+<meta name="description" content="Gusinjska kulturna baština – 3D muzej na dlanu: zgrade i predmeti Gusinja u 3D, na AR kocki i u prirodnoj veličini.">
+<meta name="theme-color" content="#f3ede3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14120f" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/museum.css">
+<script type="importmap">{"imports":{"three":"./js/vendor/three/three.module.min.js","three/addons/":"./js/vendor/three/addons/"}}</script>
+<script type="module" src="js/museum.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="back" id="back" href="#/" hidden aria-label="Nazad">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+  </a>
+  <a class="brand" href="#/"><span class="mark" aria-hidden="true"></span><span id="brandName">Gusinjska kulturna baština</span></a>
+  <div class="lang" role="group" aria-label="Jezik / Language">
+    <button data-lang="me">ME</button><button data-lang="en">EN</button>
+  </div>
+</header>
+<main id="view" tabindex="-1"></main>
+<div id="xrOverlay" class="xr-overlay" hidden>
+  <div class="xr-top"><span id="xrMsg"></span><button id="xrClose" class="xr-btn"></button></div>
+  <div class="xr-bottom"><button id="xrScale" class="xr-btn"></button></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+</body>
+</html>

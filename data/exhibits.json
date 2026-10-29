@@ -1,0 +1,81 @@
+{
+  "museum": {
+    "name": "Gusinjska kulturna baština",
+    "tagline": { "me": "Muzej na dlanu", "en": "A museum in your hand" },
+    "intro": {
+      "me": "Zgrade, predmeti i priče Gusinja i Prokletija u 3D. Okrenite ih prstom, držite ih na kocki ili ih postavite u prirodnoj veličini u prostor oko sebe.",
+      "en": "Buildings, objects and stories of Gusinje and Prokletije in 3D. Turn them with a finger, hold them on the cube, or place them at real size in the room around you."
+    }
+  },
+  "galleries": [
+    {
+      "id": "arhitektura",
+      "name": { "me": "Arhitektura", "en": "Architecture" },
+      "description": { "me": "Kule, kuće, džamije i javne zgrade Gusinja.", "en": "Towers, houses, mosques and public buildings of Gusinje." }
+    },
+    {
+      "id": "etnografija",
+      "name": { "me": "Etnografija", "en": "Ethnography" },
+      "description": { "me": "Predmeti svakodnevnog života: posuđe, namještaj, nošnja i alati.", "en": "Objects of everyday life: vessels, furniture, costume and tools." }
+    }
+  ],
+  "exhibits": [
+    {
+      "id": "kula-rasica",
+      "gallery": "arhitektura",
+      "model": "models/kula-rasica.glb",
+      "thumb": "thumbs/kula-rasica.png",
+      "placeholder": true,
+      "kind": "building",
+      "size": { "h": 17.5 },
+      "name": { "me": "Kula Rašića", "en": "Rašić Tower" },
+      "subtitle": { "me": "Gusinje", "en": "Gusinje" },
+      "description": {
+        "me": "Ovo je privremeni, pojednostavljeni model za isprobavanje aplikacije. Detaljan 3D model kule i njena priča dodaju se uskoro.",
+        "en": "This is a temporary, simplified model for trying out the app. The detailed 3D model of the tower and its story are coming soon."
+      },
+      "facts": [
+        { "k": { "me": "Mjesto", "en": "Place" }, "v": { "me": "Gusinje", "en": "Gusinje" } },
+        { "k": { "me": "Visina", "en": "Height" }, "v": { "me": "oko 17,5 m", "en": "about 17.5 m" } }
+      ]
+    },
+    {
+      "id": "ibrik",
+      "gallery": "etnografija",
+      "model": "models/ibrik.glb",
+      "thumb": "thumbs/ibrik.png",
+      "placeholder": true,
+      "kind": "object",
+      "size": { "h": 0.40 },
+      "name": { "me": "Bakarni ibrik", "en": "Copper ewer (ibrik)" },
+      "subtitle": { "me": "Primjer eksponata", "en": "Sample exhibit" },
+      "description": {
+        "me": "Primjer kako će predmet iz zbirke izgledati u aplikaciji. Ovaj model je napravljen samo za probu i biće zamijenjen skeniranim predmetom iz muzeja.",
+        "en": "An example of how an object from the collection will look in the app. This model was made only for testing and will be replaced by a scanned object from the museum."
+      },
+      "facts": [
+        { "k": { "me": "Materijal", "en": "Material" }, "v": { "me": "bakar", "en": "copper" } },
+        { "k": { "me": "Visina", "en": "Height" }, "v": { "me": "40 cm", "en": "40 cm" } }
+      ]
+    },
+    {
+      "id": "sofra",
+      "gallery": "etnografija",
+      "model": "models/sofra.glb",
+      "thumb": "thumbs/sofra.png",
+      "placeholder": true,
+      "kind": "object",
+      "size": { "h": 0.30 },
+      "name": { "me": "Sofra", "en": "Sofra (low dining table)" },
+      "subtitle": { "me": "Primjer eksponata", "en": "Sample exhibit" },
+      "description": {
+        "me": "Niska okrugla trpeza za kojom se jelo sjedeći na podu. Model je napravljen samo za probu i biće zamijenjen skeniranim predmetom.",
+        "en": "A low round table for eating while seated on the floor. The model was made only for testing and will be replaced by a scanned object."
+      },
+      "facts": [
+        { "k": { "me": "Materijal", "en": "Material" }, "v": { "me": "drvo", "en": "wood" } },
+        { "k": { "me": "Dimenzije", "en": "Size" }, "v": { "me": "Ø 86 cm, visina 30 cm", "en": "Ø 86 cm, 30 cm high" } }
+      ]
+    }
+  ]
+}
