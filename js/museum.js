@@ -6,7 +6,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STR, detectLang, L } from './i18n.js';
 
-const VERSION = '0.1';
+const VERSION = '0.2';
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const store = { get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } },
@@ -113,6 +113,13 @@ const ICONS = {
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v7h14v-7"/></svg>',
 };
 
+// size: {h: metres} (height) or {long: metres, label?: {me,en}} (longest dimension, e.g. a scythe or a wheel)
+function sizeChip(e) {
+  const s = e.size || {};
+  if (s.h) return `<span class="size">${esc(t('height'))} ${esc(fmtSize(s.h))}</span>`;
+  if (s.long) return `<span class="size">${esc(s.label ? tx(s.label) : t('length'))} ${esc(fmtSize(s.long))}</span>`;
+  return '';
+}
 function fmtSize(m) {
   if (m >= 1) return (Math.round(m * 10) / 10).toLocaleString(lang === 'en' ? 'en' : 'sr-Latn-ME') + ' m';
   return Math.round(m * 100) + ' cm';
@@ -127,7 +134,7 @@ function renderExhibit(id) {
   const inShow = showcase.includes(e.id);
   $('#view').innerHTML = `
     <div class="stage" id="stage"><div class="loading">${esc(t('loading'))}</div>
-      ${e.size && e.size.h ? `<span class="size">${esc(t('height'))} ${esc(fmtSize(e.size.h))}</span>` : ''}
+      ${sizeChip(e)}
       <span class="hint" id="hint">${esc(t('dragHint'))}</span></div>
     <header class="ex-h">
       <h1>${esc(tx(e.name))}</h1>
@@ -278,8 +285,13 @@ async function mountViewer(host, e) {
     const h = size.y * k, r = 0.5 * Math.hypot(size.x, size.y, size.z) * k;
     V.ground.scale.setScalar(Math.max(size.x, size.z) * k * 0.9);
     V.controls.target.set(0, h * 0.45, 0);
-    const dist = r / Math.sin(THREE.MathUtils.degToRad(V.camera.fov / 2)) * 1.05;
-    V.camera.position.set(dist * 0.55, h * 0.45 + dist * 0.32, dist * 0.78);
+    // fit the bounding sphere into the narrower of the two view angles
+    const vf = THREE.MathUtils.degToRad(V.camera.fov / 2), hf = Math.atan(Math.tan(vf) * Math.max(0.3, V.camera.aspect || 1));
+    const dist = r / Math.sin(Math.min(vf, hf)) * 1.02;
+    // flat objects (lying tools) are shown from higher up
+    const flat = h / Math.max(size.x * k, size.z * k) < 0.25;
+    const el = flat ? 0.95 : 0.32, fw = Math.sqrt(Math.max(0.05, 1 - el * el));
+    V.camera.position.set(dist * 0.58 * fw, h * 0.45 + dist * el, dist * 0.81 * fw);
     V.camera.near = dist / 50; V.camera.far = dist * 20; V.camera.updateProjectionMatrix();
     V.controls.minDistance = dist * 0.35; V.controls.maxDistance = dist * 2.5;
     V.controls.update();
@@ -314,7 +326,8 @@ async function startLifeSize(e) {
 async function realScaleModel(e) {
   const src = await loadModel(e.model);
   const { group, size } = normalise(src);
-  const k = (e.size && e.size.h ? e.size.h : 1) / size.y;   // model units -> metres
+  const s = e.size || {};
+  const k = s.h ? s.h / size.y : s.long ? s.long / Math.max(size.x, size.y, size.z) : 1;   // model units -> metres
   group.scale.setScalar(k);
   return { group, metres: size.clone().multiplyScalar(k) };
 }

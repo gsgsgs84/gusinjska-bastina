@@ -1,7 +1,10 @@
 {
   "museum": {
     "name": "Gusinjska kulturna baština",
-    "tagline": { "me": "Muzej na dlanu", "en": "A museum in your hand" },
+    "tagline": {
+      "me": "Muzej na dlanu",
+      "en": "A museum in your hand"
+    },
     "intro": {
       "me": "Zgrade, predmeti i priče Gusinja i Prokletija u 3D. Okrenite ih prstom, držite ih na kocki ili ih postavite u prirodnoj veličini u prostor oko sebe.",
       "en": "Buildings, objects and stories of Gusinje and Prokletije in 3D. Turn them with a finger, hold them on the cube, or place them at real size in the room around you."
@@ -9,17 +12,358 @@
   },
   "galleries": [
     {
-      "id": "arhitektura",
-      "name": { "me": "Arhitektura", "en": "Architecture" },
-      "description": { "me": "Kule, kuće, džamije i javne zgrade Gusinja.", "en": "Towers, houses, mosques and public buildings of Gusinje." }
+      "id": "etnografija",
+      "name": {
+        "me": "Etnografija",
+        "en": "Ethnography"
+      },
+      "description": {
+        "me": "Predmeti svakodnevnog života i rada: posuđe, alati za kosidbu i žetvu, samar i kola.",
+        "en": "Objects of everyday life and work: vessels, tools for mowing and harvest, a pack saddle and a cart."
+      }
     },
     {
-      "id": "etnografija",
-      "name": { "me": "Etnografija", "en": "Ethnography" },
-      "description": { "me": "Predmeti svakodnevnog života: posuđe, namještaj, nošnja i alati.", "en": "Objects of everyday life: vessels, furniture, costume and tools." }
+      "id": "arhitektura",
+      "name": {
+        "me": "Arhitektura",
+        "en": "Architecture"
+      },
+      "description": {
+        "me": "Kule, kuće, džamije i javne zgrade Gusinja.",
+        "en": "Towers, houses, mosques and public buildings of Gusinje."
+      }
     }
   ],
   "exhibits": [
+    {
+      "id": "ibrik",
+      "gallery": "etnografija",
+      "featured": true,
+      "model": "models/ibrik.glb",
+      "thumb": "thumbs/ibrik.png",
+      "kind": "object",
+      "size": {
+        "h": 0.4
+      },
+      "name": {
+        "me": "Ibrik",
+        "en": "Ibrik (metal ewer)"
+      },
+      "subtitle": {
+        "me": "Posuda za vodu",
+        "en": "Water vessel"
+      },
+      "description": {
+        "me": "Ibrik je metalna posuda s drškom i poklopcem, u koju se sipala voda za pranje ruku i lica. U kućama Gusinja stajao je uz leđen (lavor), pa se gostu i ukućanima polivalo po rukama prije i poslije jela, a voda iz ibrika služila je i za abdest.",
+        "en": "An ibrik is a metal vessel with a handle and a lid, filled with water for washing hands and face. In Gusinje homes it stood beside a basin (leđen): water was poured over the hands of guests and family before and after meals, and it was also used for the ritual washing before prayer."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "posuđe, domaćinstvo",
+            "en": "household vessel"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "metal",
+            "en": "metal"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height"
+          },
+          "v": {
+            "me": "oko 40 cm (procjena)",
+            "en": "about 40 cm (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "kosa",
+      "gallery": "etnografija",
+      "model": "models/kosa.glb",
+      "thumb": "thumbs/kosa.png",
+      "kind": "object",
+      "size": {
+        "long": 0.75
+      },
+      "name": {
+        "me": "Sječivo kose",
+        "en": "Scythe blade"
+      },
+      "subtitle": {
+        "me": "Alat za kosidbu",
+        "en": "Mowing tool"
+      },
+      "description": {
+        "me": "Sječivo kose, kovano od gvožđa. Nasađivalo se na dugo drveno kosište, a prije kosidbe otkivalo se čekićem na babici i oštrilo brusom koji je kosac nosio za pasom. Kosom se kosila trava za sijeno na livadama i katunima ispod Prokletija.",
+        "en": "A forged iron scythe blade. It was fixed to a long wooden shaft; before mowing it was hammered thin on a small anvil and sharpened with a whetstone the mower carried at his belt. Scythes cut the grass for hay on the meadows and summer pastures below Prokletije."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "poljoprivredni alat",
+            "en": "farming tool"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "kovano gvožđe",
+            "en": "forged iron"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length"
+          },
+          "v": {
+            "me": "oko 75 cm (procjena)",
+            "en": "about 75 cm (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "kosa-2",
+      "gallery": "etnografija",
+      "model": "models/kosa-2.glb",
+      "thumb": "thumbs/kosa-2.png",
+      "kind": "object",
+      "size": {
+        "long": 1.65
+      },
+      "name": {
+        "me": "Kosa (drugi primjerak)",
+        "en": "Scythe (second example)"
+      },
+      "subtitle": {
+        "me": "Ručno rađena kosa",
+        "en": "Handmade scythe"
+      },
+      "description": {
+        "me": "Još jedna kosa iz zbirke, s dugim drvenim kosištem i dvije ručice. Oblik sječiva, kosišta i ručica razlikovao se od majstora do majstora i prilagođavao se visini i ruci kosca.",
+        "en": "Another scythe from the collection, with a long wooden shaft and two grips. The shape of the blade, shaft and grips varied from smith to smith and was fitted to the height and hand of the mower."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "poljoprivredni alat",
+            "en": "farming tool"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "drvo i kovano gvožđe",
+            "en": "wood and forged iron"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length"
+          },
+          "v": {
+            "me": "oko 1,65 m (procjena)",
+            "en": "about 1.65 m (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "srp",
+      "gallery": "etnografija",
+      "model": "models/srp.glb",
+      "thumb": "thumbs/srp.png",
+      "kind": "object",
+      "size": {
+        "long": 0.45
+      },
+      "name": {
+        "me": "Srp",
+        "en": "Sickle"
+      },
+      "subtitle": {
+        "me": "Alat za žetvu",
+        "en": "Harvest tool"
+      },
+      "description": {
+        "me": "Srpom se žnjelo žito, rukovet po rukovet, a snopovi su se vezali i slagali u krstine da se osuše. Žetva je bila zajednički posao porodice i komšija.",
+        "en": "The sickle was used to reap grain one handful at a time; the sheaves were tied and stacked to dry. Harvest was shared work for the family and the neighbours."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "poljoprivredni alat",
+            "en": "farming tool"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "drvo i kovano gvožđe",
+            "en": "wood and forged iron"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length"
+          },
+          "v": {
+            "me": "oko 45 cm (procjena)",
+            "en": "about 45 cm (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "samar",
+      "gallery": "etnografija",
+      "model": "models/samar.glb",
+      "thumb": "thumbs/samar.png",
+      "kind": "object",
+      "size": {
+        "long": 0.7
+      },
+      "name": {
+        "me": "Samar",
+        "en": "Pack saddle (samar)"
+      },
+      "subtitle": {
+        "me": "Tovarno sedlo za konja",
+        "en": "Pack saddle for a horse"
+      },
+      "description": {
+        "me": "Samar je drveno tovarno sedlo koje se stavljalo na konja ili mazgu. Po strmim planinskim stazama, gdje kola nijesu mogla proći, na samaru se prenosilo sve: drva, sijeno, žito i so, sir i kajmak s katuna.",
+        "en": "A samar is a wooden pack saddle for a horse or mule. On steep mountain paths where no cart could pass, everything travelled on it: firewood, hay, grain and salt, and cheese and kajmak brought down from the summer pastures."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "prevoz, stočarstvo",
+            "en": "transport, herding"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "drvo",
+            "en": "wood"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length"
+          },
+          "v": {
+            "me": "oko 70 cm (procjena)",
+            "en": "about 70 cm (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tocak",
+      "gallery": "etnografija",
+      "model": "models/tocak.glb",
+      "thumb": "thumbs/tocak.png",
+      "kind": "object",
+      "size": {
+        "long": 1.0,
+        "label": {
+          "me": "Promjer",
+          "en": "Diameter"
+        }
+      },
+      "name": {
+        "me": "Točak",
+        "en": "Cart wheel"
+      },
+      "subtitle": {
+        "me": "Točak drvenih kola",
+        "en": "Wheel of a wooden cart"
+      },
+      "description": {
+        "me": "Drveni točak sa žbicama, glavčinom i obručem bio je djelo vještog kolara, a gvozdeni obruč navlačio je kovač dok je bio vruć. Kola su se koristila u ravnici oko Gusinja, za sijeno, drva i odlazak na pazar.",
+        "en": "A wooden wheel with spokes, a hub and a rim was the work of a skilled wheelwright; the iron tyre was fitted by the smith while still hot. Carts were used on the flat land around Gusinje for hay, firewood and trips to the market."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "prevoz",
+            "en": "transport"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "drvo i gvožđe",
+            "en": "wood and iron"
+          }
+        },
+        {
+          "k": {
+            "me": "Promjer",
+            "en": "Diameter"
+          },
+          "v": {
+            "me": "oko 1 m (procjena)",
+            "en": "about 1 m (estimate)"
+          }
+        }
+      ]
+    },
     {
       "id": "kula-rasica",
       "gallery": "arhitektura",
@@ -27,54 +371,42 @@
       "thumb": "thumbs/kula-rasica.png",
       "placeholder": true,
       "kind": "building",
-      "size": { "h": 17.5 },
-      "name": { "me": "Kula Rašića", "en": "Rašić Tower" },
-      "subtitle": { "me": "Gusinje", "en": "Gusinje" },
+      "size": {
+        "h": 17.5
+      },
+      "name": {
+        "me": "Kula Rašića",
+        "en": "Rašić Tower"
+      },
+      "subtitle": {
+        "me": "Gusinje",
+        "en": "Gusinje"
+      },
       "description": {
         "me": "Ovo je privremeni, pojednostavljeni model za isprobavanje aplikacije. Detaljan 3D model kule i njena priča dodaju se uskoro.",
         "en": "This is a temporary, simplified model for trying out the app. The detailed 3D model of the tower and its story are coming soon."
       },
       "facts": [
-        { "k": { "me": "Mjesto", "en": "Place" }, "v": { "me": "Gusinje", "en": "Gusinje" } },
-        { "k": { "me": "Visina", "en": "Height" }, "v": { "me": "oko 17,5 m", "en": "about 17.5 m" } }
-      ]
-    },
-    {
-      "id": "ibrik",
-      "gallery": "etnografija",
-      "model": "models/ibrik.glb",
-      "thumb": "thumbs/ibrik.png",
-      "placeholder": true,
-      "kind": "object",
-      "size": { "h": 0.40 },
-      "name": { "me": "Bakarni ibrik", "en": "Copper ewer (ibrik)" },
-      "subtitle": { "me": "Primjer eksponata", "en": "Sample exhibit" },
-      "description": {
-        "me": "Primjer kako će predmet iz zbirke izgledati u aplikaciji. Ovaj model je napravljen samo za probu i biće zamijenjen skeniranim predmetom iz muzeja.",
-        "en": "An example of how an object from the collection will look in the app. This model was made only for testing and will be replaced by a scanned object from the museum."
-      },
-      "facts": [
-        { "k": { "me": "Materijal", "en": "Material" }, "v": { "me": "bakar", "en": "copper" } },
-        { "k": { "me": "Visina", "en": "Height" }, "v": { "me": "40 cm", "en": "40 cm" } }
-      ]
-    },
-    {
-      "id": "sofra",
-      "gallery": "etnografija",
-      "model": "models/sofra.glb",
-      "thumb": "thumbs/sofra.png",
-      "placeholder": true,
-      "kind": "object",
-      "size": { "h": 0.30 },
-      "name": { "me": "Sofra", "en": "Sofra (low dining table)" },
-      "subtitle": { "me": "Primjer eksponata", "en": "Sample exhibit" },
-      "description": {
-        "me": "Niska okrugla trpeza za kojom se jelo sjedeći na podu. Model je napravljen samo za probu i biće zamijenjen skeniranim predmetom.",
-        "en": "A low round table for eating while seated on the floor. The model was made only for testing and will be replaced by a scanned object."
-      },
-      "facts": [
-        { "k": { "me": "Materijal", "en": "Material" }, "v": { "me": "drvo", "en": "wood" } },
-        { "k": { "me": "Dimenzije", "en": "Size" }, "v": { "me": "Ø 86 cm, visina 30 cm", "en": "Ø 86 cm, 30 cm high" } }
+        {
+          "k": {
+            "me": "Mjesto",
+            "en": "Place"
+          },
+          "v": {
+            "me": "Gusinje",
+            "en": "Gusinje"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height"
+          },
+          "v": {
+            "me": "oko 17,5 m",
+            "en": "about 17.5 m"
+          }
+        }
       ]
     }
   ]
