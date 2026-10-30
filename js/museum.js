@@ -35,6 +35,7 @@ async function init() {
   window.addEventListener('hashchange', route);
   route();
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+  installOffer();
 }
 function setLang(l) { lang = l; store.set('gkb.lang', l); paintLang(); route(); }
 function paintLang() {
@@ -381,6 +382,57 @@ function renderCubeInfo() {
 }
 
 let toastT = 0;
+// ---------------- install as an app (QR codes link here with ?app=android or ?app=windows) ----------------
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; paintInstall(); });
+window.addEventListener('appinstalled', () => { installEvt = null; $('#install')?.remove(); toast(t('inst_done')); });
+function platform() {
+  const ua = navigator.userAgent || '';
+  if (/Android/i.test(ua)) return 'android';
+  if (/iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+  if (/Windows/i.test(ua)) return 'windows';
+  return new URLSearchParams(location.search).get('app') || 'other';
+}
+function installOffer() {
+  const want = new URLSearchParams(location.search).get('app');
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (!want || standalone || store.get('gkb.installSeen', false)) return;
+  const el = document.createElement('aside');
+  el.id = 'install'; el.className = 'install'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-labelledby', 'instT');
+  document.body.append(el);
+  paintInstall();
+}
+function paintInstall() {
+  const el = $('#install'); if (!el) return;
+  const pf = platform(), ua = navigator.userAgent || '';
+  const chrome = /Chrome\//.test(ua) && !/EdgA?\/|SamsungBrowser|OPR\/|Firefox|FxiOS/.test(ua);
+  let how = '', extra = '';
+  if (installEvt) how = '';
+  else if (pf === 'android') {
+    how = t(chrome ? 'inst_howAndroid' : 'inst_notChrome');
+    if (!chrome) extra = `<a class="btn primary" href="intent://${location.host}${location.pathname}?app=android#Intent;scheme=https;package=com.android.chrome;end">${esc(t('inst_chrome'))}</a>`;
+  } else if (pf === 'ios') how = t('inst_howIos');
+  else how = t('inst_howWindows');
+  el.innerHTML = `
+    <button class="x" aria-label="${esc(t('close'))}">×</button>
+    <img src="icons/icon-192.png" alt="" width="52" height="52">
+    <div class="it">
+      <small>Xplore Prokletije</small>
+      <h2 id="instT">${esc(t('inst_title'))}</h2>
+      <p>${esc(t(pf === 'android' || pf === 'ios' ? 'inst_phone' : 'inst_pc'))}</p>
+      ${how ? `<p class="how">${esc(how)}</p>` : ''}
+      <div class="row">${installEvt ? `<button class="btn primary" id="instGo">${esc(t('inst_btn'))}</button>` : extra}</div>
+    </div>`;
+  const close = () => { store.set('gkb.installSeen', true); el.remove(); };
+  el.querySelector('.x').addEventListener('click', close);
+  el.querySelector('#instGo')?.addEventListener('click', async () => {
+    const ev = installEvt; if (!ev) return;
+    ev.prompt();
+    try { const r = await ev.userChoice; if (r && r.outcome === 'accepted') close(); } catch { /* ignore */ }
+    installEvt = null;
+  });
+}
+
 function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2600); }
 
 // ---------------- 3D viewer ----------------

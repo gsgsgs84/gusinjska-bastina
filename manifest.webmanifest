@@ -2,6 +2,7 @@
   "name": "Gusinjska kulturna baština",
   "short_name": "Baština",
   "description": "3D muzej na dlanu – zgrade i predmeti Gusinja.",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
