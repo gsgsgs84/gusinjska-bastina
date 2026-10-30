@@ -41,8 +41,11 @@ def copernicus():
     from rasterio.windows import from_bounds
     from PIL import Image
     name = "Copernicus_DSM_COG_10_N42_00_E019_00_DEM"
-    url = f"/vsicurl/https://copernicus-dem-30m.s3.amazonaws.com/{name}/{name}.tif"
-    with rasterio.open(url) as src:
+    if os.path.exists(f"{OUT}/dem_cop30.png"):
+        return
+    tmp = "/tmp/cop30.tif"
+    save(tmp, get(f"https://copernicus-dem-30m.s3.amazonaws.com/{name}/{name}.tif", timeout=300))
+    with rasterio.open(tmp) as src:
         win = from_bounds(W, S, E, N, src.transform).round_offsets().round_lengths()
         a = src.read(1, window=win).astype("float32")
         tr = src.window_transform(win)
@@ -80,7 +83,7 @@ def gpx():
     with open("tools/gusinje_trails.csv", newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             url = row["gpx_url"].strip()
-            if not url.startswith("http"):
+            if not url.startswith("http") or os.path.exists(f"{OUT}/gpx/{row['id']}.gpx"):
                 continue
             try:
                 data = get(url, timeout=60)
@@ -93,6 +96,8 @@ def gpx():
 
 
 def osm():
+    if os.path.exists(f"{OUT}/osm.json"):
+        return
     b = f"{S},{W},{N},{E}"
     q = f"""[out:json][timeout:180];
 (
@@ -123,6 +128,8 @@ out geom;"""
             report["failed"].append(f"osm {host}: {exc}")
 
 
+if os.path.exists(f"{OUT}/report.json"):
+    report["previous"] = json.load(open(f"{OUT}/report.json"))
 for step in (copernicus, terrarium, gpx, osm):
     try:
         step()
