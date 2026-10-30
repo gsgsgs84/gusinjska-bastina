@@ -1,0 +1,20 @@
+Fri Oct 30 05:52:13 UTC 2026
+staze.html                   200 4371B content-type: text/html; charset=utf-8 last-modified: Fri, 30 Oct 2026 03:36:57 GMT access-control-allow-origin: * cache-control: max-age=600 
+js/staze.js                  200 49631B content-type: application/javascript; charset=utf-8 last-modified: Fri, 30 Oct 2026 03:36:57 GMT access-control-allow-origin: * cache-control: max-age=600 
+js/i18n.js                   200 32937B content-type: application/javascript; charset=utf-8 last-modified: Fri, 30 Oct 2026 03:36:57 GMT access-control-allow-origin: * cache-control: max-age=600 
+sw.js                        200 2073B content-type: application/javascript; charset=utf-8 last-modified: Fri, 30 Oct 2026 03:36:57 GMT access-control-allow-origin: * cache-control: max-age=600 
+external/xr/xr.js            200 1036695B content-type: application/javascript; charset=utf-8 last-modified: Fri, 30 Oct 2026 03:36:57 GMT access-control-allow-origin: * cache-control: max-age=600 
+external/xr/xr-slam.js       200 5538007B content-type: application/javascript; charset=utf-8 last-modified: Fri, 30 Oct 2026 03:36:57 GMT access-control-allow-origin: * cache-control: max-age=600 
+external/xr/LICENSE          200 15994B content-type: application/octet-stream last-modified: Fri, 30 Oct 2026 03:36:57 GMT access-control-allow-origin: * cache-control: max-age=600 
+models/staze/teren_ar.glb    200 2774236B content-type: model/gltf-binary last-modified: Fri, 30 Oct 2026 03:36:57 GMT access-control-allow-origin: * cache-control: max-age=600 
+models/staze/teren.glb       200 3548720B content-type: model/gltf-binary last-modified: Fri, 30 Oct 2026 03:36:57 GMT access-control-allow-origin: * cache-control: max-age=600 
+data/staze.json              200 224644B content-type: application/json; charset=utf-8 last-modified: Fri, 30 Oct 2026 03:36:57 GMT access-control-allow-origin: * cache-control: max-age=600 
+--- markers in js/staze.js
+      2 loadXR8
+      3 motionPermissions
+      2 showChromeSheet
+      3 startSlamAR
+--- sw version
+gkb-v0.8.2
+--- github commit on main
+7ad1542b841ccfb1dc1726040f04eb93acb59927	refs/heads/main
