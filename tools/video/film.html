@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="sr-ME">
+<head>
+<meta charset="utf-8">
+<title>Gusinjska kulturna baština – showcase film</title>
+<!-- Deterministic 1080x1920 showcase film: window.render(t) draws the frame at t seconds. Rendered by tools/video/render.cjs -->
+<style>
+  :root {
+    --cream: #f3ede3; --dawn: #f1d9b3; --ink: #1f2b24; --ochre: #a4641f; --ochre-l: #d89a4e; --pine: #2f4337;
+    --stage-a: #24342b; --stage-b: #0d1310; --muted: #6e655a;
+    --logo-a: #1f2b24; --logo-b: #a4641f;
+    --serif: "Lora", Georgia, serif; --sans: "Inter", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); }
+  body { position: relative; font-family: var(--sans); color: var(--ink); }
+  .layer { position: absolute; inset: 0; opacity: 0; overflow: hidden; }
+  .xlogo { display: block; width: 100%; height: auto; overflow: visible; }
+  .xlogo .la { fill: var(--logo-a); } .xlogo .lb { fill: var(--logo-b); }
+  .dark .xlogo .la { fill: #f1ebe1; } .dark .xlogo .lb { fill: var(--ochre-l); }
+
+  /* captions */
+  .cap { position: absolute; left: 0; right: 0; text-align: center; padding: 0 80px; }
+  .cap .line { display: block; overflow: hidden; padding-bottom: 6px; }
+  .cap .line > span { display: inline-block; will-change: transform; }
+  .cap .big { font: 600 86px/1.08 var(--serif); letter-spacing: -0.012em; }
+  .cap .small { font: 600 30px/1.3 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--ochre); margin-top: 18px; }
+  .dark .cap .big { color: #f4efe6; } .dark .cap .small { color: var(--ochre-l); }
+  .kick { font: 700 26px var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--ochre); }
+
+  /* intro / outro sky */
+  .sky { position: absolute; inset: 0; background: linear-gradient(var(--cream) 0%, var(--cream) 22%, var(--dawn) 70%, #ecd2a6 100%); }
+  .pano { position: absolute; left: 0; bottom: 0; width: 1080px; height: 800px; }
+  .pano .r3 { fill: url(#gFar); } .pano .r2 { fill: #73897c; } .pano .r1 { fill: #4b6254; } .pano .r0 { fill: var(--cream); } .pano .pines { fill: var(--pine); }
+  .pano text { font: 600 22px var(--serif); fill: var(--ink); paint-order: stroke; stroke: rgba(241, 217, 179, .8); stroke-width: 5px; }
+  .pano text.ele { font: 600 14px var(--sans); fill: var(--muted); }
+  .pano line { stroke: var(--ink); stroke-width: 1.4; opacity: .45; }
+
+  /* phone */
+  .phone { position: absolute; left: 50%; top: 520px; width: 700px; height: 1468px; margin-left: -350px; border-radius: 96px; padding: 20px;
+    background: linear-gradient(145deg, #2b2f2c, #0e100f 60%, #1b1e1c); box-shadow: 0 60px 120px rgba(60, 40, 15, .35), 0 0 0 3px #3b403c inset; }
+  .screen { position: relative; width: 660px; height: 1428px; border-radius: 76px; overflow: hidden; background: var(--cream); }
+  .screen .shot { position: absolute; left: 0; top: 0; width: 660px; }
+  .screen .hdr { position: absolute; left: 0; top: 0; width: 660px; height: 90px; overflow: hidden; }
+  .screen .hdr img { width: 660px; display: block; }
+  .screen .notch { position: absolute; left: 50%; top: 18px; width: 190px; height: 50px; margin-left: -95px; border-radius: 30px; background: #0b0c0b; z-index: 3; }
+  .screen .statusbar { position: absolute; left: 0; right: 0; top: 0; height: 84px; background: var(--cream); z-index: 2; }
+  .screen .hdrwrap { position: absolute; left: 0; right: 0; top: 84px; z-index: 2; }
+  .screen .scroller { position: absolute; left: 0; right: 0; top: 84px; bottom: 0; overflow: hidden; }
+
+  /* dark stage */
+  .stage { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 52%, var(--stage-a) 0%, var(--stage-b) 75%); }
+  .stage .floor { position: absolute; left: -10%; right: -10%; bottom: 0; height: 640px; background: radial-gradient(50% 60% at 50% 0%, rgba(216, 154, 78, .10), transparent 70%); }
+  canvas.gl { position: absolute; inset: 0; width: 1080px; height: 1920px; opacity: 0; }
+  .label { position: absolute; left: 0; right: 0; bottom: 200px; text-align: center; color: #f4efe6; }
+  .label b { display: block; font: 600 64px var(--serif); }
+  .label small { display: block; font: 500 30px var(--sans); color: #c9c0b1; margin-top: 8px; }
+  .label .size { display: inline-block; margin-top: 18px; font: 700 24px var(--sans); letter-spacing: .08em; color: var(--ochre-l); border: 2px solid rgba(216, 154, 78, .5); border-radius: 999px; padding: 8px 18px; }
+  .touch { position: absolute; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; background: rgba(255, 255, 255, .22);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, .55), 0 10px 30px rgba(0, 0, 0, .3); }
+  .bokeh { position: absolute; border-radius: 50%; filter: blur(18px); }
+  .vf { position: absolute; width: 90px; height: 90px; border: 6px solid rgba(255, 255, 255, .85); }
+  .pill { position: absolute; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 14px; padding: 16px 30px 16px 24px;
+    border-radius: 999px; background: rgba(18, 20, 24, .74); border: 1px solid rgba(255, 255, 255, .12); color: #f3f1ec; font: 600 32px var(--sans); white-space: nowrap; }
+  .pill i { width: 18px; height: 18px; border-radius: 50%; background: #6fcf97; box-shadow: 0 0 0 6px rgba(111, 207, 151, .2); }
+  .stat { display: inline-block; font: 700 26px var(--sans); letter-spacing: .1em; color: #f4efe6; background: rgba(13, 19, 16, .72); border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 999px; padding: 12px 24px; margin: 0 6px; }
+
+  /* outro */
+  .qr { position: absolute; left: 50%; top: 640px; width: 600px; height: 600px; margin-left: -300px; border-radius: 48px; background: #fff; box-shadow: 0 40px 90px rgba(80, 50, 15, .22); }
+  .url { position: absolute; left: 0; right: 0; text-align: center; font: 500 30px "DejaVu Sans Mono", monospace; color: var(--muted); }
+</style>
+<script type="importmap">{"imports":{"three":"../../js/vendor/three/three.module.min.js","three/addons/":"../../js/vendor/three/addons/"}}</script>
+</head>
+<body>
+
+<!-- S1 intro -->
+<section class="layer" id="s1">
+  <div class="sky"></div>
+  <svg class="pano" id="pano1" viewBox="230 40 540 380" preserveAspectRatio="xMidYMax slice"></svg>
+  <div id="logo1" style="position:absolute;left:50%;top:250px;width:640px;margin-left:-320px"></div>
+  <div class="cap" id="c1" style="top:620px">
+    <div class="kick line"><span>Gusinje · Crna Gora</span></div>
+    <div class="big" style="margin-top:22px"><span class="line"><span>Gusinjska</span></span><span class="line"><span>kulturna baština</span></span></div>
+    <div class="line" style="margin-top:20px"><span style="font:italic 400 44px var(--serif);color:var(--muted)">Muzej na dlanu · A museum in your hand</span></div>
+  </div>
+</section>
+
+<!-- S2 phone -->
+<section class="layer" id="s2">
+  <div class="sky" style="background:linear-gradient(var(--cream), #f0e3cc)"></div>
+  <div class="cap" id="c2" style="top:130px">
+    <div class="big"><span class="line"><span>Baština Gusinja</span></span><span class="line"><span>u 3D</span></span></div>
+    <div class="small line"><span>Heritage of Gusinje in 3D</span></div>
+  </div>
+  <div class="phone" id="phone"><div class="screen">
+    <div class="statusbar"></div><div class="notch"></div>
+    <div class="scroller"><img class="shot" id="shot" src="assets/home_full.jpg"></div>
+    <div class="hdrwrap"><div class="hdr"><img src="assets/home_full.jpg"></div></div>
+  </div></div>
+</section>
+
+<!-- dark stage shared by S3-S5 -->
+<section class="layer dark" id="stage"><div class="stage"></div><div class="floor"></div><div id="bokeh"></div></section>
+<canvas class="gl" id="gl3"></canvas>
+<canvas class="gl" id="gl4"></canvas>
+<canvas class="gl" id="gl5"></canvas>
+
+<section class="layer dark" id="s3">
+  <div class="cap" id="c3" style="top:150px">
+    <div class="big"><span class="line"><span>Okrenite ih prstom</span></span></div>
+    <div class="small line"><span>Turn them with a finger</span></div>
+  </div>
+  <div class="label" id="lab3"><b></b><small></small><span class="size"></span></div>
+  <div class="touch" id="touch"></div>
+</section>
+
+<section class="layer dark" id="s4">
+  <div class="cap" id="c4" style="top:150px">
+    <div class="big"><span class="line"><span>Na AR kocki</span></span></div>
+    <div class="small line"><span>On the AR cube · 3D print or paper</span></div>
+  </div>
+  <div id="vf"></div>
+  <div class="pill" id="pill4" style="bottom:300px"><i></i>Ibrik · Na kocki</div>
+</section>
+
+<section class="layer dark" id="s5">
+  <div class="cap" id="c5" style="top:150px">
+    <div class="big"><span class="line"><span>Staze Prokletija</span></span><span class="line"><span>u 3D i AR</span></span></div>
+    <div class="small line"><span>Prokletije hiking trails</span></div>
+  </div>
+  <div id="stats5" style="position:absolute;left:0;right:0;bottom:260px;text-align:center"><span class="stat">17 × 17 km</span><span class="stat">2534 m</span><span class="stat">AR</span></div>
+</section>
+
+<!-- S6 outro -->
+<section class="layer" id="s6">
+  <div class="sky"></div>
+  <svg class="pano" id="pano6" viewBox="230 40 540 380" preserveAspectRatio="xMidYMax slice" style="opacity:.4;transform:translateY(190px)"></svg>
+  <div id="logo6" style="position:absolute;left:50%;top:150px;width:560px;margin-left:-280px"></div>
+  <div class="qr" id="qr"><svg id="qrsvg" viewBox="0 0 600 600" width="600" height="600"></svg></div>
+  <div class="cap" id="c6" style="top:1310px">
+    <div class="big" style="font-size:72px"><span class="line"><span>Skenirajte i istražite</span></span></div>
+    <div class="small line"><span>Scan and explore · Skanoni dhe eksploroni</span></div>
+  </div>
+  <div class="url" id="url" style="top:1560px">gsgsgs84.github.io/gusinjska-bastina</div>
+</section>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { logoSVG } from '../../js/logo.js';
+
+const $ = s => document.querySelector(s);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
+const easeIO = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const lerp = (a, b, k) => a + (b - a) * k;
+
+// timeline: 110 bpm, each scene = 2 bars
+const BAR = 4 * 60 / 110, SC = 2 * BAR, X = 0.5;   // crossfade length
+const S = i => i * SC;                              // scene start
+const DURATION = 6 * SC;
+const vis = (t, a, b) => (a <= 0 ? 1 : clamp((t - (a - X / 2)) / X)) * (b >= DURATION ? 1 : 1 - clamp((t - (b - X / 2)) / X));
+
+// ---------- captions: lines rise out of a mask ----------
+function caption(el, t, t0, stagger = 0.11) {
+  const spans = el.querySelectorAll('.line > span');
+  spans.forEach((s, i) => {
+    const k = ease((t - t0 - i * stagger) / 0.7);
+    s.style.transform = `translateY(${(1 - k) * 110}%)`;
+    s.style.opacity = k < 0.02 ? 0 : 1;
+  });
+}
+
+// ---------- panorama (real skyline from data/skyline.json) ----------
+const SKY = await (await fetch('../../data/skyline.json')).json();
+function buildPano(svg) {
+  const N = SKY.N, K = 34, Y0 = 290;
+  const Y = el => (Y0 - Math.max(el, -4) * K).toFixed(1), X_ = i => (i / (N - 1) * 1000).toFixed(1);
+  const sm = a => a.map((v, i) => (a[Math.max(0, i - 1)] + 2 * v + a[Math.min(a.length - 1, i + 1)]) / 4);
+  const L = [3, 2, 1].map(b => sm(SKY.prof[b]));
+  const path = a => `M0,420 ` + a.map((e, i) => `L${X_(i)},${Y(e)}`).join(' ') + ' L1000,420 Z';
+  const azX = az => (az - SKY.A0) / (SKY.A1 - SKY.A0) * 1000;
+  const meadow = x => 384 + 8 * Math.sin(x / 70) + 4 * Math.sin(x / 23 + 1);
+  const pine = (x, y, h) => `<path d="M${x},${y - h} L${x - h * .28},${y - h * .45} L${x - h * .16},${y - h * .45} L${x - h * .36},${y} L${x + h * .36},${y} L${x + h * .16},${y - h * .45} L${x + h * .28},${y - h * .45} Z"/>`;
+  const pines = [[250, 30], [268, 22], [285, 36], [302, 20], [720, 28], [738, 40], [756, 26], [772, 32]].map(([x, h]) => pine(x, meadow(x) + 4, h)).join('');
+  const peaks = SKY.peaks.filter(p => ['maja-rosit', 'karanfili'].includes(p.id)).map(p => {
+    const c = Math.round((p.az - SKY.A0) / (SKY.A1 - SKY.A0) * (N - 1)); let top = -99;
+    for (let i = c - 4; i <= c + 4; i++) top = Math.max(top, L[0][i], L[1][i], L[2][i]);
+    return `<g class="pk" transform="translate(${azX(p.az).toFixed(1)},${Y(top)})"><line y1="-5" y2="-14"/><text text-anchor="middle" y="-34">${p.name.me}</text><text class="ele" text-anchor="middle" y="-19">${p.ele.toLocaleString('sr-Latn-ME')} m</text></g>`;
+  }).join('');
+  const sunX = azX(188);
+  svg.innerHTML = `<defs><linearGradient id="gFar" x1="0" y1="0" x2="0" y2="1"><stop offset=".28" stop-color="#d5d6d0"/><stop offset=".75" stop-color="#9aa7a1"/></linearGradient>
+    <linearGradient id="gFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3ede3" stop-opacity="0"/><stop offset="1" stop-color="#f3ede3" stop-opacity=".95"/></linearGradient>
+    <radialGradient id="gSun"><stop offset="0" stop-color="#f7c77a" stop-opacity=".75"/><stop offset=".25" stop-color="#f7c77a" stop-opacity=".28"/><stop offset="1" stop-color="#f7c77a" stop-opacity="0"/></radialGradient></defs>
+    <g class="sun"><circle cx="${sunX}" cy="196" r="230" fill="url(#gSun)"/><circle cx="${sunX}" cy="196" r="38" fill="#f7c77a"/></g>
+    <g class="ly"><path class="r3" d="${path(L[0])}"/></g><g class="ly"><path class="r2" d="${path(L[1])}"/></g>
+    <g class="ly"><rect x="-500" y="280" width="2000" height="160" fill="url(#gFog)"/><path class="r1" d="${path(L[2])}"/></g>
+    <g class="ly"><path class="r0" d="M-500,420 ${Array.from({ length: 51 }, (_, i) => `L${i * 20},${meadow(i * 20).toFixed(1)}`).join(' ')} L1500,420 Z"/><g class="pines">${pines}</g></g>
+    <g class="pks">${peaks}</g>`;
+}
+buildPano($('#pano1')); buildPano($('#pano6'));
+$('#logo1').innerHTML = logoSVG(); $('#logo6').innerHTML = logoSVG();
+
+// ---------- outro QR (main address, level H, logo plate in the middle) ----------
+{
+  const M = await (await fetch('assets/qr_main.json')).json(), N = M.length, m = 600 / (N + 8), o = 4 * m;
+  const bw = 19, bh = 9, bx0 = (N - bw) >> 1, by0 = (N - bh) >> 1;
+  let r = '';
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++)
+    if (M[y][x] === '1' && !(y >= by0 - 1 && y < by0 + bh + 1 && x >= bx0 - 1 && x < bx0 + bw + 1)) r += `<rect x="${(o + x * m).toFixed(2)}" y="${(o + y * m).toFixed(2)}" width="${(m + .4).toFixed(2)}" height="${(m + .4).toFixed(2)}"/>`;
+  const px = o + bx0 * m, py = o + by0 * m, pw = bw * m, ph = bh * m;
+  const lg = logoSVG().replace('<svg class="xlogo "', `<svg class="xlogo" x="${px + 10}" y="${py + 8}" width="${pw - 20}" height="${ph - 16}"`);
+  $('#qrsvg').innerHTML = `<g fill="#1b2620">${r}</g><rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="18" fill="#fff"/><rect x="${px + 2}" y="${py + 2}" width="${pw - 4}" height="${ph - 4}" rx="16" fill="none" stroke="#2f4337" stroke-opacity=".3" stroke-width="2.5"/>${lg}`;
+}
+
+// ---------- three.js ----------
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+function makeRenderer(canvas) {
+  const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  r.setPixelRatio(1); r.setSize(1080, 1920, false);
+  r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.NeutralToneMapping;
+  r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
+  return r;
+}
+function lights(scene, r, key = 2.2) {
+  const pm = new THREE.PMREMGenerator(r);
+  scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.7;
+  const sun = new THREE.DirectionalLight(0xfff1dc, key); sun.position.set(-1.5, 3, 2); sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.02;
+  const rim = new THREE.DirectionalLight(0xd89a4e, 1.4); rim.position.set(2, 1.5, -2.5);
+  scene.add(sun, sun.target, rim, new THREE.HemisphereLight(0xfff6ea, 0x2a3a30, 0.5));
+  return sun;
+}
+async function loadNorm(url, height) {      // base on y=0, centred, scaled to a height (or longest side)
+  const g = (await loader.loadAsync(url)).scene;
+  g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  const box = new THREE.Box3().setFromObject(g), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
+  g.position.set(-c.x, -box.min.y, -c.z);
+  const w = new THREE.Group(); w.add(g);
+  const k = height.h ? height.h / s.y : height.long / Math.max(s.x, s.y, s.z);
+  w.scale.setScalar(k); w.userData.size = s.clone().multiplyScalar(k);
+  return w;
+}
+function shadowDisc(r, op = 0.35) {
+  const m = new THREE.Mesh(new THREE.CircleGeometry(r, 64), new THREE.ShadowMaterial({ opacity: op }));
+  m.rotation.x = -Math.PI / 2; m.receiveShadow = true; return m;
+}
+
+// S3: exhibits on a turntable
+const EX = [
+  { id: 'telefon', name: 'Telefon', sub: 'Stoni telefon · Candlestick telephone', size: 'VISINA 33 CM', fit: { h: 1 } },
+  { id: 'ibrik', name: 'Ibrik', sub: 'Posuda za vodu · Water ewer', size: 'VISINA 40 CM', fit: { h: 1 } },
+  { id: 'kolijevka', name: 'Kolijevka', sub: 'Drvena kolijevka · Wooden cradle', size: 'DUŽINA 95 CM', fit: { long: 1.25 } },
+];
+const r3 = makeRenderer($('#gl3')), sc3 = new THREE.Scene(), cam3 = new THREE.PerspectiveCamera(30, 1080 / 1920, 0.01, 50);
+const sun3 = lights(sc3, r3); sun3.shadow.camera.left = sun3.shadow.camera.bottom = -1.2; sun3.shadow.camera.right = sun3.shadow.camera.top = 1.2;
+const disc3 = shadowDisc(0.9); sc3.add(disc3);
+for (const e of EX) { e.obj = await loadNorm(`../../models/${e.id}.glb`, e.fit); e.obj.visible = false; sc3.add(e.obj); }
+
+// S4: AR cube with markers, ibrik on top (units: mm)
+const L = await (await fetch('../../data/layout.json')).json(), E = L.edge;
+const r4 = makeRenderer($('#gl4')), sc4 = new THREE.Scene(), cam4 = new THREE.PerspectiveCamera(30, 1080 / 1920, 5, 5000);
+const sun4 = lights(sc4, r4, 2.4); sun4.position.set(-300, 700, 450); sun4.shadow.camera.left = sun4.shadow.camera.bottom = -260; sun4.shadow.camera.right = sun4.shadow.camera.top = 260; sun4.shadow.camera.far = 3000;
+const cubeG = new THREE.Group(); sc4.add(cubeG);
+cubeG.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(E, E, E), new THREE.MeshStandardMaterial({ color: 0xf3f0ea, roughness: 0.75 })), { castShadow: true, receiveShadow: true }));
+for (const mk of L.markers) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 8; const cx = cv.getContext('2d');
+  cx.fillStyle = '#f3f0ea'; cx.fillRect(0, 0, 8, 8); cx.fillStyle = '#141615';
+  mk.cells.forEach((row, y) => row.forEach((v, x) => { if (v) cx.fillRect(x, y, 1, 1); }));
+  const tex = new THREE.CanvasTexture(cv); tex.magFilter = tex.minFilter = THREE.NearestFilter; tex.colorSpace = THREE.SRGBColorSpace;
+  const n = new THREE.Vector3(...L.faces[mk.face].N).multiplyScalar(0.25);
+  const P = mk.corners.map(c => new THREE.Vector3(...c).add(n));
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute([...P[0].toArray(), ...P[1].toArray(), ...P[2].toArray(), ...P[0].toArray(), ...P[2].toArray(), ...P[3].toArray()], 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0], 2));
+  geo.computeVertexNormals();
+  cubeG.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8, side: THREE.DoubleSide })));
+}
+const ibrik4 = await loadNorm('../../models/ibrik.glb', { h: E * 1.7 }); ibrik4.position.y = E / 2; cubeG.add(ibrik4);
+const disc4 = shadowDisc(220, 0.32); disc4.position.y = -E / 2 - 60; sc4.add(disc4);
+
+// S5: trails terrain
+const r5 = makeRenderer($('#gl5')), sc5 = new THREE.Scene(), cam5 = new THREE.PerspectiveCamera(32, 1080 / 1920, 0.01, 50);
+const sun5 = lights(sc5, r5, 2.6); sun5.position.set(-2, 3, 1.2); sun5.shadow.camera.left = sun5.shadow.camera.bottom = -1.2; sun5.shadow.camera.right = sun5.shadow.camera.top = 1.2;
+const terrain = await loadNorm('../../models/staze/teren_ar.glb', { long: 1.6 }); sc5.add(terrain);
+
+// bokeh for the AR "camera" look
+const BOK = Array.from({ length: 14 }, (_, i) => ({ x: (i * 397) % 1080, y: 300 + (i * 613) % 1400, r: 60 + (i * 37) % 120, c: i % 3 ? 'rgba(216,154,78,.16)' : 'rgba(143,179,157,.16)', s: 0.6 + (i % 5) * 0.2 }));
+$('#bokeh').innerHTML = BOK.map((b, i) => `<div class="bokeh" id="bk${i}" style="width:${b.r * 2}px;height:${b.r * 2}px;background:${b.c}"></div>`).join('');
+$('#vf').innerHTML = ['tl', 'tr', 'bl', 'br'].map(k => `<div class="vf" id="vf_${k}" style="border-${k[0] === 't' ? 'bottom' : 'top'}:0;border-${k[1] === 'l' ? 'right' : 'left'}:0;border-radius:${k === 'tl' ? '26px 0 0 0' : k === 'tr' ? '0 26px 0 0' : k === 'bl' ? '0 0 0 26px' : '0 0 26px 0'}"></div>`).join('');
+
+// ---------- the frame at time t ----------
+function render(t) {
+  const v = [0, 1, 2, 3, 4, 5].map(i => vis(t, S(i), S(i + 1)));
+  // S1 intro
+  $('#s1').style.opacity = v[0];
+  if (v[0] > 0) {
+    const ly = $('#pano1').querySelectorAll('.ly');
+    ly.forEach((g, i) => g.setAttribute('transform', `translate(0,${((1 - ease((t - 0.1 - i * 0.18) / 1.5)) * 90).toFixed(1)})`));
+    $('#pano1 .sun').setAttribute('transform', `translate(0,${(1 - ease(t / 3)) * 70})`);
+    $('#pano1 .pks').style.opacity = ease((t - 1.8) / 0.6);
+    const lk = ease((t - 0.35) / 0.9);
+    $('#logo1').style.opacity = lk; $('#logo1').style.transform = `translateY(${(1 - lk) * 40}px) scale(${0.92 + 0.08 * lk})`;
+    caption($('#c1'), t, 1.0, 0.13);
+    $('#s1').style.transform = `scale(${1 + 0.035 * clamp(t / SC)})`;
+  }
+  // S2 phone scrolling the app
+  $('#s2').style.opacity = v[1];
+  if (v[1] > 0) {
+    const u = t - S(1);
+    const pk = ease((u + 0.3) / 1.1);
+    $('#phone').style.transform = `perspective(2400px) translateY(${(1 - pk) * 520}px) rotateX(${(1 - pk) * 18}deg) rotateZ(${(1 - pk) * -4}deg)`;
+    const css = easeIO((u - 0.9) / 3.2) * 1310;            // CSS px scrolled in the app
+    $('#shot').style.transform = `translateY(${-(css * 2) * (660 / 780)}px)`;
+    caption($('#c2'), u, 0.15);
+  }
+  // dark stage behind S3-S5
+  const vd = Math.max(v[2], v[3], v[4]);
+  $('#stage').style.opacity = vd;
+  BOK.forEach((b, i) => { const el = $('#bk' + i); el.style.transform = `translate(${b.x + Math.sin(t * 0.3 * b.s + i) * 40 - b.r}px,${b.y + Math.cos(t * 0.25 * b.s + i) * 30 - b.r}px)`; el.style.opacity = v[3]; });
+  // S3 exhibits turning
+  $('#s3').style.opacity = v[2]; $('#gl3').style.opacity = v[2];
+  if (v[2] > 0) {
+    const u = t - S(2), seg = SC / 3;
+    const i = clamp(Math.floor(u / seg), 0, 2), w = u - i * seg;
+    EX.forEach((e, j) => e.obj.visible = j === i);
+    const e = EX[i];
+    const pop = ease(w / 0.35) * (i < 2 ? 1 - ease((w - seg + 0.25) / 0.25) : 1);
+    e.obj.rotation.y = -0.6 + u * 1.55 + Math.sin(u * 2.2) * 0.25;      // turning, as if pushed by the finger
+    e.obj.scale.setScalar((e.obj.userData.k ||= e.obj.scale.x) * (0.8 + 0.2 * pop));
+    const s = e.obj.userData.size, h = s.y, rad = 0.5 * Math.hypot(s.x, s.y, s.z);
+    disc3.scale.setScalar(Math.max(s.x, s.z) * 0.75);
+    const dist = rad / Math.sin(THREE.MathUtils.degToRad(15)) * 1.75;
+    cam3.position.set(0, h * 0.45 + dist * 0.26, dist); cam3.lookAt(0, h * 0.30, 0); cam3.updateMatrixWorld();
+    r3.render(sc3, cam3);
+    const lab = $('#lab3'); lab.querySelector('b').textContent = e.name; lab.querySelector('small').textContent = e.sub; lab.querySelector('.size').textContent = e.size;
+    lab.style.opacity = pop; lab.style.transform = `translateY(${(1 - pop) * 30}px)`;
+    caption($('#c3'), u, 0.1);
+    const tk = Math.sin(u * 2.2);
+    $('#touch').style.cssText = `left:${540 + tk * 200}px;top:${1390 + Math.cos(u * 2.2) * 14}px;opacity:${0.9 * ease((u - 0.3) / 0.4)}`;
+  }
+  // S4 AR cube
+  $('#s4').style.opacity = v[3]; $('#gl4').style.opacity = v[3];
+  if (v[3] > 0) {
+    const u = t - S(3);
+    cubeG.rotation.set(0.32 * Math.sin(u * 0.9 + 0.4) - 0.1, 0.7 + u * 0.55, 0.12 * Math.sin(u * 1.3));
+    cubeG.position.set(0, 18 * Math.sin(u * 1.6), 0);
+    ibrik4.rotation.y = -cubeG.rotation.y + 0.4;           // keeps facing the viewer, like "Face me"
+    cam4.position.set(0, 140, 900); cam4.lookAt(0, 60, 0); cam4.updateMatrixWorld();
+    r4.render(sc4, cam4);
+    caption($('#c4'), u, 0.1);
+    const a = ease((u - 0.4) / 0.5), sz = 300 - 60 * a;
+    const box = { l: 540 - 330, r: 540 + 330, t: 600, b: 1520 };
+    const pos = { tl: [box.l, box.t], tr: [box.r - 90, box.t], bl: [box.l, box.b - 90], br: [box.r - 90, box.b - 90] };
+    for (const k in pos) { const el = $('#vf_' + k), d = (1 - a) * 60 * (k[1] === 'l' ? -1 : 1), dy = (1 - a) * 60 * (k[0] === 't' ? -1 : 1);
+      el.style.left = (pos[k][0] + d) + 'px'; el.style.top = (pos[k][1] + dy) + 'px'; el.style.opacity = a; }
+    const pa = ease((u - 0.9) / 0.4); $('#pill4').style.opacity = pa; $('#pill4').style.transform = `translateX(-50%) translateY(${(1 - pa) * 20}px)`;
+  }
+  // S5 trails terrain
+  $('#s5').style.opacity = v[4]; $('#gl5').style.opacity = v[4];
+  if (v[4] > 0) {
+    const u = t - S(4), az = THREE.MathUtils.degToRad(195 + u * 9), el = THREE.MathUtils.degToRad(40 - u * 2.5), d = 4.0 - u * 0.14;
+    cam5.position.set(Math.sin(az) * Math.cos(el) * d, Math.sin(el) * d + 0.05, Math.cos(az) * Math.cos(el) * d);
+    cam5.lookAt(0, 0.22, 0); cam5.updateMatrixWorld();
+    r5.render(sc5, cam5);
+    caption($('#c5'), u, 0.1);
+    const sk = ease((u - 0.9) / 0.5); $('#stats5').style.opacity = sk; $('#stats5').style.transform = `translateY(${(1 - sk) * 24}px)`;
+  }
+  // S6 outro
+  $('#s6').style.opacity = v[5];
+  if (v[5] > 0) {
+    const u = t - S(5);
+    $('#pano6').querySelectorAll('.ly').forEach((g, i) => g.setAttribute('transform', `translate(0,${((1 - ease((u + 0.2 - i * 0.12) / 1.2)) * 60).toFixed(1)})`));
+    $('#pano6 .pks').style.opacity = 0;
+    const lk = ease((u + 0.1) / 0.7); $('#logo6').style.opacity = lk; $('#logo6').style.transform = `translateY(${(1 - lk) * 30}px)`;
+    const q = ease((u - 0.25) / 0.7); $('#qr').style.opacity = q; $('#qr').style.transform = `scale(${0.88 + 0.12 * q})`;
+    caption($('#c6'), u, 0.6);
+    const ua = ease((u - 1.2) / 0.6); $('#url').style.opacity = ua;
+  }
+}
+window.render = render; window.DURATION = DURATION; window.FILM_READY = true;
+render(0);
+</script>
+</body>
+</html>
