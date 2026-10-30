@@ -1,0 +1,48 @@
+<!doctype html><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"../../js/vendor/three/three.module.min.js","three/addons/":"../../js/vendor/three/addons/"}}</script>
+<script type="module">
+// Bake the real skyline seen from a viewpoint into layered silhouettes (by distance band).
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+const q = new URLSearchParams(location.search);
+const D = await (await fetch('../../data/staze.json')).json();
+const W = D.widthM;
+const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('../../' + D.model);
+gltf.scene.updateMatrixWorld(true);
+const P = []; const v = new THREE.Vector3();
+gltf.scene.traverse(o => { if (!o.isMesh) return; const a = o.geometry.attributes.position;
+  for (let i = 0; i < a.count; i++) { v.fromBufferAttribute(a, i).applyMatrix4(o.matrixWorld); P.push(v.x, v.y, v.z); } });
+// viewpoint: offset from Gusinje (metres east, south) and eye height above ground
+const g = D.places.find(p => p.id === 'gusinje').pos;
+const vx = g[0] + (+q.get('e') || 0) / W, vz = g[2] + (+q.get('s') || 0) / W;
+// ground height at the viewpoint = highest vertex within 60 m
+let gy = -1; for (let i = 0; i < P.length; i += 3) { const dx = P[i] - vx, dz = P[i + 2] - vz; if (dx * dx + dz * dz < (60 / W) ** 2) gy = Math.max(gy, P[i + 1]); }
+const eye = gy + (+q.get('h') || 40) / W;
+const A0 = +q.get('a0') || 125, A1 = +q.get('a1') || 255, N = 520;
+const bands = (q.get('bands') || '0.4,2.5,5,8.5,30').split(',').map(Number);   // km
+const prof = bands.slice(1).map(() => new Float32Array(N).fill(-10));
+const R = 6371000 / W;
+const sp = Math.sqrt(D.widthM * D.depthM / (P.length / 3)) / W;   // ~vertex spacing
+const bin = (A1 - A0) / (N - 1);
+for (let i = 0; i < P.length; i += 3) {
+  const dx = P[i] - vx, dz = P[i + 2] - vz, d = Math.hypot(dx, dz), km = d * W / 1000;
+  if (km < bands[0]) continue;
+  let b = 0; while (b < bands.length - 2 && km >= bands[b + 1]) b++;
+  let az = Math.atan2(dx, -dz) * 180 / Math.PI; if (az < 0) az += 360;
+  if (az < A0 || az > A1) continue;
+  const el = Math.atan2(P[i + 1] - eye - d * d / (2 * R) * 0.87, d) * 180 / Math.PI;
+  const k = Math.round((az - A0) / (A1 - A0) * (N - 1));
+  const w = Math.min(40, Math.ceil(Math.atan(sp * 0.75 / d) * 180 / Math.PI / bin));
+  for (let j = Math.max(0, k - w); j <= Math.min(N - 1, k + w); j++) if (el > prof[b][j]) prof[b][j] = el;
+}
+// peaks: visible if their angle is close to the skyline at their azimuth
+const peaks = D.places.filter(p => p.kind === 'peak').map(p => {
+  const dx = p.pos[0] - vx, dz = p.pos[2] - vz, d = Math.hypot(dx, dz);
+  let az = Math.atan2(dx, -dz) * 180 / Math.PI; if (az < 0) az += 360;
+  const ele = p.ele; const el = Math.atan2((ele - D.base) / W - eye - d * d / (2 * R) * 0.87, d) * 180 / Math.PI;
+  return { id: p.id, name: p.name, ele, az, el, km: d * W / 1000 };
+});
+window.result = { A0, A1, N, bands, eyeM: Math.round(eye * W + D.base), prof: prof.map(a => Array.from(a, x => Math.round(x * 100) / 100)), peaks };
+document.title = 'done';
+</script>

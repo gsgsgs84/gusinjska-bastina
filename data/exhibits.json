@@ -769,6 +769,7 @@
     },
     {
       "id": "razboj",
+      "heavy": true,
       "gallery": "vuna",
       "model": "models/razboj.glb",
       "thumb": "thumbs/razboj.png",

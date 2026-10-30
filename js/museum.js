@@ -6,7 +6,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STR, detectLang, L, HTML_LANG, NUM_LOCALE } from './i18n.js';
 
-const VERSION = '0.6';
+const VERSION = '0.7';
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const store = { get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } },
@@ -63,40 +63,202 @@ const ex = id => DATA.exhibits.find(x => x.id === id);
 const inGallery = gid => DATA.exhibits.filter(x => x.gallery === gid);
 const thumb = (e, cls = '') => e.thumb ? `<img class="${cls}" src="${esc(e.thumb)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : '';
 
+// ---------------- home ----------------
+let SKY = null;
+const skyData = () => (SKY ||= fetch('data/skyline.json').then(r => r.json()).catch(() => null));
+const dayPool = () => DATA.exhibits.filter(e => !e.heavy && e.model);
+const todayIdx = n => { const d = new Date(); return Math.floor((d.getTime() - d.getTimezoneOffset() * 6e4) / 864e5) % n; };
+let dayI = null;
+function dayLabel(d = new Date()) {
+  const loc = NUM_LOCALE[lang] || 'sr-Latn-ME';
+  if (lang === 'sq' && !Intl.DateTimeFormat.supportedLocalesOf(loc).length)
+    return `${d.getDate()} ${['janar', 'shkurt', 'mars', 'prill', 'maj', 'qershor', 'korrik', 'gusht', 'shtator', 'tetor', 'nëntor', 'dhjetor'][d.getMonth()]}`;
+  return d.toLocaleDateString(loc, { day: 'numeric', month: 'long' });
+}
+
 function renderHome() {
   document.title = DATA.museum.name;
-  const feat = DATA.exhibits.find(x => x.featured) || DATA.exhibits[0];
+  const pool = dayPool();
+  if (dayI === null) dayI = todayIdx(pool.length);
+  const ways = [['cube', 'onCube', 'w1'], ['room', 'inRoom', 'w2'], ['touch', 'w3t', 'w3']];
   $('#view').innerHTML = `
-    <section class="hero">
-      <h1>${esc(DATA.museum.name)}</h1>
-      <p class="tag">${esc(tx(DATA.museum.tagline))}</p>
-      <p class="lede">${esc(tx(DATA.museum.intro))}</p>
+    <section class="hero2" id="hero">
+      <div class="sky" aria-hidden="true"><span class="moon"></span></div>
+      <svg class="ridges" id="ridges" aria-hidden="true" preserveAspectRatio="xMidYMax slice"></svg>
+      <div class="hero-txt">
+        <p class="kicker">${esc(t('kicker'))}</p>
+        <h1>${esc(DATA.museum.name)}</h1>
+        <p class="tagline">${esc(tx(DATA.museum.tagline))}</p>
+      </div>
+      <div class="hero-cta">
+        <a class="pill solid" href="#zbirka" id="goCollection">${esc(t('explore'))}</a>
+        <a class="pill" href="kocka.html">${ICONS.cube}${esc(t('cubeTitle'))}</a>
+      </div>
+      <p class="sky-cap" id="skyCap"></p>
     </section>
-    ${feat ? `<a class="feature" href="#/e/${encodeURIComponent(feat.id)}">
-      <div class="img">${thumb(feat)}</div>
-      <div class="txt"><small>${esc(t('featured'))}</small><h2>${esc(tx(feat.name))}</h2><p>${esc(tx(feat.subtitle))}</p></div></a>` : ''}
-    <div class="section-h"><h2>${esc(t('galleries'))}</h2></div>
-    <div class="galleries">${DATA.galleries.map(g => {
-      const items = inGallery(g.id);
-      return `<a class="gal" href="#/g/${encodeURIComponent(g.id)}">
-        <div class="thumbs${items.length < 4 ? ' one' : ''}">${(items.length < 4 ? items.slice(0, 1) : items.slice(0, 4)).map(e => thumb(e)).join('')}</div>
-        <div><h3>${esc(tx(g.name))}</h3><p>${esc(tx(g.description))}</p><span class="count">${items.length} ${esc(t(items.length === 1 ? 'exhibit1' : 'exhibitN'))}</span></div></a>`;
+    <p class="lede2">${esc(tx(DATA.museum.intro))}</p>
+    ${pool.length ? `<section class="day" aria-labelledby="dayName">
+      <div class="dstage" id="dstage" data-touch="pan-y">
+        <span class="chip">${esc(t('dayEx'))} · ${esc(dayLabel())}</span>
+        <button class="arrow prev" id="dayPrev" aria-label="${esc(t('prevEx'))}"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button class="arrow next" id="dayNext" aria-label="${esc(t('nextEx'))}"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <a class="dbar" id="dayLink" href="#"><div><h2 id="dayName"></h2><p id="daySub"></p></div><span class="go">${esc(t('openEx'))} →</span></a>
+    </section>` : ''}
+    <section class="ways">
+      <h2 class="sh">${esc(t('waysTitle'))}</h2>
+      <div class="ways-row">${ways.map(([ic, a, b]) => `<div class="way"><span class="ic">${ICONS[ic]}</span><b>${esc(t(a))}</b><small>${esc(t(b))}</small></div>`).join('')}</div>
+    </section>
+    <div class="section-h" id="zbirka"><h2>${esc(t('collection'))}</h2><a href="#galerije" id="goGalleries">${esc(t('allGalleries'))}</a></div>
+    <div class="strip">${DATA.exhibits.map(e => `<a class="card" href="#/e/${encodeURIComponent(e.id)}"><div class="img">${thumb(e)}</div><b>${esc(tx(e.name))}</b></a>`).join('')}</div>
+    <div class="section-h" id="galerije"><h2>${esc(t('galleries'))}</h2></div>
+    <div class="gals2">${DATA.galleries.map(g => {
+      const items = inGallery(g.id), four = items.length >= 4;
+      return `<a class="gal2" href="#/g/${encodeURIComponent(g.id)}">
+        <div class="collage${four ? '' : ' n' + Math.min(items.length, 2)}">${items.slice(0, four ? 4 : 2).map(e => thumb(e)).join('')}</div>
+        <div class="gt"><h3>${esc(tx(g.name))}</h3><span class="count">${items.length} ${esc(t(items.length === 1 ? 'exhibit1' : 'exhibitN'))}</span></div></a>`;
     }).join('')}</div>
-    <a class="trailbox" href="staze.html">
+    <a class="trail2" href="staze.html">
       <img src="thumbs/staze.jpg" alt="" loading="lazy" onerror="this.remove()">
-      <div><h2>${esc(t('trailsTitle'))}</h2><p>${esc(t('trailsText'))}</p><span class="go">${esc(t('openTrails'))} →</span></div>
+      <div class="tt"><span class="tag2">3D · AR</span><h2>${esc(t('trailsTitle'))}</h2><p>${esc(t('trailsText'))}</p><span class="go">${esc(t('openTrails'))} →</span></div>
     </a>
-    <section class="cubebox">
-      <h2>${esc(t('cubeTitle'))}</h2>
-      <p>${esc(t('cubeText'))}</p>
+    <section class="cube2">
+      <div class="ct">
+        <h2>${esc(t('cubeTitle'))}</h2>
+        <p>${esc(t('cubeText'))}</p>
+      </div>
+      <div class="cubeart" aria-hidden="true">${CUBE_ART}</div>
       <div class="row">
         <a class="solid" href="kocka.html">${esc(t('openCube'))}</a>
         <a href="#/vitrina">${esc(t('showcase'))}${showcase.length ? ` (${showcase.length})` : ''}</a>
         <a href="#/kocka">${esc(t('getCube'))}</a>
       </div>
     </section>
-    <p class="note">v${VERSION}</p>`;
+    <footer class="foot"><b>${esc(DATA.museum.name)}</b><span>v${VERSION}</span><small>${esc(t('skyCredit'))}</small></footer>`;
+  const jump = (a, id) => a && a.addEventListener('click', ev => { ev.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  jump($('#goCollection'), 'zbirka'); jump($('#goGalleries'), 'galerije');
+  drawSky();
+  if (pool.length) setupDay(pool);
 }
+
+// The panorama is the real skyline seen from 1.5 km north of Gusinje, 400 m up (tools/skyline), drawn in layers by distance.
+const SKY_H = 420, SKY_K = 34, SKY_Y0 = 290, SKY_TOP = -120;   // SVG units: height, units per degree of elevation, horizon line
+async function drawSky() {
+  const svg = $('#ridges'); if (!svg) return;
+  const S = await skyData();
+  if (!S || svg !== $('#ridges')) return;
+  const N = S.N, X = i => (i / (N - 1) * 1000).toFixed(1), Y = el => (SKY_Y0 - Math.max(el, -4) * SKY_K).toFixed(1);
+  const smooth = a => a.map((v, i) => (a[Math.max(0, i - 1)] + 2 * v + a[Math.min(a.length - 1, i + 1)]) / 4);
+  const path = a => `M0,${SKY_H} ` + a.map((el, i) => `L${X(i)},${Y(el)}`).join(' ') + ` L1000,${SKY_H} Z`;
+  const layers = [3, 2, 1].map(b => smooth(S.prof[b]));          // far → near (band 0 is empty from this height)
+  const azX = az => (az - S.A0) / (S.A1 - S.A0) * 1000;
+  // peaks with a label: sit on the drawn skyline near their azimuth
+  const labels = S.peaks.filter(p => ['zla-kolata', 'maja-rosit', 'karanfili', 'talijanka', 'trojan'].includes(p.id)).map(p => {
+    const c = Math.round((p.az - S.A0) / (S.A1 - S.A0) * (N - 1));
+    let top = -99; for (let i = Math.max(0, c - 4); i <= Math.min(N - 1, c + 4); i++) top = Math.max(top, layers[0][i], layers[1][i], layers[2][i]);
+    return { p, x: azX(p.az), y: +Y(top) };
+  });
+  // stars (dark mode) – fixed pseudo-random so they don't jump between renders
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const stars = Array.from({ length: 70 }, () => `<circle cx="${(rnd() * 1000).toFixed(0)}" cy="${(rnd() * 230 - 120).toFixed(0)}" r="${(0.6 + rnd() * 1.3).toFixed(1)}" opacity="${(0.35 + rnd() * 0.6).toFixed(2)}"/>`).join('');
+  // a few pines on the foreground meadow
+  const pine = (x, y, h) => `<path d="M${x},${y - h} L${x - h * 0.28},${y - h * 0.45} L${x - h * 0.16},${y - h * 0.45} L${x - h * 0.36},${y} L${x + h * 0.36},${y} L${x + h * 0.16},${y - h * 0.45} L${x + h * 0.28},${y - h * 0.45} Z"/>`;
+  const meadow = x => 382 + 8 * Math.sin(x / 70) + 4 * Math.sin(x / 23 + 1);
+  const pines = [[0, 34], [22, 26], [40, 40], [62, 22], [80, 30], [905, 30], [925, 44], [948, 28], [966, 36], [986, 24]]
+    .map(([x, h]) => pine(x, meadow(x) + 4, h)).join('');
+  const sunX = azX(188);
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="gFar" x1="0" y1="0" x2="0" y2="1"><stop offset="0.28" stop-color="var(--r3a)"/><stop offset="0.75" stop-color="var(--r3b)"/></linearGradient>
+      <linearGradient id="gFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--bg)" stop-opacity="0"/><stop offset="1" stop-color="var(--bg)" stop-opacity="0.95"/></linearGradient>
+      <radialGradient id="gSun"><stop offset="0" stop-color="var(--sun)" stop-opacity="0.75"/><stop offset="0.25" stop-color="var(--sun)" stop-opacity="0.28"/><stop offset="1" stop-color="var(--sun)" stop-opacity="0"/></radialGradient>
+    </defs>
+    <g class="stars par" data-k="0.55">${stars}</g>
+    <g class="sun par" data-k="0.5"><circle cx="${sunX}" cy="196" r="230" fill="url(#gSun)"/><circle cx="${sunX}" cy="196" r="38" fill="var(--sun)"/></g>
+    <g class="par" data-k="0.42"><path class="ridge r3" d="${path(layers[0])}" fill="url(#gFar)"/></g>
+    <g class="par" data-k="0.30"><path class="ridge r2" d="${path(layers[1])}"/></g>
+    <g class="par" data-k="0.19"><rect x="-500" y="280" width="2000" height="160" fill="url(#gFog)" class="fog"/><path class="ridge r1" d="${path(layers[2])}"/></g>
+    <g class="par" data-k="0.07"><path class="ridge r0" d="M-500,${SKY_H} L0,${meadow(0)} ${Array.from({ length: 51 }, (_, i) => `L${i * 20},${meadow(i * 20).toFixed(1)}`).join(' ')} L1500,${meadow(1000)} L1500,${SKY_H} Z"/><g class="pines">${pines}</g></g>
+    <g class="peaks par" data-k="0.42">${labels.map(({ p, x, y }) => `<g class="pk" data-x="${x.toFixed(1)}" transform="translate(${x.toFixed(1)},${y})">
+      <line y1="-5" y2="-15"/><text y="-36">${esc(tx(p.name))}</text><text class="ele" y="-21">${p.ele.toLocaleString(NUM_LOCALE[lang] || 'sr-Latn-ME')} m</text></g>`).join('')}</g>`;
+  $('#skyCap').textContent = tx(S.view);
+  fitSky();
+  parallax();
+}
+// The SVG is drawn with "slice": it is scaled to the hero's height and cropped at the sides. Centre the crop a little right of
+// the middle (between Maja Rosit and Karanfili) and anchor the labels near the visible edges inwards.
+function fitSky() {
+  const svg = $('#ridges'); if (!svg || !svg.firstElementChild) return;
+  const hero = $('#hero'), txt = hero.querySelector('.hero-txt');
+  hero.style.height = '';
+  for (let k = 0; k < 2; k++) {
+    const sw = svg.clientWidth, sh = svg.clientHeight, sc = Math.max(sw / 1000, sh / (SKY_H - SKY_TOP));
+    const peakTop = hero.clientHeight - (SKY_H - (SKY_Y0 - 5.6 * SKY_K - 58)) * sc;    // highest label, px from hero top
+    const need = txt.offsetTop + txt.offsetHeight + 14 - peakTop;
+    if (need <= 1) break;
+    hero.style.height = (hero.clientHeight + need) + 'px';
+  }
+  const w = svg.clientWidth, h = svg.clientHeight; if (!w || !h) return;
+  const vh = SKY_H - SKY_TOP, vis = Math.min(1000, vh * w / h);        // SVG units visible across
+  const cx = 500 + Math.min(40, (1000 - vis) / 2);
+  const x0 = Math.max(0, Math.min(1000 - vis, cx - vis / 2));
+  svg.setAttribute('viewBox', `${x0.toFixed(0)} ${SKY_TOP} ${vis.toFixed(0)} ${vh}`);
+  for (const g of svg.querySelectorAll('.pk')) {
+    const rel = (+g.dataset.x - x0) / vis;
+    g.style.display = rel < 0.03 || rel > 0.97 ? 'none' : '';
+    const a = rel < 0.16 ? 'start' : rel > 0.84 ? 'end' : 'middle';
+    for (const tEl of g.querySelectorAll('text')) { tEl.setAttribute('text-anchor', a); tEl.setAttribute('x', a === 'start' ? -6 : a === 'end' ? 6 : 0); }
+  }
+}
+function parallax() {
+  const hero = $('#hero'); if (!hero) return;
+  const y = Math.min(window.scrollY, hero.offsetHeight), svg = $('#ridges');
+  const unit = (SKY_H - SKY_TOP) / Math.max(1, svg.clientHeight);     // px → SVG units
+  for (const g of svg.querySelectorAll('.par')) g.setAttribute('transform', `translate(0,${(-y * (+g.dataset.k) * unit * -1).toFixed(1)})`);
+}
+let parT = 0;
+window.addEventListener('scroll', () => { if (!parT && !matchMedia('(prefers-reduced-motion: reduce)').matches) parT = requestAnimationFrame(() => { parT = 0; parallax(); }); }, { passive: true });
+window.addEventListener('resize', () => fitSky());
+
+function setupDay(pool) {
+  const stage = $('#dstage');
+  let mounted = false;
+  const show = () => {
+    const e = pool[((dayI % pool.length) + pool.length) % pool.length];
+    $('#dayName').textContent = tx(e.name);
+    $('#daySub').textContent = tx(e.subtitle);
+    $('#dayLink').href = '#/e/' + encodeURIComponent(e.id);
+    stage.querySelector('.ph')?.remove();
+    stage.insertAdjacentHTML('afterbegin', e.thumb ? `<img class="ph loading" src="${esc(e.thumb)}" alt="">` : '');
+    if (mounted) mountViewer(stage, e);
+    return e;
+  };
+  show();
+  const mount = () => { if (mounted) return; mounted = true; stage.classList.remove('tap'); mountViewer(stage, pool[((dayI % pool.length) + pool.length) % pool.length]); };
+  const saveData = navigator.connection && navigator.connection.saveData;
+  if (saveData) { stage.classList.add('tap'); stage.insertAdjacentHTML('beforeend', `<span class="tap3d">${esc(t('tap3d'))}</span>`); stage.addEventListener('click', ev => { if (!ev.target.closest('.arrow')) mount(); }); }
+  else if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); mount(); } }, { rootMargin: '250px' });
+    io.observe(stage);
+  } else mount();
+  $('#dayPrev').addEventListener('click', () => { dayI--; show(); });
+  $('#dayNext').addEventListener('click', () => { dayI++; show(); });
+}
+
+const CUBE_ART = (() => {   // isometric marker cube, faces drawn as 4×4 cell patterns like the real markers
+  const pat = ['1001011001101001', '0110100110010110', '1010010110100101'];
+  const face = (o, u, v, bits, shade) => {
+    let d = `<path d="M${o[0]},${o[1]} l${u[0]},${u[1]} l${v[0]},${v[1]} l${-u[0]},${-u[1]} Z" fill="var(--cf${shade})"/>`;
+    for (let i = 0; i < 16; i++) if (bits[i] === '1') {
+      const a = (i % 4 + 0.5) / 5.6 + 0.08, b = (Math.floor(i / 4) + 0.5) / 5.6 + 0.08, s = 1 / 5.6;
+      const p = [o[0] + u[0] * a + v[0] * b, o[1] + u[1] * a + v[1] * b];
+      d += `<path d="M${p[0].toFixed(1)},${p[1].toFixed(1)} l${(u[0] * s).toFixed(1)},${(u[1] * s).toFixed(1)} l${(v[0] * s).toFixed(1)},${(v[1] * s).toFixed(1)} l${(-u[0] * s).toFixed(1)},${(-u[1] * s).toFixed(1)} Z" fill="#1d1a16"/>`;
+    }
+    return d;
+  };
+  return `<svg viewBox="0 0 120 130"><ellipse cx="60" cy="122" rx="34" ry="6" fill="rgba(0,0,0,.22)" class="cshadow"/><g class="cbody">
+    ${face([60, 10], [44, 24], [-44, 24], pat[0], 1)}${face([16, 34], [44, 24], [0, 50], pat[1], 2)}${face([60, 58], [44, -24], [0, 50], pat[2], 3)}</g></svg>`;
+})();
 
 function renderGallery(gid) {
   const g = DATA.galleries.find(x => x.id === gid);
@@ -115,6 +277,7 @@ const ICONS = {
   cube: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>',
   room: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3"/><path d="M12 7.5l4 2.3v4.4L12 16.5l-4-2.3V9.8z"/></svg>',
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M12 9v6M9 12h6"/></svg>',
+  touch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 013 0V10"/><path d="M12 9.5a1.5 1.5 0 013 0v1a1.5 1.5 0 013 0V15a6 6 0 01-6 6h-.5a5.5 5.5 0 01-4.6-2.5L5 15.5a1.6 1.6 0 012.6-1.8L9 15"/><path d="M5 6.5a5 5 0 0111 0" opacity=".5"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v7h14v-7"/></svg>',
 };
 
@@ -241,7 +404,7 @@ function normalise(src) {
   return { group: g, size };
 }
 
-const V = { renderer: null, scene: null, camera: null, controls: null, item: null, host: null, ro: null, ground: null, sun: null, interacted: false };
+const V = { visible: true, io: null, renderer: null, scene: null, camera: null, controls: null, item: null, host: null, ro: null, ground: null, sun: null, interacted: false };
 function ensureViewer() {
   if (V.renderer) return;
   const r = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -276,7 +439,13 @@ function sizeViewer() {
 }
 async function mountViewer(host, e) {
   ensureViewer();
+  if (V.host && V.host !== host) V.ro.unobserve(V.host);
+  V.renderer.domElement.style.touchAction = host.dataset.touch || 'none';   // home card: vertical swipes still scroll the page
   V.host = host; host.appendChild(V.renderer.domElement); V.ro.observe(host); sizeViewer();
+  if ('IntersectionObserver' in window) {
+    V.io ||= new IntersectionObserver(es => { for (const x of es) if (x.target === V.host) V.visible = x.isIntersecting; });
+    V.io.disconnect(); V.visible = true; V.io.observe(host);
+  }
   V.interacted = false; V.controls.autoRotate = true;
   const token = (V.token = {});
   try {
@@ -312,7 +481,7 @@ function leaveViewer() {
 }
 function frameLoop(time, frame) {
   if (V.renderer.xr.isPresenting && XR.session) return xrFrame(frame);
-  if (!V.host) return;
+  if (!V.host || !V.visible) return;
   V.controls.update();
   V.renderer.render(V.scene, V.camera);
 }
