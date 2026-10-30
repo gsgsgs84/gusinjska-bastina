@@ -82,6 +82,10 @@ function renderHome() {
         <div class="thumbs${items.length < 4 ? ' one' : ''}">${(items.length < 4 ? items.slice(0, 1) : items.slice(0, 4)).map(e => thumb(e)).join('')}</div>
         <div><h3>${esc(tx(g.name))}</h3><p>${esc(tx(g.description))}</p><span class="count">${items.length} ${esc(t(items.length === 1 ? 'exhibit1' : 'exhibitN'))}</span></div></a>`;
     }).join('')}</div>
+    <a class="trailbox" href="staze.html">
+      <img src="thumbs/staze.jpg" alt="" loading="lazy" onerror="this.remove()">
+      <div><h2>${esc(t('trailsTitle'))}</h2><p>${esc(t('trailsText'))}</p><span class="go">${esc(t('openTrails'))} →</span></div>
+    </a>
     <section class="cubebox">
       <h2>${esc(t('cubeTitle'))}</h2>
       <p>${esc(t('cubeText'))}</p>

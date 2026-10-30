@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="sr-ME">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Planinarske staze – Gusinjska kulturna baština</title>
+<meta name="description" content="Gusinje i Prokletije u 3D: teren sa planinarskim stazama koji možete postaviti na sto.">
+<meta name="theme-color" content="#f3ede3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14120f" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/museum.css">
+<link rel="stylesheet" href="css/staze.css">
+<script type="importmap">{"imports":{"three":"./js/vendor/three/three.module.min.js","three/addons/":"./js/vendor/three/addons/"}}</script>
+<script type="module" src="js/staze.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="back" id="back" href="index.html" aria-label="Nazad">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+  </a>
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span><span id="brandName">Gusinjska kulturna baština</span></a>
+  <div class="lang" role="group" aria-label="Jezik / Language">
+    <button data-lang="me">ME</button><button data-lang="sq">SQ</button><button data-lang="en">EN</button>
+  </div>
+</header>
+<main id="view" class="staze" tabindex="-1">
+  <div class="stage relief" id="stage">
+    <div class="loading" id="loading"></div>
+    <div class="north" id="north" aria-hidden="true"><span id="northTxt">S</span><i></i></div>
+    <div class="hint" id="hint"></div>
+  </div>
+  <div class="tools" role="toolbar">
+    <button class="btn primary" id="btnTable"></button>
+    <button class="btn" id="btnHeight"></button>
+    <button class="btn" id="btnLabels" aria-pressed="true"></button>
+    <button class="btn" id="btnReset"></button>
+  </div>
+  <section class="trail-card" id="card" hidden></section>
+  <header class="page-h"><h1 id="title"></h1><p id="lead"></p></header>
+  <div id="groups"></div>
+  <section class="legend"><h2 id="legendH"></h2><ul id="legend"></ul></section>
+  <p class="note" id="note"></p>
+  <details class="credits"><summary id="creditsH"></summary><ul id="credits"></ul></details>
+</main>
+<div id="xrOverlay" class="xr-overlay staze-xr" hidden>
+  <div class="xr-top"><span id="xrMsg"></span><button id="xrClose" class="xr-btn"></button></div>
+  <div class="xr-panel">
+    <div class="xr-trail"><button class="xr-btn round" id="xrPrev" aria-label="◀">◀</button><span id="xrTrail"></span><button class="xr-btn round" id="xrNext" aria-label="▶">▶</button></div>
+    <div class="xr-row">
+      <button class="xr-btn" id="xrSmaller" aria-label="−">−</button><span id="xrSize"></span><button class="xr-btn" id="xrBigger" aria-label="+">+</button>
+      <button class="xr-btn" id="xrRotL" aria-label="⟲">⟲</button><button class="xr-btn" id="xrRotR" aria-label="⟳">⟳</button>
+      <button class="xr-btn" id="xrMove"></button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+</body>
+</html>
