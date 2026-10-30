@@ -1,6 +1,7 @@
 // Interface text: Montenegrin (latinica), English and Albanian. Exhibit texts live in data/exhibits.json.
 export const STR = {
   me: {
+    c_place: 'Položaj eksponata', c_place2: 'Na vrhu kocke ili umjesto kocke, kao da ga držite u ruci', c_onTop: 'Na kocki', c_inHand: 'U ruci', c_placeHand: '✋ U ruci', c_placeTop: '▣ Na kocki',
     c_cam: 'Kamera', c_cam2: 'Ako je slika previše uvećana, izaberite drugu kameru', c_zoom: 'Zum kamere',
     c_errApi: 'Ovaj preglednik ovdje ne može otvoriti kameru. Otvorite stranicu u Chromeu (Android) ili Safariju (iPhone).',
     c_errBlocked: 'Pristup kameri je blokiran. Dozvolite kameru za ovu stranicu u podešavanjima preglednika i pokušajte ponovo.',
@@ -40,6 +41,7 @@ export const STR = {
     xrPlaced: 'Obiđite ga! Dodirnite ponovo da ga pomjerite.', xrRealSize: 'Prirodna veličina', xrModelSize: 'Maketa 1:50',
   },
   en: {
+    c_place: 'Exhibit position', c_place2: 'On top of the cube, or instead of the cube as if you hold it in your hand', c_onTop: 'On the cube', c_inHand: 'In hand', c_placeHand: '✋ In hand', c_placeTop: '▣ On cube',
     c_cam: 'Camera', c_cam2: 'If the picture is too zoomed in, choose another camera', c_zoom: 'Camera zoom',
     c_errApi: 'This browser cannot open the camera here. Open the page in Chrome (Android) or Safari (iPhone).',
     c_errBlocked: 'Camera access was blocked. Allow the camera for this site in the browser settings and try again.',
@@ -79,6 +81,7 @@ export const STR = {
     xrPlaced: 'Walk around it! Tap again to move it.', xrRealSize: 'Real size', xrModelSize: 'Model 1:50',
   },
   sq: {
+    c_place: 'Vendi i eksponatit', c_place2: 'Mbi kub ose në vend të kubit, sikur ta mbani në dorë', c_onTop: 'Mbi kub', c_inHand: 'Në dorë', c_placeHand: '✋ Në dorë', c_placeTop: '▣ Mbi kub',
     c_cam: 'Kamera', c_cam2: 'Nëse imazhi është shumë i zmadhuar, zgjidhni një kamerë tjetër', c_zoom: 'Zmadhimi i kamerës',
     c_errApi: 'Ky shfletues nuk mund ta hapë kamerën këtu. Hapeni faqen në Chrome (Android) ose Safari (iPhone).',
     c_errBlocked: 'Qasja në kamerë u bllokua. Lejojeni kamerën për këtë faqe në cilësimet e shfletuesit dhe provoni përsëri.',

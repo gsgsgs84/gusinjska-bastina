@@ -20,10 +20,11 @@ const D2R = Math.PI / 180;
 const params = new URLSearchParams(location.search);
 
 // ---------------- settings (per-viewer convenience only) ----------------
-const DEFAULTS = { plinth: 'stone', size: 1, upright: true, shadows: true, debug: false, fov: 66, view: 'auto' };
+const DEFAULTS = { plinth: 'stone', size: 1, upright: true, shadows: true, debug: false, fov: 66, view: 'auto', place: 'top' };
 const settings = Object.assign({}, DEFAULTS, readStore('arcube.settings') || {});
 if (params.has('debug')) settings.debug = true;
 if (params.has('fov')) settings.fov = +params.get('fov');
+if (params.get('place') === 'hand' || params.get('place') === 'top') settings.place = params.get('place');
 function readStore(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
 function saveSettings() { try { localStorage.setItem('arcube.settings', JSON.stringify(settings)); } catch { /* private mode */ } }
 
@@ -305,8 +306,9 @@ function buildPlinth() {
 }
 function applyPlinthStyle() {
   if (!plinth) return;
-  plinth.visible = settings.plinth !== 'none';
-  turf.visible = settings.plinth === 'grass' && active !== 'card';
+  const hand = settings.place === 'hand' && active !== 'card';
+  plinth.visible = settings.plinth !== 'none' && !hand;
+  turf.visible = settings.plinth === 'grass' && active !== 'card' && !hand;
   updateHolderOffset();
 }
 function updateHolderOffset() {
@@ -391,7 +393,11 @@ function applySize() {
   const fit = (current && current.fit) || 0.94;
   const footMM = active === 'card' ? (layout.card ? 110 : S) : S * fit;
   const tallMM = active === 'card' ? 220 : S * 1.7;
-  const s = Math.min(u.unit * footMM, tallMM / Math.max(1e-6, u.height)) * settings.size;
+  let s = Math.min(u.unit * footMM, tallMM / Math.max(1e-6, u.height)) * settings.size;
+  if (settings.place === 'hand' && active !== 'card') {
+    // in the hand: the longest side is about 1.8 cube edges, so the object covers the cube
+    s = S * 1.8 / Math.max(u.foot, u.height) * settings.size;
+  }
   modelRoot.scale.setScalar(s);
   const r = Math.max(u.foot, u.height) * s;
   const cam = sun.shadow.camera;
@@ -645,7 +651,8 @@ function render(t = performance.now() / 1000) {
   const ky = ease((now - place.yt0) / 0.5);
   place.yaw = place.yawFrom + (place.yawTo - place.yawFrom) * ky;
   holder.quaternion.copy(place.Q);
-  const off = active === 'card' ? 0.3 : S / 2 * (plinth && plinth.visible ? 1.025 : 1) + 0.2;
+  const hand = settings.place === 'hand' && active !== 'card';
+  const off = active === 'card' ? 0.3 : hand ? -(modelRoot ? modelRoot.userData.height * modelRoot.scale.y / 2 : 0) : S / 2 * (plinth && plinth.visible ? 1.025 : 1) + 0.2;
   holder.position.set(0, off, 0).applyQuaternion(place.Q);
   yawGroup.rotation.y = place.yaw;
   place.appear = Math.min(1, place.appear + 0.12);
@@ -726,10 +733,16 @@ $('#btnTurn').addEventListener('click', () => setYaw(place.yawTo + Math.PI / 2, 
 $('#btnFace').addEventListener('click', () => faceCamera(true));
 function bindSettingsUI() {
   const seg = $('#segPlinth');
+  const segP = $('#segPlace');
+  const setPlace = v => { settings.place = v; saveSettings(); applyPlinthStyle(); applySize(); paint(); };
+  segP.addEventListener('click', e => { const v = e.target.closest('button')?.dataset.v; if (v) setPlace(v); });
+  $('#btnPlace').addEventListener('click', () => setPlace(settings.place === 'hand' ? 'top' : 'hand'));
   const segV = $('#segView');
   segV.addEventListener('click', e => { const v = e.target.closest('button')?.dataset.v; if (!v) return; settings.view = v; saveSettings(); updateProjection(); paint(); });
   const paint = () => {
     for (const b of segV.querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.v === settings.view));
+    for (const b of segP.querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.v === settings.place));
+    $('#btnPlace').textContent = T_(settings.place === 'hand' ? 'c_placeTop' : 'c_placeHand');
     for (const b of seg.querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.v === settings.plinth));
     $('#rngSize').value = settings.size; $('#sizeVal').textContent = (+settings.size).toFixed(1) + '×';
     $('#chkUpright').checked = settings.upright; $('#chkShadow').checked = settings.shadows; $('#chkDebug').checked = settings.debug;

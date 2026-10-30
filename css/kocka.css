@@ -88,8 +88,8 @@ a { color: var(--accent); }
 .chip .ld { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--muted); border-top-color: transparent; animation: rot 0.8s linear infinite; display: none; }
 .chip.loading .ld { display: block; }
 @keyframes rot { to { transform: rotate(360deg); } }
-.actions { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
-.actions .btn { padding: 9px 14px; font-size: 13.5px; background: var(--panel); border: 1px solid var(--line); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0 10px 10px; }
+.actions .btn { padding: 8px 11px; font-size: 13px; background: var(--panel); border: 1px solid var(--line); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
 
 /* ---------- sheets ---------- */
 .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--panel-solid); border-top-left-radius: 20px; border-top-right-radius: 20px;
