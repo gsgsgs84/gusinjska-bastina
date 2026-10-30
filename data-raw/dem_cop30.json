@@ -1,0 +1,11 @@
+{
+ "west": 19.69986111111111,
+ "north": 42.62013888888889,
+ "dx": 0.0002777777777777778,
+ "dy": -0.0002777777777777778,
+ "width": 1044,
+ "height": 684,
+ "units": "decimetres",
+ "source": "Copernicus_DSM_COG_10_N42_00_E019_00_DEM",
+ "credit": "Copernicus DEM GLO-30 \u00a9 DLR e.V. 2010-2014 and \u00a9 Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA"
+}

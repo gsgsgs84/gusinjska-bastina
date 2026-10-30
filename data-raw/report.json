@@ -1,33 +1,42 @@
 {
  "ok": [
-  "terrarium z13: 49 tiles",
-  "gpx gu03-ropojana 44493 bytes",
-  "gpx ropojana-circular-osm 65354 bytes",
-  "gpx gu02-grebaje 19722 bytes",
-  "gpx gu01-grncar 36530 bytes",
-  "gpx gu04-gerani 27981 bytes",
-  "gpx gusinje-alipasini-izvori 5627 bytes",
-  "gpx pl01-gusinje-plav 33810 bytes",
-  "gpx vusanje-zla-kolata 27005 bytes",
-  "gpx maja-rosit-zastan 11709 bytes",
-  "gpx gusinje-velji-vrh 18364 bytes",
-  "gpx grbaja-skala-popadija 17648 bytes",
-  "gpx sekijeva-staza 8332 bytes",
-  "gpx grebaje-karanfili 7900 bytes",
-  "gpx ocnjak 8172 bytes",
-  "gpx karanfili-ridge 6996 bytes",
-  "gpx krosnjin-prolaz 8857 bytes",
-  "gpx grebaje-talijanka-loop 76567 bytes",
-  "gpx plav-bor-vusanje 260471 bytes",
-  "gpx vusanje-theth 60753 bytes",
-  "gpx vusanje-buni-jezerces 58027 bytes",
-  "gpx pob-circular-osm 463994 bytes",
-  "gpx hridsko-lake 8744 bytes",
-  "gpx greben-katun-road 291144 bytes",
-  "osm 3387 elements from https://overpass-api.de/api/interpreter"
+  "copernicus (684, 1044) min 511 max 2676",
+  "terrarium z13: 0 tiles"
  ],
  "failed": [
-  "copernicus: FileNotFoundError(2, 'No such file or directory')",
   "gpx zla-kolata-peakbook: HTTP Error 401: Unauthorized"
- ]
+ ],
+ "previous": {
+  "ok": [
+   "terrarium z13: 49 tiles",
+   "gpx gu03-ropojana 44493 bytes",
+   "gpx ropojana-circular-osm 65354 bytes",
+   "gpx gu02-grebaje 19722 bytes",
+   "gpx gu01-grncar 36530 bytes",
+   "gpx gu04-gerani 27981 bytes",
+   "gpx gusinje-alipasini-izvori 5627 bytes",
+   "gpx pl01-gusinje-plav 33810 bytes",
+   "gpx vusanje-zla-kolata 27005 bytes",
+   "gpx maja-rosit-zastan 11709 bytes",
+   "gpx gusinje-velji-vrh 18364 bytes",
+   "gpx grbaja-skala-popadija 17648 bytes",
+   "gpx sekijeva-staza 8332 bytes",
+   "gpx grebaje-karanfili 7900 bytes",
+   "gpx ocnjak 8172 bytes",
+   "gpx karanfili-ridge 6996 bytes",
+   "gpx krosnjin-prolaz 8857 bytes",
+   "gpx grebaje-talijanka-loop 76567 bytes",
+   "gpx plav-bor-vusanje 260471 bytes",
+   "gpx vusanje-theth 60753 bytes",
+   "gpx vusanje-buni-jezerces 58027 bytes",
+   "gpx pob-circular-osm 463994 bytes",
+   "gpx hridsko-lake 8744 bytes",
+   "gpx greben-katun-road 291144 bytes",
+   "osm 3387 elements from https://overpass-api.de/api/interpreter"
+  ],
+  "failed": [
+   "copernicus: FileNotFoundError(2, 'No such file or directory')",
+   "gpx zla-kolata-peakbook: HTTP Error 401: Unauthorized"
+  ]
+ }
 }
