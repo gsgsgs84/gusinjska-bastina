@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""QR codes for the hiking-trails page, with the Xplore Prokletije mark in the middle.
+"""QR codes for the hiking-trails page, with the Xplore Prokletije logo in the middle.
 
 usage: python3 tools/qr/make_qr.py   ->  print/qr/staze_android.png, print/qr/staze_windows.png
-Error correction H (30 %) keeps the codes readable with the badge covering the centre.
+Error correction H (30 %) keeps the codes readable with the logo covering the centre.
+The logo's white background is removed and the code takes the logo's colours.
 Each code is checked by decoding it again with OpenCV.
 """
 import os
@@ -19,11 +20,42 @@ CODES = [
     ("staze_windows", SITE + "staze.html?pc=1", "Windows", "otvara se u pregledniku (Edge ili Chrome)"),
 ]
 TITLE = "Planinarske staze u 3D"
-PINE, INK, CREAM, OCHRE = (47, 67, 55), (22, 32, 26), (244, 239, 230), (164, 100, 31)
+# colours taken from the Xplore Prokletije logo
+INK, BLUE, WHITE, GREY = (23, 33, 42), (0, 92, 248), (255, 255, 255), (96, 104, 114)
 FONT_B = "/usr/share/fonts/truetype/google-fonts/Poppins-Bold.ttf"
 FONT_R = "/usr/share/fonts/truetype/google-fonts/Poppins-Regular.ttf"
 if not os.path.exists(FONT_R):
     FONT_R = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+LOGO_SRC = os.path.join(HERE, "xplore_prokletije_logo.png")       # original logo on its white background
+LOGO_OUT = os.path.join(OUT, "xplore_prokletije_logo_transparent.png")
+
+
+def logo_rgba():
+    """Remove the white background (soft edges, colours un-mixed from white) and crop to the logo."""
+    a = np.asarray(Image.open(LOGO_SRC).convert("RGB")).astype(np.float32)
+    border = np.concatenate([a[:16].reshape(-1, 3), a[-16:].reshape(-1, 3), a[:, :16].reshape(-1, 3), a[:, -16:].reshape(-1, 3)])
+    bg = np.median(border, 0)
+    dist = np.abs(a - bg).max(-1)
+    alpha = np.clip((dist - 10) / 60, 0, 1)
+    al = np.maximum(alpha, 1e-3)[..., None]
+    rgb = np.clip((a - (1 - al) * bg) / al, 0, 255)          # remove the white mixed into edge pixels
+    # white areas closed inside the building (windows, door, the small QR mark) stay white;
+    # only the background around the logo and inside the letters becomes transparent
+    ys, xs = np.where(alpha > 0.04)
+    x0, x1 = xs.min(), xs.max()
+    n, lab, stats, cent = cv2.connectedComponentsWithStats((alpha < 0.5).astype(np.uint8), connectivity=4)
+    h, w = alpha.shape
+    for i in range(1, n):
+        x, y, cw, ch, _ = stats[i]
+        touches = x == 0 or y == 0 or x + cw == w or y + ch == h
+        if not touches and cent[i][0] < x0 + 0.42 * (x1 - x0):
+            m = lab == i
+            m = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & (alpha < 1)
+            rgb[m] = rgb[m] * alpha[m][:, None] + 255 * (1 - alpha[m][:, None])
+            alpha[m] = 1
+    rgba = np.dstack([rgb, alpha * 255]).astype(np.uint8)
+    pad = 6
+    return Image.fromarray(rgba, "RGBA").crop((xs.min() - pad, ys.min() - pad, xs.max() + pad + 1, ys.max() + pad + 1))
 
 
 def matrix(text):
@@ -39,63 +71,50 @@ def matrix(text):
     raise ValueError("too long")
 
 
-def badge(w, h):
-    """The Xplore Prokletije mark: pine rounded box, mountain with an ochre snow cap, two lines of text."""
-    s = 4                                            # draw large, scale down for smooth edges
-    im = Image.new("RGBA", (w * s, h * s), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    d.rounded_rectangle([0, 0, w * s - 1, h * s - 1], radius=int(h * s * 0.16), fill=PINE + (255,))
-    # mountain (same shape as the brand line on the museum home page, viewBox 32 x 20)
-    mw = w * s * 0.30; mh = mw * 20 / 32; mx = (w * s - mw) / 2; my = h * s * 0.10
-    P = lambda x, y: (mx + x / 32 * mw, my + y / 20 * mh)
-    d.polygon([P(1, 19), P(11, 5), P(15, 10), P(20, 2), P(31, 19)], fill=CREAM)
-    d.polygon([P(18.3, 4.6), P(20, 2), P(21.8, 4.8), P(20.6, 6), P(19.6, 5.1)], fill=OCHRE)
-    for txt, frac, yfrac in (("XPLORE", 0.17, 0.50), ("PROKLETIJE", 0.155, 0.75)):
-        size = int(h * s * frac)
-        f = ImageFont.truetype(FONT_B, size)
-        spacing = size * 0.10
-        widths = [f.getlength(ch) for ch in txt]
-        total = sum(widths) + spacing * (len(txt) - 1)
-        while total > w * s * 0.86:                   # keep inside the box
-            size -= 2; f = ImageFont.truetype(FONT_B, size); spacing = size * 0.10
-            widths = [f.getlength(ch) for ch in txt]; total = sum(widths) + spacing * (len(txt) - 1)
-        x = (w * s - total) / 2
-        for ch, cw in zip(txt, widths):
-            d.text((x, h * s * yfrac), ch, font=f, fill=CREAM, anchor="lm")
-            x += cw + spacing
-    return im.resize((w, h), Image.LANCZOS)
-
-
 def make(name, url, platform, how):
     M = matrix(url)
     n = M.shape[0]
     quiet = 4
     mod = 1500 // (n + 2 * quiet)
     side = mod * (n + 2 * quiet)
-    # clear a centred block of modules for the badge (about 30 % x 21 % of the code: ~6 % of its area)
-    bw = int(round(n * 0.32)) | 1; bh = int(round(n * 0.22)) | 1
+    # clear a centred block for the logo: about 47 % x 21 % of the code, on a white plate
+    logo = logo_rgba()
+    bw = int(round(n * 0.47)) | 1
+    bh = int(round(bw * logo.height / logo.width + 2)) | 1
     r0, c0 = (n - bh) // 2, (n - bw) // 2
-    M = M.copy(); M[r0 - 1:r0 + bh + 1, c0 - 1:c0 + bw + 1] = False
+    M = M.copy(); M[r0:r0 + bh, c0:c0 + bw] = False
     W, H = side + 160, side + 470
     img = Image.new("RGB", (W, H), "white")
     d = ImageDraw.Draw(img)
     ox, oy = 80, 70
+    finder = lambda r, c: (r < 7 and c < 7) or (r < 7 and c >= n - 7) or (r >= n - 7 and c < 7)
     for r in range(n):
         for c in range(n):
             if M[r, c]:
                 x, y = ox + (c + quiet) * mod, oy + (r + quiet) * mod
-                d.rectangle([x, y, x + mod - 1, y + mod - 1], fill=INK)
-    b = badge(bw * mod, bh * mod)
-    img.paste(b, (ox + (c0 + quiet) * mod, oy + (r0 + quiet) * mod), b)
+                col = INK
+                if finder(r, c):          # the three corner squares in the logo's blue, their centres dark
+                    rr, cc = r % (n - 7) if r >= n - 7 else r, c % (n - 7) if c >= n - 7 else c
+                    col = INK if (2 <= rr <= 4 and 2 <= cc <= 4) else BLUE
+                d.rectangle([x, y, x + mod - 1, y + mod - 1], fill=col)
+    # logo, scaled to the cleared block with a margin of one module
+    px0, py0 = ox + (c0 + quiet) * mod, oy + (r0 + quiet) * mod
+    pw, ph = bw * mod, bh * mod
+    d.rounded_rectangle([px0, py0, px0 + pw - 1, py0 + ph - 1], radius=mod, fill=WHITE)
+    lw = pw - 2 * mod; lh = round(lw * logo.height / logo.width)
+    if lh > ph - 2 * mod:
+        lh = ph - 2 * mod; lw = round(lh * logo.width / logo.height)
+    lg = logo.resize((lw, lh), Image.LANCZOS)
+    img.paste(lg, (px0 + (pw - lw) // 2, py0 + (ph - lh) // 2), lg)
     # name of the program and the platform below the code
     ty = oy + side + 10
     f1 = ImageFont.truetype(FONT_B, 92); f2 = ImageFont.truetype(FONT_B, 64); f3 = ImageFont.truetype(FONT_R, 40)
     d.text((W / 2, ty + 55), TITLE, font=f1, fill=INK, anchor="mm")
-    pw = d.textlength(platform, font=f2) + 70
-    d.rounded_rectangle([W / 2 - pw / 2, ty + 125, W / 2 + pw / 2, ty + 215], radius=45, fill=PINE)
-    d.text((W / 2, ty + 170), platform, font=f2, fill=CREAM, anchor="mm")
-    d.text((W / 2, ty + 268), how, font=f3, fill=(90, 84, 76), anchor="mm")
-    d.text((W / 2, ty + 325), url.replace("https://", ""), font=ImageFont.truetype(FONT_R, 30), fill=(120, 114, 106), anchor="mm")
+    tw = d.textlength(platform, font=f2) + 70
+    d.rounded_rectangle([W / 2 - tw / 2, ty + 125, W / 2 + tw / 2, ty + 215], radius=45, fill=BLUE)
+    d.text((W / 2, ty + 170), platform, font=f2, fill=WHITE, anchor="mm")
+    d.text((W / 2, ty + 268), how, font=f3, fill=GREY, anchor="mm")
+    d.text((W / 2, ty + 325), url.replace("https://", ""), font=ImageFont.truetype(FONT_R, 30), fill=(128, 136, 146), anchor="mm")
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, name + ".png")
     img.save(path, dpi=(300, 300))
@@ -108,5 +127,7 @@ def make(name, url, platform, how):
 
 
 if __name__ == "__main__":
+    os.makedirs(OUT, exist_ok=True)
+    logo_rgba().save(LOGO_OUT)
     for c in CODES:
         make(*c)
