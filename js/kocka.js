@@ -145,6 +145,9 @@ async function openCamera(deviceId) {
     try { await cam.track.applyConstraints({ advanced: [{ zoom: want }] }); } catch { /* not supported */ }
     cam.zoom = (cam.track.getSettings().zoom) || want;
   }
+  if (cam.caps.focusMode && cam.caps.focusMode.includes('continuous')) {
+    try { await cam.track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); } catch { /* ignore */ }
+  }
   video.srcObject = stream;
   await video.play();
   if (lastFrameT) updateProjection();
@@ -157,7 +160,24 @@ async function listCameras() {
   } catch { cam.list = []; }
   paintCameraUI();
 }
+async function nextCamera() {
+  if (cam.list.length < 2) return;
+  const cur = cam.track && cam.track.getSettings().deviceId;
+  const i = cam.list.findIndex(d => d.deviceId === cur);
+  const d = cam.list[(i + 1) % cam.list.length];
+  settings.camId = d.deviceId; saveSettings();
+  try { await openCamera(d.deviceId); } catch (e) { toast(T_('c_errStart')); }
+  paintCameraUI();
+  toast(`${T_('c_cam')} ${cam.list.indexOf(d) + 1} / ${cam.list.length}`);
+}
 function paintCameraUI() {
+  const bc = $('#btnCam');
+  if (bc && cam.list.length > 1) {
+    bc.hidden = false; bc.style.position = 'relative';
+    const cur = cam.track && cam.track.getSettings().deviceId;
+    $('#camNo').textContent = String(Math.max(0, cam.list.findIndex(d => d.deviceId === cur)) + 1);
+    bc.onclick = nextCamera; bc.setAttribute('aria-label', T_('c_cam'));
+  }
   const row = $('#rowCam'), seg = $('#segCam');
   if (row && cam.list.length > 1) {
     row.hidden = false; seg.innerHTML = '';
