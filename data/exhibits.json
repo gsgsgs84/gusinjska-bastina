@@ -12,14 +12,47 @@
   },
   "galleries": [
     {
-      "id": "etnografija",
+      "id": "dom",
       "name": {
-        "me": "Etnografija",
-        "en": "Ethnography"
+        "me": "Kuća i porodica",
+        "en": "Home and family"
       },
       "description": {
-        "me": "Predmeti svakodnevnog života i rada: posuđe, alati za kosidbu i žetvu, samar i kola.",
-        "en": "Objects of everyday life and work: vessels, tools for mowing and harvest, a pack saddle and a cart."
+        "me": "Posuđe, kolijevka, kopanja i stap: predmeti koji su držali kuću na okupu.",
+        "en": "Vessels, a cradle, a trough and a churn: the objects that kept a household going."
+      }
+    },
+    {
+      "id": "polje",
+      "name": {
+        "me": "Polje i planina",
+        "en": "Field and mountain"
+      },
+      "description": {
+        "me": "Kosidba, žetva, samar i kola: rad na zemlji i put do katuna.",
+        "en": "Mowing, harvest, the pack saddle and the cart: work on the land and the road to the summer pastures."
+      }
+    },
+    {
+      "id": "vuna",
+      "name": {
+        "me": "Vuna i tkanje",
+        "en": "Wool and weaving"
+      },
+      "description": {
+        "me": "Od runa do ćilima: preslica i razboj.",
+        "en": "From fleece to rug: the distaff and the loom."
+      }
+    },
+    {
+      "id": "vijek",
+      "name": {
+        "me": "Dvadeseti vijek",
+        "en": "The 20th century"
+      },
+      "description": {
+        "me": "Telefon, vojnički šljem i drugi tragovi novog doba.",
+        "en": "A telephone, a soldier's helmet and other traces of a new age."
       }
     },
     {
@@ -37,7 +70,7 @@
   "exhibits": [
     {
       "id": "ibrik",
-      "gallery": "etnografija",
+      "gallery": "dom",
       "featured": true,
       "model": "models/ibrik.glb",
       "thumb": "thumbs/ibrik.png",
@@ -92,7 +125,7 @@
     },
     {
       "id": "kosa",
-      "gallery": "etnografija",
+      "gallery": "polje",
       "model": "models/kosa.glb",
       "thumb": "thumbs/kosa.png",
       "kind": "object",
@@ -146,7 +179,7 @@
     },
     {
       "id": "kosa-2",
-      "gallery": "etnografija",
+      "gallery": "polje",
       "model": "models/kosa-2.glb",
       "thumb": "thumbs/kosa-2.png",
       "kind": "object",
@@ -200,7 +233,7 @@
     },
     {
       "id": "srp",
-      "gallery": "etnografija",
+      "gallery": "polje",
       "model": "models/srp.glb",
       "thumb": "thumbs/srp.png",
       "kind": "object",
@@ -254,7 +287,7 @@
     },
     {
       "id": "samar",
-      "gallery": "etnografija",
+      "gallery": "polje",
       "model": "models/samar.glb",
       "thumb": "thumbs/samar.png",
       "kind": "object",
@@ -308,7 +341,7 @@
     },
     {
       "id": "tocak",
-      "gallery": "etnografija",
+      "gallery": "polje",
       "model": "models/tocak.glb",
       "thumb": "thumbs/tocak.png",
       "kind": "object",
@@ -360,6 +393,428 @@
           "v": {
             "me": "oko 1 m (procjena)",
             "en": "about 1 m (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "kolijevka",
+      "gallery": "dom",
+      "model": "models/kolijevka.glb",
+      "thumb": "thumbs/kolijevka.png",
+      "kind": "object",
+      "size": {
+        "long": 0.95
+      },
+      "name": {
+        "me": "Kolijevka",
+        "en": "Cradle"
+      },
+      "subtitle": {
+        "me": "Drvena kolijevka za ljuljanje",
+        "en": "Wooden rocking cradle"
+      },
+      "description": {
+        "me": "Drvena kolijevka na lučnim nogama, pa se mogla ljuljati. Stranice su ukrašene rezbarijom, a dijete je ležalo na vezenoj posteljini. Kolijevka se često prenosila s generacije na generaciju.",
+        "en": "A wooden cradle on curved runners so it could be rocked. The ends are decorated with carving, and the baby lay on embroidered bedding. Cradles were often handed down from one generation to the next."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "namještaj, porodica",
+            "en": "furniture, family"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "drvo, tekstil",
+            "en": "wood, textile"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length"
+          },
+          "v": {
+            "me": "oko 95 cm (procjena)",
+            "en": "about 95 cm (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "kopanja",
+      "gallery": "dom",
+      "model": "models/kopanja.glb",
+      "thumb": "thumbs/kopanja.png",
+      "kind": "object",
+      "size": {
+        "long": 1.0
+      },
+      "name": {
+        "me": "Kopanja",
+        "en": "Wooden trough (kopanja)"
+      },
+      "subtitle": {
+        "me": "Korito izdubljeno iz drveta",
+        "en": "Trough carved from wood"
+      },
+      "description": {
+        "me": "Kopanja je duguljasto korito izdubljeno iz jednog komada drveta. U kući je služila za miješenje tijesta, pranje i druge poslove, a slične posude koristile su se i za hranjenje stoke.",
+        "en": "A kopanja is a long trough hollowed out of a single piece of wood. In the house it was used for kneading dough, washing and other chores, and similar troughs were used to feed livestock."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "domaćinstvo",
+            "en": "household"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "drvo",
+            "en": "wood"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length"
+          },
+          "v": {
+            "me": "oko 1 m (procjena)",
+            "en": "about 1 m (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "mlatilica",
+      "gallery": "dom",
+      "model": "models/mlatilica.glb",
+      "thumb": "thumbs/mlatilica.png",
+      "kind": "object",
+      "size": {
+        "h": 0.9
+      },
+      "name": {
+        "me": "Mlatilica",
+        "en": "Butter churn"
+      },
+      "subtitle": {
+        "me": "Posuda za mućenje maslaca",
+        "en": "Vessel for making butter"
+      },
+      "description": {
+        "me": "Visoka drvena posuda od dužica stegnutih obručima, s motkom koja prolazi kroz poklopac. Mlijeko ili pavlaka mutili su se pomjeranjem motke gore-dolje dok se ne izdvoji maslac, jedan od glavnih proizvoda stočarskih domaćinstava.",
+        "en": "A tall wooden vessel made of staves held by hoops, with a plunger passing through the lid. Milk or cream was churned by moving the plunger up and down until the butter separated, one of the main products of herding households."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "domaćinstvo, mljekarstvo",
+            "en": "household, dairy"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "drvo, metalni obruči",
+            "en": "wood, metal hoops"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height"
+          },
+          "v": {
+            "me": "oko 90 cm (procjena)",
+            "en": "about 90 cm (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cijev",
+      "gallery": "polje",
+      "model": "models/cijev.glb",
+      "thumb": "thumbs/cijev.png",
+      "kind": "object",
+      "size": {
+        "long": 1.0
+      },
+      "name": {
+        "me": "Cijev za vodu",
+        "en": "Water pipe"
+      },
+      "subtitle": {
+        "me": "Dio starog vodovoda",
+        "en": "Part of an old water supply"
+      },
+      "description": {
+        "me": "Dio stare cijevi kojom se voda dovodila sa izvora do česmi i kuća. Cijevi su se nastavljale jedna na drugu i polagale u zemlju.",
+        "en": "A section of an old pipe that carried water from a spring to fountains and houses. The pipes were joined end to end and laid in the ground."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "vodovod",
+            "en": "water supply"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length"
+          },
+          "v": {
+            "me": "oko 1 m (procjena)",
+            "en": "about 1 m (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "preslica",
+      "gallery": "vuna",
+      "model": "models/za-vunu.glb",
+      "thumb": "thumbs/za-vunu.png",
+      "kind": "object",
+      "size": {
+        "h": 1.0
+      },
+      "name": {
+        "me": "Preslica",
+        "en": "Distaff (preslica)"
+      },
+      "subtitle": {
+        "me": "Za predenje vune",
+        "en": "For spinning wool"
+      },
+      "description": {
+        "me": "Na račvasti vrh preslice stavljala se očešljana vuna, a donja daska držala je preslicu uspravno. Prelja je izvlačila vlakna i vretenom ih uvijala u pređu, od koje su se tkali ćilimi, ponjave i odjeća.",
+        "en": "Combed wool was placed on the forked top of the distaff, and the board at the bottom held it upright. The spinner drew out the fibres and twisted them into yarn with a spindle; the yarn was woven into rugs, blankets and clothing."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "predenje",
+            "en": "spinning"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "drvo",
+            "en": "wood"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height"
+          },
+          "v": {
+            "me": "oko 1 m (procjena)",
+            "en": "about 1 m (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "razboj",
+      "gallery": "vuna",
+      "model": "models/razboj.glb",
+      "thumb": "thumbs/razboj.png",
+      "kind": "object",
+      "size": {
+        "h": 1.6
+      },
+      "name": {
+        "me": "Razboj",
+        "en": "Loom (razboj)"
+      },
+      "subtitle": {
+        "me": "Uspravni tkalački stan",
+        "en": "Upright loom"
+      },
+      "description": {
+        "me": "Na uspravnom razboju tkali su se ćilimi, ponjave i torbe. Osnova se zatezala između gornje i donje grede, a tkalja je potkom provlačila vunu u bojama i stvarala šare koje su se prenosile s majke na kćer.",
+        "en": "Rugs, blankets and bags were woven on the upright loom. The warp was stretched between the top and bottom beams, and the weaver passed coloured wool through it to make patterns handed down from mother to daughter."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "tkanje",
+            "en": "weaving"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "drvo, vuna",
+            "en": "wood, wool"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height"
+          },
+          "v": {
+            "me": "oko 1,6 m (procjena)",
+            "en": "about 1.6 m (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "telefon",
+      "gallery": "vijek",
+      "model": "models/telefon.glb",
+      "thumb": "thumbs/telefon.png",
+      "kind": "object",
+      "size": {
+        "h": 0.33
+      },
+      "name": {
+        "me": "Telefon",
+        "en": "Telephone"
+      },
+      "subtitle": {
+        "me": "Stari stoni telefon",
+        "en": "Old candlestick telephone"
+      },
+      "description": {
+        "me": "Stoni telefon s uspravnim stalkom, slušalicom na kuki i brojčanikom. Ovakvi aparati pojavili su se početkom 20. vijeka i bili su rijetkost, obično u poštama, opštinama i rijetkim kućama.",
+        "en": "A candlestick telephone with an upright stand, an earpiece on a hook and a dial. Phones like this appeared in the early 20th century and were rare, usually found in post offices, town halls and a few homes."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "komunikacija",
+            "en": "communication"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "metal, bakelit",
+            "en": "metal, Bakelite"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height"
+          },
+          "v": {
+            "me": "oko 33 cm (procjena)",
+            "en": "about 33 cm (estimate)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sljem",
+      "gallery": "vijek",
+      "model": "models/sljem.glb",
+      "thumb": "thumbs/sljem.png",
+      "kind": "object",
+      "size": {
+        "long": 0.3
+      },
+      "name": {
+        "me": "Šljem",
+        "en": "Steel helmet"
+      },
+      "subtitle": {
+        "me": "Vojnički čelični šljem",
+        "en": "Soldier's steel helmet"
+      },
+      "description": {
+        "me": "Čelični vojnički šljem iz prve polovine 20. vijeka, s karakterističnim obodom koji štiti vrat i uši. Ovakvi predmeti svjedoče o ratovima koji su prošli i kroz ovaj kraj.",
+        "en": "A steel soldier's helmet from the first half of the 20th century, with the characteristic flared rim that protects the neck and ears. Objects like this bear witness to the wars that also passed through this region."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type"
+          },
+          "v": {
+            "me": "vojna oprema",
+            "en": "military equipment"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material"
+          },
+          "v": {
+            "me": "čelik",
+            "en": "steel"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length"
+          },
+          "v": {
+            "me": "oko 30 cm (procjena)",
+            "en": "about 30 cm (estimate)"
           }
         }
       ]
