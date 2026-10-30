@@ -47,13 +47,14 @@ def card(key):
                  f'<rect x="{x + 2 * m:.1f}" y="{y + 2 * m:.1f}" width="{3 * m}" height="{3 * m}" rx="{RF * 0.6 * m}" fill="{INK}"/>')
     bx, by, bW, bH = qx + bx0 * m, qy + by0 * m, bw * m, bh * m
     cx = W / 2
-    mountain = (f'<g transform="translate({cx - 29},{by + 16}) scale(1.8)"><path d="M1 19 L11 5 L15 10 L20 2 L31 19 Z" fill="#f4efe6"/>'
-                f'<path d="M18.3 4.6 L20 2 L21.8 4.8 L20.6 6 L19.6 5.1 Z" fill="{OCHRE}"/></g>')
-    badge = (f'<rect x="{bx}" y="{by}" width="{bW}" height="{bH}" rx="28" fill="{PINE}"/>'
-             f'<rect x="{bx + 6}" y="{by + 6}" width="{bW - 12}" height="{bH - 12}" rx="23" fill="none" stroke="#f4efe6" stroke-opacity=".22" stroke-width="2"/>'
-             + mountain +
-             f'<text x="{cx + 4}" y="{by + 105}" text-anchor="middle" font-family="Inter" font-weight="800" font-size="51" letter-spacing="7.5" fill="#f4efe6">XPLORE</text>'
-             f'<text x="{cx + 3}" y="{by + 136}" text-anchor="middle" font-family="Inter" font-weight="700" font-size="22" letter-spacing="6.4" fill="{OCHRE}">PROKLETIJE</text>')
+    # project logo (icons/xplore-prokletije.svg) on a white rounded plate
+    lg = open(os.path.join(os.path.dirname(__file__), '../../icons/xplore-prokletije.svg')).read()
+    inner = lg[lg.index('>') + 1: lg.rindex('</svg>')]
+    LW, LH = 1152, 472
+    lw = bW - 30; lh = lw * LH / LW
+    badge = (f'<rect x="{bx}" y="{by}" width="{bW}" height="{bH}" rx="24" fill="#fff"/>'
+             f'<rect x="{bx + 3}" y="{by + 3}" width="{bW - 6}" height="{bH - 6}" rx="21" fill="none" stroke="{PINE}" stroke-opacity=".28" stroke-width="3"/>'
+             f'<svg x="{bx + 15}" y="{by + (bH - lh) / 2 + 2:.1f}" width="{lw}" height="{lh:.1f}" viewBox="0 0 {LW} {LH}">{inner}</svg>')
     ty = qy + Q + 4 * m + 92
     far, mid = sky['prof'][3], sky['prof'][2]
     rid = (f'<g transform="translate(0,{H - 150})"><path d="{ridge(far, W, 150, 112, 9)}" fill="#c9cfc9"/>'

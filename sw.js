@@ -1,9 +1,9 @@
 // Offline support: the app shell is cached on install; models and thumbnails are cached the first time they are opened.
 // Pages, code and data are fetched from the network first (the cache is the offline fallback), so phones never keep running an old version.
-const VERSION = 'gkb-v0.9.0';
+const VERSION = 'gkb-v0.9.1';
 const SHELL = [
   './', 'index.html', 'kocka.html', 'staze.html', 'css/staze.css', 'js/staze.js', 'manifest.webmanifest', 'css/museum.css', 'css/kocka.css',
-  'js/museum.js', 'js/kocka.js', 'js/i18n.js', 'js/cv/detector.js', 'js/cv/pose.js', 'js/cv/tracker.js',
+  'js/museum.js', 'js/logo.js', 'js/kocka.js', 'js/i18n.js', 'js/cv/detector.js', 'js/cv/pose.js', 'js/cv/tracker.js',
   'js/vendor/three/three.module.min.js', 'js/vendor/three/three.core.min.js',
   'js/vendor/three/addons/loaders/GLTFLoader.js', 'js/vendor/three/addons/utils/BufferGeometryUtils.js', 'js/vendor/three/addons/utils/SkeletonUtils.js',
   'js/vendor/three/addons/libs/meshopt_decoder.module.js', 'js/vendor/three/addons/environments/RoomEnvironment.js',

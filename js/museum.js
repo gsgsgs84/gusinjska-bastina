@@ -5,8 +5,9 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STR, detectLang, L, HTML_LANG, NUM_LOCALE } from './i18n.js';
+import { logoSVG } from './logo.js';
 
-const VERSION = '0.8';
+const VERSION = '0.9';
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const store = { get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } },
@@ -87,7 +88,7 @@ function renderHome() {
       <div class="sky" aria-hidden="true"><span class="moon"></span></div>
       <svg class="ridges" id="ridges" aria-hidden="true" preserveAspectRatio="xMidYMax slice"></svg>
       <div class="hero-txt">
-        <p class="xbrand"><svg viewBox="0 0 32 20" aria-hidden="true"><path d="M1 19 L11 5 L15 10 L20 2 L31 19 Z"/><path d="M18.3 4.6 L20 2 L21.8 4.8 L20.6 6 L19.6 5.1 Z" class="snow"/></svg><span>Xplore Prokletije</span></p>
+        <div class="xbrand">${logoSVG()}</div>
         <p class="kicker">${esc(t('kicker'))}</p>
         <h1>${esc(DATA.museum.name)}</h1>
         <p class="tagline">${esc(tx(DATA.museum.tagline))}</p>
@@ -136,7 +137,7 @@ function renderHome() {
         <a href="#/kocka">${esc(t('getCube'))}</a>
       </div>
     </section>
-    <footer class="foot"><b>${esc(DATA.museum.name)}</b><span>v${VERSION}</span><small>${esc(t('skyCredit'))}</small></footer>`;
+    <footer class="foot"><small class="proj">${esc(t('partOf'))}</small>${logoSVG('foot')}<b>${esc(DATA.museum.name)}</b><span>v${VERSION}</span><small>${esc(t('skyCredit'))}</small></footer>`;
   const jump = (a, id) => a && a.addEventListener('click', ev => { ev.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   jump($('#goCollection'), 'zbirka'); jump($('#goGalleries'), 'galerije');
   drawSky();
@@ -240,7 +241,8 @@ function setupDay(pool) {
   const saveData = navigator.connection && navigator.connection.saveData;
   if (saveData) { stage.classList.add('tap'); stage.insertAdjacentHTML('beforeend', `<span class="tap3d">${esc(t('tap3d'))}</span>`); stage.addEventListener('click', ev => { if (!ev.target.closest('.arrow')) mount(); }); }
   else if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); mount(); } }, { rootMargin: '250px' });
+    // start WebGL only when the card is really on screen, so it doesn't compete with the panorama's intro animation
+    const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); mount(); } }, { threshold: 0.12 });
     io.observe(stage);
   } else mount();
   $('#dayPrev').addEventListener('click', () => { dayI--; show(); });
@@ -417,7 +419,7 @@ function paintInstall() {
     <button class="x" aria-label="${esc(t('close'))}">×</button>
     <img src="icons/icon-192.png" alt="" width="52" height="52">
     <div class="it">
-      <small>Xplore Prokletije</small>
+      ${logoSVG('mini')}
       <h2 id="instT">${esc(t('inst_title'))}</h2>
       <p>${esc(t(pf === 'android' || pf === 'ios' ? 'inst_phone' : 'inst_pc'))}</p>
       ${how ? `<p class="how">${esc(how)}</p>` : ''}

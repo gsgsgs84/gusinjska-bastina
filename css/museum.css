@@ -258,11 +258,16 @@ body { overflow-x: clip; }
 }
 @media (min-width: 700px) { .gals2 { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); } }
 
-/* Xplore Prokletije brand line, first thing on the landing page */
-.xbrand { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 14px; padding: 7px 15px 7px 12px; border-radius: 999px;
-  background: var(--pine); color: #f4efe6; font: 800 13px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; box-shadow: var(--shadow); }
-.xbrand svg { width: 24px; height: 15px; fill: currentColor; } .xbrand .snow { fill: var(--accent); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .xbrand { background: #2b3d32; } }
+/* Xplore Prokletije project logo (js/logo.js): tower + "Xplore" in ink, QR blocks + "PROKLETIJE" in ochre */
+:root { --logo-a: #1f2b24; --logo-b: var(--accent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --logo-a: #f1ebe1; --logo-b: #d89a4e; } }
+.xlogo { display: block; height: auto; overflow: visible; }
+.xlogo .la { fill: var(--logo-a); } .xlogo .lb { fill: var(--logo-b); }
+.xbrand { margin: 0 auto 14px; width: clamp(190px, 54vw, 290px); filter: drop-shadow(0 6px 14px rgba(120, 80, 30, .14)); }
+.xbrand .xlogo { width: 100%; }
+.install .xlogo.mini { width: 112px; margin: 1px 0 3px; }
+.foot .proj { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+.foot .xlogo.foot { width: 150px; margin: 4px 0 10px; }
 .hero-txt .kicker { margin-bottom: 8px; font-size: 11.5px; }
 
 /* install offer (QR links ?app=android / ?app=windows) */
