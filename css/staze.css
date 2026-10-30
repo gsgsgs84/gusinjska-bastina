@@ -81,3 +81,10 @@ body.in-ar { overflow: hidden; }
 .ar-help .opt small { color: var(--muted); font-size: 13px; }
 .ar-help .opt.first { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
 .ar-help .opt.first small { color: inherit; opacity: .85; }
+
+/* world tracking (8th Wall engine): its camera canvas under our 3D canvas */
+.cam-ar .xr8-feed { position: absolute; inset: 0; width: 100%; height: 100%; }
+.cam-ar video[hidden] { display: none; }
+.staze-xr .xr-powered { pointer-events: auto; display: block; opacity: .85; }
+.staze-xr .xr-powered[hidden] { display: none; }
+.staze-xr .xr-powered img { height: 14px; width: auto; display: block; }

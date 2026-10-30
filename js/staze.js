@@ -68,7 +68,7 @@ reticle.matrixAutoUpdate = false; reticle.visible = false; scene.add(reticle);
 }
 
 function resize() {
-  if (renderer.xr.isPresenting || (S.xr && S.xr.kind === 'cam')) return;
+  if (renderer.xr.isPresenting || (S.xr && S.xr.kind !== 'webxr')) return;
   const w = stage.clientWidth, h = stage.clientHeight;
   if (!w || !h) return;
   renderer.setSize(w, h, false);
@@ -133,7 +133,8 @@ function paintText() {
   const styles = S.data.styles, colors = S.data.colors;
   $('#legend').innerHTML = Object.keys(styles).map(k => `<li><span class="line" style="background:${colors[k]}"></span>${esc(tx(styles[k]))}</li>`).join('') +
     `<li><span class="line border-line"></span>${esc(lang === 'en' ? 'State border' : lang === 'sq' ? 'Kufiri shtetëror' : 'Državna granica')}</li>`;
-  $('#credits').innerHTML = S.data.credits.map(c => `<li>${esc(c)}</li>`).join('');
+  $('#credits').innerHTML = S.data.credits.map(c => `<li>${esc(c)}</li>`).join('') +
+    `<li>${esc(t('s_engine'))} <a href="external/xr/LICENSE" target="_blank" rel="noopener">XR Engine License Agreement</a></li>`;
 }
 
 // ---------------- geometry ----------------
@@ -391,15 +392,16 @@ renderer.domElement.addEventListener('pointerdown', e => {
   down = { x: e.clientX, y: e.clientY, t: performance.now(), rot0: holder.rotation.y, moved: false };
 });
 renderer.domElement.addEventListener('pointermove', e => {
-  if (!down || !S.xr || S.xr.kind !== 'cam') return;     // camera AR: drag sideways to turn the terrain
+  if (!down || !S.xr || S.xr.kind === 'webxr') return;     // camera AR: drag sideways to turn the terrain
   const dx = e.clientX - down.x;
   if (Math.abs(dx) > 8) down.moved = true;
   if (down.moved) holder.rotation.y = down.rot0 + dx / innerWidth * Math.PI * 1.5;
 });
 renderer.domElement.addEventListener('pointerup', e => {
-  if (!down || (S.xr && S.xr.kind !== 'cam')) { down = null; return; }
+  if (!down || (S.xr && S.xr.kind === 'webxr')) { down = null; return; }
   const moved = down.moved || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8, dt = performance.now() - down.t; down = null;
   if (moved || dt > 500) return;
+  if (S.xr && S.xr.kind === 'slam' && S.xr.mode === 'table') return slamPlace(e.clientX, e.clientY);
   const r = renderer.domElement.getBoundingClientRect();
   ray.setFromCamera(new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), S.xr ? arCam : camera);
   const hits = ray.intersectObjects(pickGroup.children, false);
@@ -448,12 +450,14 @@ function frame(now, xrFrame) {
   const kind = S.xr && S.xr.kind;
   if (kind === 'webxr' && xrFrame) xrStep(xrFrame);
   else if (kind === 'cam') camStep();
+  else if (kind === 'slam') slamStep();
   else if (!kind) { stepCamera(now); controls.update(); }
   stepWalk(now);
-  const cam = renderer.xr.isPresenting ? (renderer.xr.getCamera().cameras[0] || renderer.xr.getCamera()) : kind === 'cam' ? arCam : camera;
+  const camLike = kind === 'cam' || kind === 'slam';
+  const cam = renderer.xr.isPresenting ? (renderer.xr.getCamera().cameras[0] || renderer.xr.getCamera()) : camLike ? arCam : camera;
   layoutLabels(cam, kind ? innerHeight : stage.clientHeight, kind ? innerWidth : stage.clientWidth);
   if (!kind) $('#north').style.transform = `rotate(${THREE.MathUtils.radToDeg(controls.getAzimuthalAngle())}deg)`;
-  renderer.render(scene, kind === 'cam' ? arCam : camera);
+  renderer.render(scene, camLike ? arCam : camera);
 }
 
 // ---------------- AR: the terrain appears in front of you ----------------
@@ -477,14 +481,22 @@ const IN_APP = IS_ANDROID && /; wv\)|FBAN|FBAV|Instagram|Line\/|MicroMessenger|T
 // Only if none works: a help sheet with the other ways (open in Chrome, install AR services, the printed cube/card, camera only).
 function startAR() {
   hideCTA();
+  const perms = motionPermissions();      // iPhone: must be asked inside the tap, before anything is awaited
   (async () => {
     let ok = false;
     try { ok = !!(navigator.xr && await navigator.xr.isSessionSupported('immersive-ar')); } catch { ok = false; }
     if (ok && await startWebXR()) return;
-    if (IS_IOS && quickLookOK) return quickLook();
-    if (IS_ANDROID && !IN_APP) return sceneViewer();
+    await perms;
+    if (await startSlamAR()) return;     // world tracking from the camera image: works without Google's AR services
     showHelp();
   })();
+}
+function motionPermissions() {
+  const ask = [];
+  for (const E of [typeof DeviceMotionEvent !== 'undefined' && DeviceMotionEvent, typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent]) {
+    if (E && typeof E.requestPermission === 'function') ask.push(E.requestPermission().catch(() => 'denied'));
+  }
+  return Promise.all(ask);
 }
 function arModelURL() { return new URL(S.data.arModel, location.href).href; }
 function pageURL(hash = '') { return location.href.split('#')[0] + hash; }
@@ -500,6 +512,7 @@ function sceneViewer() {
 }
 function showHelp() {
   const opts = [];
+  if (!slamFailed) opts.push(['slam', 's_optSlam', 's_optSlamSub']);
   if (IS_ANDROID && !IN_APP) opts.push(['scene', 's_optScene', 's_optSceneSub']);
   if (IS_ANDROID) opts.push(['chrome', 's_optChrome', 's_optChromeSub'], ['arcore', 's_optArcore', 's_optArcoreSub']);
   if (IS_IOS && quickLookOK) opts.push(['quick', 's_optQuick', 's_optQuickSub']);
@@ -513,6 +526,7 @@ function showHelp() {
 function hideHelp() { $('#arHelp').hidden = true; if (location.hash === '#ar-pomoc') history.replaceState(null, '', pageURL()); }
 function helpChoice(id) {
   hideHelp();
+  if (id === 'slam') { motionPermissions(); startSlamAR().then(ok => { if (!ok) { toast(t('s_slamFail')); } }); return; }
   if (id === 'scene') return sceneViewer();
   if (id === 'quick') return quickLook();
   if (id === 'chrome') { location.href = `intent://${location.host}${location.pathname}?ar=1#Intent;scheme=https;package=com.android.chrome;end`; return; }
@@ -551,13 +565,15 @@ function openOverlay(kind) {
   $('#xrBigger').onclick = () => { S.sizeIdx = Math.min(SIZES.length - 1, S.sizeIdx + 1); applySize(); };
   $('#xrRotL').onclick = () => { holder.rotation.y += Math.PI / 6; };
   $('#xrRotR').onclick = () => { holder.rotation.y -= Math.PI / 6; };
-  $('#xrFront').onclick = () => { S.xr.mode = 'front'; S.xr.needFront = true; msg(kind === 'cam' ? 's_arCam' : 's_arFront'); };
+  $('#xrFront').onclick = () => { S.xr.mode = 'front'; S.xr.needFront = true; msg(kind === 'cam' ? 's_arCam' : kind === 'slam' ? 's_slamPlaced' : 's_arFront'); };
   $('#xrTable').onclick = () => {
+    if (kind === 'slam') { S.xr.mode = 'table'; msg('s_slamTable'); return; }
     if (!S.xr.hit) { toast(t('s_noTable')); return; }
     S.xr.mode = 'table'; S.xr.placed = false; holder.visible = false; msg('s_arTable');
   };
   $('#xrQuick').onclick = () => { stopAR(); showHelp(); };
-  $('#xrTable').hidden = kind !== 'webxr';
+  $('#xrTable').hidden = kind === 'cam';
+  $('#xrPowered').hidden = kind !== 'slam';
   $('#xrQuick').hidden = kind !== 'cam';
   const ids = S.data.trails.map(x => x.id);
   const step = d => { const i = S.sel ? ids.indexOf(S.sel) : (d > 0 ? -1 : 0); select(ids[(i + d + ids.length) % ids.length]); };
@@ -575,6 +591,7 @@ function closeOverlay() {
 function stopAR() {
   if (!S.xr) return;
   if (S.xr.kind === 'webxr') S.xr.session?.end();
+  else if (S.xr.kind === 'slam') stopSlamAR();
   else stopCamAR();
 }
 
@@ -702,9 +719,14 @@ async function startCamAR(orientPerm) {
   msg('s_arCam');
 }
 function sizeCam() {
-  if (!S.xr || S.xr.kind !== 'cam') return;
+  if (!S.xr || S.xr.kind === 'webxr') return;
   renderer.setSize(innerWidth, innerHeight, false);
   renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%';
+  if (S.xr.kind === 'slam') {                  // the engine's camera picture; the projection comes from the engine
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    feed.width = Math.round(innerWidth * dpr); feed.height = Math.round(innerHeight * dpr);
+    return;
+  }
   arCam.aspect = innerWidth / innerHeight;
   arCam.fov = arCam.aspect < 1 ? 62 : 42;      // roughly a phone's main camera, after the picture is cropped to fill the screen
   arCam.updateProjectionMatrix();
@@ -720,6 +742,115 @@ function stopCamAR() {
   window.removeEventListener('resize', sizeCam);
   S.xr.stream?.getTracks().forEach(tr => tr.stop());
   video.srcObject = null; camEl.hidden = true;
+  stage.prepend(renderer.domElement); renderer.domElement.style.width = ''; renderer.domElement.style.height = '';
+  closeOverlay();
+}
+
+// ---- 3. world tracking from the camera image (8th Wall engine): any phone, no Google AR services needed ----
+// The XR Engine (© Niantic Spatial, Inc., used unmodified under its licence, external/xr/LICENSE) runs SLAM on the
+// camera picture and gives the phone's position and turn in the room; our own three.js canvas is drawn on top.
+const feed = document.createElement('canvas'); feed.className = 'xr8-feed';
+let xr8Loading = null, slamFailed = false;
+function loadXR8() {
+  if (window.XR8) return Promise.resolve(window.XR8);
+  if (!xr8Loading) xr8Loading = new Promise((resolve, reject) => {
+    const sc = document.createElement('script');
+    sc.src = 'external/xr/xr.js'; sc.async = true; sc.crossOrigin = 'anonymous';
+    sc.setAttribute('data-preload-chunks', 'slam');
+    const to = setTimeout(() => reject(new Error('XR engine timeout')), 60000);
+    window.addEventListener('xrloaded', () => { clearTimeout(to); resolve(window.XR8); }, { once: true });
+    sc.onerror = () => { clearTimeout(to); xr8Loading = null; reject(new Error('XR engine did not load')); };
+    document.head.appendChild(sc);
+  });
+  return xr8Loading;
+}
+async function startSlamAR() {
+  openOverlay('slam');
+  msg('s_slamLoading');
+  let XR8;
+  try {
+    XR8 = await loadXR8();
+    if (typeof XR8.loadChunk === 'function') await XR8.loadChunk('slam');
+  } catch (e) {
+    console.warn(e); slamFailed = true; closeOverlay(); return false;
+  }
+  if (!S.xr || S.xr.kind !== 'slam') return true;          // closed while loading
+  video.hidden = true; camEl.prepend(feed); camEl.hidden = false; camEl.appendChild(renderer.domElement);
+  S.xr.slam = { status: 'LIMITED', reason: 'INITIALIZING', pose: false, wasNormal: false, t0: performance.now(), failed: false };
+  sizeCam(); window.addEventListener('resize', sizeCam);
+  const fail = why => {
+    if (!S.xr || S.xr.kind !== 'slam' || S.xr.slam.failed) return;
+    console.warn('XR engine:', why); S.xr.slam.failed = true; slamFailed = true;
+    stopSlamAR(); toast(t('s_slamFail')); showHelp();
+  };
+  try {
+    XR8.clearCameraPipelineModules();
+    XR8.XrController.configure({ disableWorldTracking: false, scale: 'responsive' });
+    XR8.addCameraPipelineModules([
+      XR8.GlTextureRenderer.pipelineModule(),          // draws the camera picture
+      XR8.XrController.pipelineModule(),               // world tracking (SLAM)
+      {
+        name: 'gkb-staze',
+        onStart: () => {
+          // the floor is y = 0 and the phone starts 1.4 units above it, so one unit is about a metre
+          XR8.XrController.updateCameraProjectionMatrix({ origin: { x: 0, y: 1.4, z: 0 }, facing: { w: 1, x: 0, y: 0, z: 0 } });
+        },
+        onUpdate: ({ processCpuResult }) => {
+          const r = processCpuResult && processCpuResult.reality;
+          if (!r || !S.xr || S.xr.kind !== 'slam') return;
+          if (r.position) arCam.position.set(r.position.x, r.position.y, r.position.z);
+          if (r.rotation) arCam.quaternion.set(r.rotation.x, r.rotation.y, r.rotation.z, r.rotation.w);
+          if (r.intrinsics) { arCam.projectionMatrix.fromArray(r.intrinsics); arCam.projectionMatrixInverse.copy(arCam.projectionMatrix).invert(); }
+          if (r.trackingStatus) S.xr.slam.status = r.trackingStatus;
+          if (r.trackingReason) S.xr.slam.reason = r.trackingReason;
+          S.xr.slam.pose = true;
+        },
+        onCameraStatusChange: st => { if (st && st.status === 'failed') fail(st); },
+        onException: e => fail(e),
+        listeners: [{ event: 'reality.trackingstatus', process: ({ detail }) => {
+          if (S.xr && S.xr.slam && detail) { S.xr.slam.status = detail.status; S.xr.slam.reason = detail.reason; }
+        } }],
+      },
+    ]);
+    XR8.run({ canvas: feed, allowedDevices: XR8.XrConfig.device().ANY });
+  } catch (e) { fail(e); return true; }
+  return true;
+}
+let slamMsg = '';
+function slamStep() {
+  const sl = S.xr.slam;
+  arCam.updateMatrixWorld();
+  if (!sl || !sl.pose) return;
+  const normal = sl.status === 'NORMAL';
+  if (normal) sl.wasNormal = true;
+  if (S.xr.needFront && (normal || performance.now() - sl.t0 > 6000)) placeInFront(arCam.matrixWorld, arCam.projectionMatrix);
+  const k = !S.xr.placed ? 's_slamInit' : S.xr.mode === 'table' ? 's_slamTable' : (!normal && sl.wasNormal) ? 's_slamLost' : 's_slamPlaced';
+  if (k !== slamMsg) { slamMsg = k; msg(k); }
+}
+const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hitV = new THREE.Vector3();
+function slamPlace(cx, cy) {
+  // put the terrain where the user tapped: a tracked point on the table or floor, else the floor (y = 0)
+  let p = null;
+  try {
+    const hits = window.XR8.XrController.hitTest(cx / innerWidth, cy / innerHeight, ['FEATURE_POINT']) || [];
+    if (hits.length) p = new THREE.Vector3(hits[0].position.x, hits[0].position.y, hits[0].position.z);
+  } catch { p = null; }
+  if (!p) {
+    ray.setFromCamera(new THREE.Vector2(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1), arCam);
+    if (ray.ray.intersectPlane(groundPlane, hitV)) p = hitV.clone();
+  }
+  if (!p) return;
+  holder.position.copy(p);
+  arCam.getWorldPosition(camP);
+  holder.rotation.set(0, Math.atan2(camP.x - p.x, camP.z - p.z), 0);
+  holder.visible = true; if (shadowMesh) shadowMesh.visible = true;
+  S.xr.placed = true; S.xr.needFront = false; S.xr.mode = 'placed';
+}
+function stopSlamAR() {
+  try { window.XR8 && window.XR8.stop(); } catch (e) { console.warn(e); }
+  try { window.XR8 && window.XR8.clearCameraPipelineModules(); } catch (e) { console.warn(e); }
+  window.removeEventListener('resize', sizeCam);
+  feed.remove(); video.hidden = false; camEl.hidden = true; slamMsg = '';
   stage.prepend(renderer.domElement); renderer.domElement.style.width = ''; renderer.domElement.style.height = '';
   closeOverlay();
 }
