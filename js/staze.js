@@ -1,4 +1,4 @@
-// Planinarske staze – 3D relief of the Gusinje area with hiking trails: touch viewer, "on the table" AR (WebXR / Quick Look).
+// Planinarske staze – 3D relief of the Gusinje area with hiking trails: touch viewer and AR in front of you (WebXR, camera + motion sensors, Quick Look).
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
@@ -68,7 +68,7 @@ reticle.matrixAutoUpdate = false; reticle.visible = false; scene.add(reticle);
 }
 
 function resize() {
-  if (renderer.xr.isPresenting) return;
+  if (renderer.xr.isPresenting || (S.xr && S.xr.kind === 'cam')) return;
   const w = stage.clientWidth, h = stage.clientHeight;
   if (!w || !h) return;
   renderer.setSize(w, h, false);
@@ -98,6 +98,7 @@ async function init() {
   resetView(true);
   const pre = decodeURIComponent(location.hash.slice(1));
   if (S.trails.has(pre)) select(pre, false);
+  if (pre === 'ar' || matchMedia('(pointer: coarse)').matches) showCTA();
   renderer.setAnimationLoop(frame);
   wireUI();
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -116,7 +117,8 @@ function paintText() {
   $('#title').textContent = t('s_title');
   $('#lead').textContent = t('s_lead');
   $('#hint').textContent = t('s_hint');
-  $('#btnTable').textContent = t('s_table');
+  $('#btnTable').textContent = t('s_ar');
+  $('#ctaTxt').textContent = t('s_ar'); $('#ctaSub').textContent = t('s_ctaSub'); $('#ctaSkip').textContent = t('s_ctaSkip');
   $('#btnHeight').innerHTML = `${esc(t('s_height'))} <small>×${num(S.exag, S.exag % 1 ? 1 : 0)}</small>`;
   $('#btnLabels').textContent = t('s_labels');
   $('#btnLabels').setAttribute('aria-pressed', String(S.labels));
@@ -126,7 +128,7 @@ function paintText() {
   $('#creditsH').textContent = t('s_credits');
   $('#northTxt').textContent = t('s_north');
   $('#xrClose').textContent = t('close');
-  $('#xrMove').textContent = t('s_move');
+  $('#xrFront').textContent = t('s_front'); $('#xrTable').textContent = t('s_toTable'); $('#xrQuick').textContent = 'Quick Look';
   if (!S.data) return;
   const styles = S.data.styles, colors = S.data.colors;
   $('#legend').innerHTML = Object.keys(styles).map(k => `<li><span class="line" style="background:${colors[k]}"></span>${esc(tx(styles[k]))}</li>`).join('') +
@@ -385,16 +387,24 @@ function pickTrail(origin, dir) {
   return hits.length ? hits[0].object.userData.id : null;
 }
 let down = null;
-renderer.domElement.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+renderer.domElement.addEventListener('pointerdown', e => {
+  down = { x: e.clientX, y: e.clientY, t: performance.now(), rot0: holder.rotation.y, moved: false };
+});
+renderer.domElement.addEventListener('pointermove', e => {
+  if (!down || !S.xr || S.xr.kind !== 'cam') return;     // camera AR: drag sideways to turn the terrain
+  const dx = e.clientX - down.x;
+  if (Math.abs(dx) > 8) down.moved = true;
+  if (down.moved) holder.rotation.y = down.rot0 + dx / innerWidth * Math.PI * 1.5;
+});
 renderer.domElement.addEventListener('pointerup', e => {
-  if (!down || S.xr) return;
-  const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t; down = null;
-  if (moved > 8 || dt > 500) return;
+  if (!down || (S.xr && S.xr.kind !== 'cam')) { down = null; return; }
+  const moved = down.moved || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8, dt = performance.now() - down.t; down = null;
+  if (moved || dt > 500) return;
   const r = renderer.domElement.getBoundingClientRect();
-  ray.setFromCamera(new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+  ray.setFromCamera(new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), S.xr ? arCam : camera);
   const hits = ray.intersectObjects(pickGroup.children, false);
   if (hits.length) select(hits[0].object.userData.id);
-  else if (S.sel) select(S.sel);   // tap on empty terrain clears the selection
+  else if (S.sel && !S.xr) select(S.sel);   // tap on empty terrain clears the selection
 });
 
 // ---------------- lists ----------------
@@ -412,7 +422,11 @@ function renderLists() {
   });
 }
 
+function showCTA() { const c = $('#arCta'); if (c) c.hidden = false; }
+function hideCTA() { const c = $('#arCta'); if (c) c.hidden = true; }
 function wireUI() {
+  $('#ctaStart').addEventListener('click', startAR);
+  $('#ctaSkip').addEventListener('click', hideCTA);
   $('#btnHeight').addEventListener('click', () => {
     S.exag = EXAGS[(EXAGS.indexOf(S.exag) + 1) % EXAGS.length] || 1.5; store.set('gkb.staze.exag', S.exag);
     terrainWrap.scale.y = S.exag; buildTrails(); buildPlaces(); paintText();
@@ -427,25 +441,41 @@ function wireUI() {
 
 // ---------------- frame loop ----------------
 function frame(now, xrFrame) {
-  if (S.xr && xrFrame) xrStep(xrFrame);
-  else { stepCamera(now); controls.update(); }
+  const kind = S.xr && S.xr.kind;
+  if (kind === 'webxr' && xrFrame) xrStep(xrFrame);
+  else if (kind === 'cam') camStep();
+  else if (!kind) { stepCamera(now); controls.update(); }
   stepWalk(now);
-  const cam = renderer.xr.isPresenting ? (renderer.xr.getCamera().cameras[0] || renderer.xr.getCamera()) : camera;
-  layoutLabels(cam, S.xr ? innerHeight : stage.clientHeight, S.xr ? innerWidth : stage.clientWidth);
-  if (!S.xr) $('#north').style.transform = `rotate(${THREE.MathUtils.radToDeg(controls.getAzimuthalAngle())}deg)`;
-  renderer.render(scene, camera);
+  const cam = renderer.xr.isPresenting ? (renderer.xr.getCamera().cameras[0] || renderer.xr.getCamera()) : kind === 'cam' ? arCam : camera;
+  layoutLabels(cam, kind ? innerHeight : stage.clientHeight, kind ? innerWidth : stage.clientWidth);
+  if (!kind) $('#north').style.transform = `rotate(${THREE.MathUtils.radToDeg(controls.getAzimuthalAngle())}deg)`;
+  renderer.render(scene, kind === 'cam' ? arCam : camera);
 }
 
-// ---------------- on the table: WebXR (Android) or Quick Look (iPhone) ----------------
+// ---------------- AR: the terrain appears in front of you ----------------
+// 1. WebXR (Chrome on Android with Google Play Services for AR): world-tracked. The terrain floats in front of you at once;
+//    "On a table" puts it down on a real surface. Drag across the screen to turn it, tap a trail to select it.
+// 2. Camera + motion sensors (any phone, also iPhone): the camera picture is shown behind the 3D and the terrain stays
+//    in front of you while you turn the phone (rotation only). iPhone also offers Quick Look (world-tracked, no names).
 let toastT;
-function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 3200); }
-async function startAR() {
-  let ok = false;
-  try { ok = !!(navigator.xr && await navigator.xr.isSessionSupported('immersive-ar')); } catch { ok = false; }
-  if (ok) return startWebXR();
-  const a = document.createElement('a');
-  if (a.relList && a.relList.supports && a.relList.supports('ar')) return quickLook();
-  toast(t('s_noAR'));
+function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 3600); }
+const FRONT_SIZE = 1;                       // index into SIZES: 45 cm wide when floating in front of you
+const arCam = new THREE.PerspectiveCamera(60, 1, 0.01, 50);
+let shadowMesh = null;
+holder.traverse(o => { if (o.isMesh && o.material?.map && o.renderOrder === -1) shadowMesh = o; });
+const quickLookOK = (() => { const a = document.createElement('a'); return !!(a.relList && a.relList.supports && a.relList.supports('ar')); })();
+
+function startAR() {
+  // iPhone asks for motion-sensor permission; the request must start inside the tap, before anything is awaited
+  const orientPerm = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'
+    ? DeviceOrientationEvent.requestPermission().catch(() => 'denied') : null;
+  hideCTA();
+  (async () => {
+    let ok = false;
+    try { ok = !!(navigator.xr && await navigator.xr.isSessionSupported('immersive-ar')); } catch { ok = false; }
+    if (ok && await startWebXR()) return;
+    startCamAR(orientPerm);
+  })();
 }
 function sizeLabel() {
   const m = SIZES[S.sizeIdx], scale = Math.round(S.data.widthM / m / 100) * 100;
@@ -457,68 +487,195 @@ function updateXRTrail() {
   const tr = S.sel && S.trails.get(S.sel).tr;
   el.innerHTML = tr ? `<span class="dot" style="background:${tr.color}"></span>${esc(tx(tr.name))}` : esc(t('s_noTrail'));
 }
-async function startWebXR() {
+function msg(k) { $('#xrMsg').textContent = t(k); }
+
+// shared overlay (buttons work the same in both kinds of AR)
+function openOverlay(kind) {
   const ov = $('#xrOverlay');
-  const S0 = { pos: holder.position.clone(), rot: holder.rotation.y, scale: holder.scale.x };
-  S.xr = { session: null, hit: null, placed: false, S0 };
-  holder.visible = false; applySize(); updateXRTrail();
-  ov.hidden = false; $('#xrMsg').textContent = t('s_xrFind');
-  for (const el of ov.querySelectorAll('.xr-top, .xr-panel')) el.addEventListener('beforexrselect', ev => ev.preventDefault());
-  $('#xrClose').onclick = () => S.xr?.session?.end();
+  S.xr = { kind, S0: { pos: holder.position.clone(), rot: holder.rotation.y, scale: holder.scale.x, size: S.sizeIdx }, mode: 'front', placed: false,
+    needFront: true, drag: null };
+  controls.enabled = false;
+  S.sizeIdx = FRONT_SIZE; applySize(); updateXRTrail();
+  holder.visible = false;
+  ov.hidden = false; msg('s_starting');
+  $('#xrClose').onclick = () => stopAR();
   $('#xrSmaller').onclick = () => { S.sizeIdx = Math.max(0, S.sizeIdx - 1); applySize(); };
   $('#xrBigger').onclick = () => { S.sizeIdx = Math.min(SIZES.length - 1, S.sizeIdx + 1); applySize(); };
   $('#xrRotL').onclick = () => { holder.rotation.y += Math.PI / 6; };
   $('#xrRotR').onclick = () => { holder.rotation.y -= Math.PI / 6; };
-  $('#xrMove').onclick = () => { S.xr.placed = false; holder.visible = false; $('#xrMsg').textContent = t('s_xrFind'); };
+  $('#xrFront').onclick = () => { S.xr.mode = 'front'; S.xr.needFront = true; msg(kind === 'cam' ? 's_arCam' : 's_arFront'); };
+  $('#xrTable').onclick = () => {
+    if (!S.xr.hit) { toast(t('s_noTable')); return; }
+    S.xr.mode = 'table'; S.xr.placed = false; holder.visible = false; msg('s_arTable');
+  };
+  $('#xrQuick').onclick = () => quickLook();
+  $('#xrTable').hidden = kind !== 'webxr';
+  $('#xrQuick').hidden = !(kind === 'cam' && quickLookOK);
   const ids = S.data.trails.map(x => x.id);
   const step = d => { const i = S.sel ? ids.indexOf(S.sel) : (d > 0 ? -1 : 0); select(ids[(i + d + ids.length) % ids.length]); };
   $('#xrPrev').onclick = () => step(-1); $('#xrNext').onclick = () => step(1);
-  try {
-    const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay'], domOverlay: { root: ov } });
-    S.xr.session = session;
-    renderer.xr.setReferenceSpaceType('local');
-    await renderer.xr.setSession(session);
-    S.xr.hit = await session.requestHitTestSource({ space: await session.requestReferenceSpace('viewer') });
-    session.addEventListener('select', xrSelect);
-    session.addEventListener('end', () => {
-      const s0 = S.xr.S0; S.xr = null; ov.hidden = true; reticle.visible = false;
-      holder.position.copy(s0.pos); holder.rotation.y = s0.rot; holder.scale.setScalar(s0.scale); holder.visible = true;
-      resize();
-    });
-  } catch (e) {
-    console.warn(e); ov.hidden = true; S.xr = null; holder.visible = true; holder.scale.setScalar(1); toast(t('s_noAR'));
-  }
+  document.body.classList.add('in-ar');
+  return ov;
 }
+function closeOverlay() {
+  const s0 = S.xr && S.xr.S0;
+  S.xr = null; $('#xrOverlay').hidden = true; reticle.visible = false; document.body.classList.remove('in-ar');
+  if (s0) { holder.position.copy(s0.pos); holder.rotation.y = s0.rot; holder.scale.setScalar(s0.scale); S.sizeIdx = s0.size; }
+  holder.visible = true; if (shadowMesh) shadowMesh.visible = true;
+  controls.enabled = true; resize();
+}
+function stopAR() {
+  if (!S.xr) return;
+  if (S.xr.kind === 'webxr') S.xr.session?.end();
+  else stopCamAR();
+}
+
+// put the terrain in front of the viewer, a little below the eyes, south edge towards them, at a distance where it fits the view
+const fwd = new THREE.Vector3(), eye = new THREE.Vector3();
+function placeInFront(camMatrix, proj) {
+  eye.setFromMatrixPosition(camMatrix);
+  fwd.set(0, 0, -1).transformDirection(camMatrix); fwd.y = 0;
+  if (fwd.lengthSq() < 1e-4) fwd.set(0, 0, -1);
+  fwd.normalize();
+  const e = proj ? proj.elements : null;
+  const half = e ? Math.atan(1 / Math.max(e[0], e[5])) : THREE.MathUtils.degToRad(15);   // narrower half-angle of the view
+  const size = SIZES[S.sizeIdx], radius = size * 0.5 * Math.hypot(1, S.data.depth) * 0.8;
+  const dist = Math.min(2.5, Math.max(0.45, radius / Math.tan(half)));
+  holder.position.copy(eye).addScaledVector(fwd, dist); holder.position.y -= dist * 0.42;    // about 23° below eye level
+  holder.rotation.set(0, Math.atan2(eye.x - holder.position.x, eye.z - holder.position.z), 0);
+  holder.visible = true; if (shadowMesh) shadowMesh.visible = false;
+  S.xr.placed = true; S.xr.needFront = false;
+}
+
+// ---- 1. WebXR ----
+async function startWebXR() {
+  const ov = openOverlay('webxr');
+  for (const el of ov.querySelectorAll('.xr-top, .xr-panel')) el.addEventListener('beforexrselect', ev => ev.preventDefault());
+  let session;
+  try {
+    session = await navigator.xr.requestSession('immersive-ar', { optionalFeatures: ['hit-test', 'dom-overlay'], domOverlay: { root: ov } });
+  } catch (e) {
+    console.warn('WebXR session failed', e); closeOverlay(); return false;
+  }
+  S.xr.session = session;
+  renderer.xr.setReferenceSpaceType('local');
+  await renderer.xr.setSession(session);
+  try { S.xr.hit = await session.requestHitTestSource({ space: await session.requestReferenceSpace('viewer') }); } catch { S.xr.hit = null; }
+  session.addEventListener('selectstart', e => { if (S.xr) S.xr.drag = { source: e.inputSource, yaw0: null, rot0: holder.rotation.y, moved: false }; });
+  session.addEventListener('select', xrSelect);
+  session.addEventListener('selectend', () => { if (S.xr) S.xr.drag = null; });
+  session.addEventListener('end', () => closeOverlay());
+  msg('s_arFront');
+  return true;
+}
+const rayM = new THREE.Matrix4(), rayO = new THREE.Vector3(), rayD = new THREE.Vector3();
 function xrStep(xrFrame) {
   const ref = renderer.xr.getReferenceSpace();
-  if (S.xr.hit && !S.xr.placed) {
+  if (S.xr.needFront) {
+    const vp = xrFrame.getViewerPose(ref);
+    if (vp) placeInFront(rayM.fromArray(vp.transform.matrix), (renderer.xr.getCamera().cameras[0] || arCam).projectionMatrix);
+  }
+  if (S.xr.mode === 'table' && !S.xr.placed && S.xr.hit) {
     const hits = xrFrame.getHitTestResults(S.xr.hit);
-    if (hits.length) {
-      reticle.visible = true; reticle.matrix.fromArray(hits[0].getPose(ref).transform.matrix);
-      $('#xrMsg').textContent = t('s_xrTap');
-    } else reticle.visible = false;
+    reticle.visible = hits.length > 0;
+    if (hits.length) reticle.matrix.fromArray(hits[0].getPose(ref).transform.matrix);
   } else reticle.visible = false;
+  const d = S.xr.drag;                   // one-finger drag across the screen turns the terrain
+  if (d && S.xr.placed) {
+    const pose = xrFrame.getPose(d.source.targetRaySpace, ref);
+    if (pose) {
+      rayD.set(0, 0, -1).transformDirection(rayM.fromArray(pose.transform.matrix));
+      const yaw = Math.atan2(rayD.x, rayD.z);
+      if (d.yaw0 == null) d.yaw0 = yaw;
+      let dy = yaw - d.yaw0; if (dy > Math.PI) dy -= 2 * Math.PI; if (dy < -Math.PI) dy += 2 * Math.PI;
+      if (Math.abs(dy) > 0.035) d.moved = true;
+      if (d.moved) holder.rotation.y = d.rot0 + dy * 3;
+    }
+  }
 }
 const tmpP = new THREE.Vector3(), tmpQ = new THREE.Quaternion(), tmpS = new THREE.Vector3(), camP = new THREE.Vector3();
 function xrSelect(e) {
-  if (!S.xr) return;
-  if (!S.xr.placed) {
+  if (!S.xr || S.xr.drag?.moved) return;
+  if (S.xr.mode === 'table' && !S.xr.placed) {
     if (!reticle.visible) return;
     reticle.matrix.decompose(tmpP, tmpQ, tmpS);
     holder.position.copy(tmpP);
     renderer.xr.getCamera().getWorldPosition(camP);
     holder.rotation.set(0, Math.atan2(camP.x - tmpP.x, camP.z - tmpP.z), 0);     // south edge towards the visitor, north away
-    holder.visible = true; S.xr.placed = true;
-    $('#xrMsg').textContent = t('s_xrPlaced');
+    holder.visible = true; if (shadowMesh) shadowMesh.visible = true; S.xr.placed = true;
+    msg('s_xrPlaced');
     return;
   }
   const pose = e.frame.getPose(e.inputSource.targetRaySpace, renderer.xr.getReferenceSpace());
   if (!pose) return;
-  const m = new THREE.Matrix4().fromArray(pose.transform.matrix);
-  const o = new THREE.Vector3().setFromMatrixPosition(m), d = new THREE.Vector3(0, 0, -1).transformDirection(m);
-  const id = pickTrail(o, d);
+  rayM.fromArray(pose.transform.matrix);
+  const id = pickTrail(rayO.setFromMatrixPosition(rayM), rayD.set(0, 0, -1).transformDirection(rayM));
   if (id) select(id);
 }
+
+// ---- 2. camera picture + motion sensors ----
+const camEl = document.createElement('div'); camEl.className = 'cam-ar'; camEl.hidden = true;
+const video = document.createElement('video'); video.playsInline = true; video.muted = true; video.setAttribute('playsinline', '');
+camEl.appendChild(video); document.body.appendChild(camEl);
+const orient = { q: new THREE.Quaternion(), have: false, alpha0: null };
+const EUL = new THREE.Euler(), Q90 = new THREE.Quaternion(-Math.SQRT1_2, 0, 0, Math.SQRT1_2), QZ = new THREE.Quaternion(), ZAX = new THREE.Vector3(0, 0, 1);
+function onOrient(e) {
+  if (e.alpha == null && e.beta == null) return;
+  const d2r = Math.PI / 180, so = ((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) * d2r;
+  EUL.set((e.beta || 0) * d2r, (e.alpha || 0) * d2r, -(e.gamma || 0) * d2r, 'YXZ');
+  orient.q.setFromEuler(EUL).multiply(Q90).multiply(QZ.setFromAxisAngle(ZAX, -so));
+  if (!orient.have && S.xr && S.xr.kind === 'cam') { S.xr.needFront = true; msg('s_arCam'); }   // sensor came late: place again
+  orient.have = true;
+}
+async function startCamAR(orientPerm) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    toast(quickLookOK ? t('preparing') : t('s_noAR')); if (quickLookOK) quickLook(); return;
+  }
+  openOverlay('cam');
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+  } catch (e) {
+    closeOverlay();
+    toast(e && e.name === 'NotAllowedError' ? t('c_errBlocked') : e && e.name === 'NotFoundError' ? t('c_errNoCam') : t('c_errStart'));
+    return;
+  }
+  video.srcObject = stream; camEl.hidden = false;
+  try { await video.play(); } catch { /* starts on the next tap */ }
+  camEl.appendChild(renderer.domElement);
+  S.xr.stream = stream;
+  orient.have = false;
+  if (orientPerm) await orientPerm;          // iPhone: wait for the motion-sensor answer (no events if refused)
+  window.addEventListener('deviceorientation', onOrient);
+  sizeCam();
+  window.addEventListener('resize', sizeCam);
+  arCam.position.set(0, 0, 0); arCam.quaternion.identity();
+  setTimeout(() => { if (S.xr && S.xr.kind === 'cam') msg(orient.have ? 's_arCam' : 's_arCamDrag'); }, 1200);
+  msg('s_arCam');
+}
+function sizeCam() {
+  if (!S.xr || S.xr.kind !== 'cam') return;
+  renderer.setSize(innerWidth, innerHeight, false);
+  renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%';
+  arCam.aspect = innerWidth / innerHeight;
+  arCam.fov = arCam.aspect < 1 ? 62 : 42;      // roughly a phone's main camera, after the picture is cropped to fill the screen
+  arCam.updateProjectionMatrix();
+}
+function camStep() {
+  if (orient.have) arCam.quaternion.copy(orient.q);
+  else arCam.quaternion.setFromEuler(EUL.set(-0.45, 0, 0, 'YXZ'));     // no sensor: look a little downwards
+  arCam.updateMatrixWorld();
+  if (S.xr.needFront && (orient.have || performance.now() - (S.xr.t0 ||= performance.now()) > 900)) placeInFront(arCam.matrixWorld, arCam.projectionMatrix);
+}
+function stopCamAR() {
+  window.removeEventListener('deviceorientation', onOrient);
+  window.removeEventListener('resize', sizeCam);
+  S.xr.stream?.getTracks().forEach(tr => tr.stop());
+  video.srcObject = null; camEl.hidden = true;
+  stage.prepend(renderer.domElement); renderer.domElement.style.width = ''; renderer.domElement.style.height = '';
+  closeOverlay();
+}
+
 async function quickLook() {
   toast(t('preparing'));
   try {
@@ -538,4 +695,4 @@ async function quickLook() {
   } catch (e) { console.warn(e); toast(t('s_noAR')); }
 }
 
-window.__staze = { S, scene, camera, controls, renderer, holder, select };
+window.__staze = { S, scene, camera, controls, renderer, holder, select, arCam, startAR, stopAR, orient };   // for tests

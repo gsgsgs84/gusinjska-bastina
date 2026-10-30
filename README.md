@@ -13,12 +13,14 @@ A 3D museum in your hand: buildings and objects of Gusinje and Prokletije that y
   - `?id=<exhibit>` shows one exhibit.
   - `?ids=a,b,c` is the showcase: the side of the cube that points up chooses the exhibit.
 - QR codes for physical labels point at `…/#/e/<exhibit>`.
-- `staze.html`: hiking trails around Gusinje in 3D, also placeable on a table (see below).
+- `staze.html`: hiking trails around Gusinje in 3D, also in AR in front of you (see below).
 
 ## Hiking trails (`staze.html`)
 A 3D relief of the Gusinje area (19.74–19.95 E, 42.45–42.60 N, about 17 × 17 km) with 18 hiking and cycling routes.
 - **Touch viewer:** drag to turn, pinch to zoom, tap a trail (on the terrain or in the list) for its card, elevation profile and a walking marker. `staze.html#<trail-id>` opens a trail directly, e.g. for a QR code.
-- **On the table:** Android Chrome uses WebXR (`immersive-ar` + hit-test + dom-overlay): tap to place, then tap a trail to select it; size 30–150 cm, turn, move. iPhone gets an AR Quick Look USDZ made on the phone (terrain and trails, without names).
+- **AR in front of me** (big button; offered automatically on phones, or open `staze.html#ar`): the terrain appears about a metre in front of you, a little below eye level, sized to fit the view.
+  - Android Chrome with Google Play Services for AR: WebXR (`immersive-ar`, optional hit-test and dom-overlay). Walk around it, drag across the screen to turn it, tap a trail to select it, ± to resize (30–150 cm, scale shown), *On a table* puts it down on a real surface.
+  - Other phones, including iPhone: the camera picture is shown behind the 3D and the motion sensors keep the terrain in front of you as you turn the phone (rotation only, no walking around). Without a motion sensor, drag to turn it. On iPhone a *Quick Look* button opens Apple's world-tracked AR (terrain and trails, no names).
 - **Height** button: vertical exaggeration ×1, ×1.5 (default), ×2.
 
 Files: `models/staze/teren.glb` (terrain block with a painted map texture), `data/staze.json` (trails, places, credits), `js/staze.js`, `css/staze.css`.

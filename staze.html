@@ -30,6 +30,13 @@
     <div class="loading" id="loading"></div>
     <div class="north" id="north" aria-hidden="true"><span id="northTxt">S</span><i></i></div>
     <div class="hint" id="hint"></div>
+    <div class="ar-cta" id="arCta" hidden>
+      <div class="ar-cta-box">
+        <button class="btn primary" id="ctaStart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3"/><path d="M12 7.5l4 2.3v4.4L12 16.5l-4-2.3V9.8z"/></svg><span id="ctaTxt"></span></button>
+        <p id="ctaSub"></p>
+        <button class="linkbtn" id="ctaSkip"></button>
+      </div>
+    </div>
   </div>
   <div class="tools" role="toolbar">
     <button class="btn primary" id="btnTable"></button>
@@ -51,7 +58,9 @@
     <div class="xr-row">
       <button class="xr-btn" id="xrSmaller" aria-label="−">−</button><span id="xrSize"></span><button class="xr-btn" id="xrBigger" aria-label="+">+</button>
       <button class="xr-btn" id="xrRotL" aria-label="⟲">⟲</button><button class="xr-btn" id="xrRotR" aria-label="⟳">⟳</button>
-      <button class="xr-btn" id="xrMove"></button>
+    </div>
+    <div class="xr-row">
+      <button class="xr-btn" id="xrFront"></button><button class="xr-btn" id="xrTable"></button><button class="xr-btn" id="xrQuick" hidden></button>
     </div>
   </div>
 </div>
