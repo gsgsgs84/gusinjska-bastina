@@ -1,0 +1,33 @@
+name: Vendor 8th Wall engine binary
+on:
+  push:
+    branches: [trails-data]
+    paths: [".github/workflows/vendor-8thwall.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Download the package unmodified
+        run: |
+          rm -rf vendor/8thwall && mkdir -p vendor/8thwall
+          cd vendor/8thwall
+          npm view @8thwall/engine-binary versions --json > versions.json || true
+          npm pack @8thwall/engine-binary
+          tar xzf 8thwall-engine-binary-*.tgz
+          rm 8thwall-engine-binary-*.tgz
+          ls -laR package | head -80 > listing.txt
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vendor
+          git commit -m "Vendor @8thwall/engine-binary (unmodified)" || echo "nothing to commit"
+          git push
