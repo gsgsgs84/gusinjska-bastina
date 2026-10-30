@@ -528,9 +528,9 @@ function showHelp() {
   if (IS_ANDROID && !IN_APP) opts.push(['scene', 's_optScene', 's_optSceneSub']);
   if (IS_ANDROID) opts.push(['chrome', 's_optChrome', 's_optChromeSub'], ['arcore', 's_optArcore', 's_optArcoreSub']);
   if (IS_IOS && quickLookOK) opts.push(['quick', 's_optQuick', 's_optQuickSub']);
-  opts.push(['cube', 's_optCube', 's_optCubeSub'], ['cam', 's_optCam', 's_optCamSub']);
+  opts.push(['cube', 's_optCube', 's_optCubeSub'], ['cam', 's_optCam', 's_optCamSub'], ['test', 's_optTest', 's_optTestSub']);
   $('#arHelpH').textContent = t('s_helpTitle');
-  $('#arHelpWhy').textContent = t(IN_APP ? 's_helpInApp' : 's_helpWhy');
+  $('#arHelpWhy').textContent = t(IN_APP ? 's_helpInApp' : 's_helpWhy') + (arError ? `\n(${arError})` : '');
   $('#arOpts').innerHTML = opts.map(([id, h, sub], i) => `<button class="opt${i ? '' : ' first'}" data-opt="${id}"><b>${esc(t(h))}</b><small>${esc(t(sub))}</small></button>`).join('');
   $('#arHelpClose').textContent = t('close');
   $('#arHelp').hidden = false;
@@ -544,6 +544,7 @@ function helpChoice(id) {
   if (id === 'quick') return quickLook();
   if (id === 'chrome') { location.href = `intent://${location.host}${location.pathname}?ar=1#Intent;scheme=https;package=com.android.chrome;end`; return; }
   if (id === 'arcore') { location.href = 'https://play.google.com/store/apps/details?id=com.google.ar.core'; return; }
+  if (id === 'test') { location.href = 'ar-test.html'; return; }
   if (id === 'cube') { location.href = 'kocka.html?id=staze-teren'; return; }
   if (id === 'cam') {
     // iPhone asks for motion-sensor permission; the request must start inside the tap
@@ -763,7 +764,20 @@ function stopCamAR() {
 // The XR Engine (© Niantic Spatial, Inc., used unmodified under its licence, external/xr/LICENSE) runs SLAM on the
 // camera picture and gives the phone's position and turn in the room; our own three.js canvas is drawn on top.
 const feed = document.createElement('canvas'); feed.className = 'xr8-feed';
-let xr8Loading = null, slamFailed = false;
+let xr8Loading = null, slamFailed = false, arError = '', gumPatched = false;
+// The engine asks for an exact 960x720 back camera; some phones refuse that. Retry with the same size as a wish.
+function softenCamera() {
+  if (gumPatched || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  gumPatched = true;
+  const orig = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+  navigator.mediaDevices.getUserMedia = c => orig(c).catch(e => {
+    if (!(e && /Overconstrained|NotReadable|NotFound/.test(e.name)) || !c || typeof c.video !== 'object') throw e;
+    const v = { facingMode: { ideal: 'environment' } };
+    for (const k of ['width', 'height']) if (c.video[k] != null) { const x = c.video[k]; v[k] = { ideal: typeof x === 'object' ? (x.exact ?? x.ideal ?? x.min) : x }; }
+    arError = `camera ${e.name}${e.constraint ? ' (' + e.constraint + ')' : ''}, retried`;
+    return orig({ ...c, video: v });
+  });
+}
 function loadXR8() {
   if (window.XR8) return Promise.resolve(window.XR8);
   if (!xr8Loading) xr8Loading = new Promise((resolve, reject) => {
@@ -785,7 +799,7 @@ async function startSlamAR() {
     XR8 = await loadXR8();
     if (typeof XR8.loadChunk === 'function') await XR8.loadChunk('slam');
   } catch (e) {
-    console.warn(e); slamFailed = true; closeOverlay(); return false;
+    console.warn(e); slamFailed = true; arError = 'XR engine load: ' + (e && e.message || e); closeOverlay(); return false;
   }
   if (!S.xr || S.xr.kind !== 'slam') return true;          // closed while loading
   video.hidden = true; camEl.prepend(feed); camEl.hidden = false; camEl.appendChild(renderer.domElement);
@@ -794,6 +808,7 @@ async function startSlamAR() {
   const fail = why => {
     if (!S.xr || S.xr.kind !== 'slam' || S.xr.slam.failed) return;
     console.warn('XR engine:', why); S.xr.slam.failed = true; slamFailed = true;
+    arError = 'XR engine: ' + (typeof why === 'string' ? why : (why && (why.message || JSON.stringify(why))) || 'unknown');
     stopSlamAR(); toast(t('s_slamFail')); showHelp();
   };
   try {
@@ -825,6 +840,7 @@ async function startSlamAR() {
         } }],
       },
     ]);
+    softenCamera();
     XR8.run({ canvas: feed, allowedDevices: XR8.XrConfig.device().ANY });
   } catch (e) { fail(e); return true; }
   return true;

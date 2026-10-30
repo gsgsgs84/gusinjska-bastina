@@ -74,7 +74,7 @@ body.in-ar { overflow: hidden; }
 .ar-help[hidden] { display: none; }
 .ar-help .sheet { width: min(100%, 520px); background: var(--bg); border-radius: 18px 18px 0 0; padding: 18px 16px calc(14px + var(--safe-b)); display: grid; gap: 10px; max-height: 88dvh; overflow: auto; }
 .ar-help h2 { font-size: 21px; }
-.ar-help p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.ar-help p { margin: 0; color: var(--muted); font-size: 14.5px; white-space: pre-line; }
 .ar-help .opts { display: grid; gap: 8px; }
 .ar-help .opt { text-align: left; border: 1px solid var(--line); background: var(--paper); border-radius: 14px; padding: 11px 14px; cursor: pointer; display: grid; gap: 2px; }
 .ar-help .opt b { font-size: 15.5px; }

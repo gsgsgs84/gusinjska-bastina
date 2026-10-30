@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AR test – Gusinjska kulturna baština</title>
+<style>
+  body { margin: 0; font: 15px/1.45 system-ui, -apple-system, Roboto, sans-serif; background: #f3ede3; color: #221e19; }
+  main { max-width: 640px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 22px; margin: 4px 0 6px; } p { margin: 0 0 10px; color: #6e655a; }
+  button { font: inherit; font-weight: 650; border: 0; border-radius: 12px; padding: 12px 14px; margin: 4px 6px 4px 0; background: #2f4337; color: #f4efe6; }
+  button.alt { background: #a4641f; }
+  button:disabled { opacity: .45; }
+  #log { white-space: pre-wrap; font: 12.5px/1.4 ui-monospace, Menlo, Consolas, monospace; background: #fff; border-radius: 12px; padding: 10px; min-height: 120px; overflow-wrap: anywhere; }
+  .ok { color: #1e7a3c; } .bad { color: #b3261e; } .warn { color: #8a5a00; }
+  #feedBox { position: relative; width: 100%; aspect-ratio: 3 / 4; max-height: 50vh; background: #000; border-radius: 12px; overflow: hidden; margin: 8px 0; display: none; }
+  #feedBox canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<main>
+  <h1>AR test</h1>
+  <p>Checks, step by step, what this phone and browser can do for AR. Tap the three buttons in order, then tap <b>Copy result</b> and paste it into the chat.</p>
+  <button id="b1">1. Camera + sensors</button><button id="b2">2. Room tracking (8th Wall)</button><button id="b3" class="alt">Copy result</button>
+  <div id="feedBox"></div>
+  <div id="log"></div>
+</main>
+<script>
+// Diagnostics for the trails AR page. Nothing is sent anywhere; the user copies the text by hand.
+const logEl = document.getElementById('log');
+const t0 = performance.now();
+const lines = [];
+function log(msg, cls) {
+  const s = `[${((performance.now() - t0) / 1000).toFixed(1)}s] ${msg}`;
+  lines.push(s);
+  const d = document.createElement('div'); d.textContent = s; if (cls) d.className = cls; logEl.appendChild(d);
+}
+const yes = (v, m) => log((v ? '✓ ' : '✗ ') + m, v ? 'ok' : 'bad');
+
+(async function basics() {
+  log('Page: ' + location.href);
+  log('UA: ' + navigator.userAgent);
+  try {
+    if (navigator.userAgentData) {
+      const h = await navigator.userAgentData.getHighEntropyValues(['model', 'platformVersion', 'fullVersionList']);
+      log(`Device: ${h.model || '?'} · ${h.platform} ${h.platformVersion} · ${(h.fullVersionList || []).map(b => b.brand + ' ' + b.version).join(', ')}`);
+    }
+  } catch (e) { log('userAgentData: ' + e); }
+  log(`Screen ${screen.width}x${screen.height} @${devicePixelRatio}, window ${innerWidth}x${innerHeight}`);
+  yes(window.isSecureContext, 'secure context (https)');
+  try {
+    const c = document.createElement('canvas');
+    const gl2 = c.getContext('webgl2'); yes(!!gl2, 'WebGL2');
+    const gl = gl2 || c.getContext('webgl');
+    const ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
+    if (ext) log('GPU: ' + gl.getParameter(ext.UNMASKED_RENDERER_WEBGL));
+  } catch (e) { log('WebGL: ' + e, 'bad'); }
+  yes(typeof WebAssembly === 'object', 'WebAssembly');
+  try {
+    const simd = WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
+    yes(simd, 'WebAssembly SIMD');
+  } catch (e) { log('SIMD check: ' + e); }
+  yes(typeof SharedArrayBuffer !== 'undefined', 'SharedArrayBuffer');
+  yes(!!navigator.xr, 'WebXR API present');
+  if (navigator.xr) {
+    try { yes(await navigator.xr.isSessionSupported('immersive-ar'), 'WebXR immersive-ar supported (needs Google Play Services for AR)'); }
+    catch (e) { log('WebXR check error: ' + e, 'bad'); }
+  }
+  log('Service worker: ' + (navigator.serviceWorker && navigator.serviceWorker.controller ? 'active' : 'none'));
+  try { const r = await fetch('sw.js', { cache: 'no-store' }); const s = await r.text(); log('Site version: ' + (s.match(/gkb-v[0-9.]+/) || ['?'])[0]); } catch (e) { log('version: ' + e); }
+})();
+
+// 1. camera + motion sensors
+document.getElementById('b1').onclick = async () => {
+  log('--- 1. camera + sensors');
+  const asks = [];
+  for (const E of [window.DeviceMotionEvent, window.DeviceOrientationEvent]) {
+    if (E && typeof E.requestPermission === 'function') asks.push(E.requestPermission().then(r => log(`${E.name}.requestPermission: ${r}`)).catch(e => log(`${E.name}.requestPermission error: ${e}`, 'bad')));
+  }
+  await Promise.all(asks);
+  let nO = 0, nM = 0, lastO = null;
+  const o = e => { nO++; lastO = e; }, m = () => { nM++; };
+  addEventListener('deviceorientation', o); addEventListener('devicemotion', m);
+  const tryCam = async (label, c) => {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia(c);
+      const tr = s.getVideoTracks()[0], st = tr.getSettings();
+      log(`✓ camera ${label}: ${st.width}x${st.height} ${st.facingMode || ''} "${tr.label}"`, 'ok');
+      s.getTracks().forEach(t => t.stop());
+    } catch (e) { log(`✗ camera ${label}: ${e.name} ${e.message || ''} ${e.constraint || ''}`, 'bad'); }
+  };
+  await tryCam('back', { video: { facingMode: { ideal: 'environment' } } });
+  await tryCam('exact 960x720 back (what 8th Wall asks)', { video: { width: { exact: 960 }, height: { exact: 720 }, facingMode: { exact: 'environment' } } });
+  try {
+    const devs = await navigator.mediaDevices.enumerateDevices();
+    log('cameras: ' + devs.filter(d => d.kind === 'videoinput').map(d => d.label || '(no label)').join(' | '));
+  } catch (e) { log('enumerateDevices: ' + e); }
+  await new Promise(r => setTimeout(r, 1500));
+  removeEventListener('deviceorientation', o); removeEventListener('devicemotion', m);
+  yes(nO > 0, `deviceorientation events: ${nO}${lastO ? ` (alpha ${Math.round(lastO.alpha)}, beta ${Math.round(lastO.beta)}, gamma ${Math.round(lastO.gamma)})` : ''}`);
+  yes(nM > 0, `devicemotion events: ${nM}`);
+};
+
+// 2. 8th Wall engine
+document.getElementById('b2').onclick = async (ev) => {
+  ev.target.disabled = true;
+  log('--- 2. room tracking (8th Wall engine)');
+  for (const E of [window.DeviceMotionEvent, window.DeviceOrientationEvent]) {
+    if (E && typeof E.requestPermission === 'function') E.requestPermission().then(r => log(`${E.name}.requestPermission: ${r}`)).catch(e => log('perm error ' + e));
+  }
+  const box = document.getElementById('feedBox'); box.style.display = 'block';
+  const canvas = document.createElement('canvas'); box.appendChild(canvas);
+  const r = box.getBoundingClientRect(); canvas.width = Math.round(r.width * devicePixelRatio); canvas.height = Math.round(r.height * devicePixelRatio);
+  const gum = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+  navigator.mediaDevices.getUserMedia = c => { log('engine asks camera: ' + JSON.stringify(c)); return gum(c).then(s => { log('✓ camera opened for engine', 'ok'); return s; }, e => { log(`✗ camera refused: ${e.name} ${e.message || ''} ${e.constraint || ''}`, 'bad'); throw e; }); };
+  const t1 = performance.now();
+  try {
+    await new Promise((res, rej) => {
+      if (window.XR8) return res();
+      const sc = document.createElement('script'); sc.src = 'external/xr/xr.js'; sc.async = true; sc.crossOrigin = 'anonymous';
+      sc.setAttribute('data-preload-chunks', 'slam');
+      addEventListener('xrloaded', res, { once: true }); sc.onerror = () => rej(new Error('xr.js did not load'));
+      setTimeout(() => rej(new Error('timeout 60 s')), 60000);
+      document.head.appendChild(sc);
+    });
+    log(`✓ engine loaded in ${((performance.now() - t1) / 1000).toFixed(1)} s`, 'ok');
+    if (XR8.loadChunk) { await XR8.loadChunk('slam'); log('✓ slam chunk loaded', 'ok'); }
+  } catch (e) { log('✗ engine: ' + e, 'bad'); return; }
+  let updates = 0, lastStatus = '';
+  try {
+    XR8.XrController.configure({ disableWorldTracking: false, scale: 'responsive' });
+    XR8.addCameraPipelineModules([
+      XR8.GlTextureRenderer.pipelineModule(),
+      XR8.XrController.pipelineModule(),
+      {
+        name: 'artest',
+        onStart: a => log(`engine onStart: canvas ${a.canvasWidth}x${a.canvasHeight}, video ${a.videoWidth}x${a.videoHeight}, webgl2 ${a.isWebgl2}`),
+        onCameraStatusChange: s => log('camera status: ' + JSON.stringify(s), s.status === 'failed' ? 'bad' : ''),
+        onException: e => log('✗ engine exception: ' + (e && (e.message || JSON.stringify(e))), 'bad'),
+        onUpdate: ({ processCpuResult }) => {
+          const re = processCpuResult && processCpuResult.reality; if (!re) return;
+          updates++;
+          const st = `${re.trackingStatus}/${re.trackingReason}`;
+          if (st !== lastStatus) { lastStatus = st; log(`tracking ${st}; camera at ${['x', 'y', 'z'].map(k => re.position ? re.position[k].toFixed(2) : '?').join(', ')}`, re.trackingStatus === 'NORMAL' ? 'ok' : 'warn'); }
+        },
+        listeners: [{ event: 'reality.trackingstatus', process: ({ detail }) => log('event trackingstatus: ' + JSON.stringify(detail)) }],
+      },
+    ]);
+    XR8.run({ canvas, allowedDevices: XR8.XrConfig.device().ANY });
+    log('XR8.run called – move the phone slowly left and right, pointed at the floor or a table');
+  } catch (e) { log('✗ engine start: ' + e, 'bad'); return; }
+  let last = 0;
+  const iv = setInterval(() => {
+    log(`pose updates so far: ${updates}`);
+    if (++last >= 6) {
+      clearInterval(iv);
+      try { const pos = []; log('stopping after 30 s'); XR8.stop(); XR8.clearCameraPipelineModules(); } catch (e) { log('stop: ' + e); }
+      log(updates > 0 ? '✓ engine produced poses' : '✗ no poses from the engine', updates > 0 ? 'ok' : 'bad');
+    }
+  }, 5000);
+};
+
+document.getElementById('b3').onclick = async () => {
+  const text = lines.join('\n');
+  try { await navigator.clipboard.writeText(text); log('(copied – paste it into the chat)', 'ok'); }
+  catch {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); log('(copied – paste it into the chat)', 'ok'); } catch { log('copy failed: select the text above by hand'); }
+    ta.remove();
+  }
+};
+</script>
+</body>
+</html>

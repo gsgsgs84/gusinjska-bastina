@@ -81,6 +81,7 @@ export const STR = {
     s_engine: 'Praćenje prostora: XR Engine, © 2026 Niantic Spatial, Inc. (8th Wall), bez garancije, prema licenci:',
     s_chromeTitle: 'Otvorite u Chromeu', s_chromeWhy: 'Planinarske staze u AR-u rade najbolje u Chromeu. Ovaj preglednik možda neće prikazati teren u prostoru.',
     s_chromeSub: 'Stranica se otvara u Chromeu, spremna za AR.', s_stayHere: 'Nastavi ovdje', s_stayHereSub: 'Pokušaj AR u ovom pregledniku.',
+    s_optTest: 'AR provjera telefona', s_optTestSub: 'Pokaže šta tačno ne radi; rezultat pošaljite nama.',
     s_loading: 'Učitavanje terena…', s_error: 'Teren se nije učitao. Provjerite internet i osvježite stranicu.', s_scale: 'mjerilo',
   },
   en: {
@@ -164,6 +165,7 @@ export const STR = {
     s_engine: 'Room tracking: XR Engine, © 2026 Niantic Spatial, Inc. (8th Wall), without warranty, under the',
     s_chromeTitle: 'Open in Chrome', s_chromeWhy: 'Hiking trails in AR work best in Chrome. This browser may not show the terrain in the room.',
     s_chromeSub: 'The page opens in Chrome, ready for AR.', s_stayHere: 'Continue here', s_stayHereSub: 'Try AR in this browser.',
+    s_optTest: 'AR check for this phone', s_optTestSub: 'Shows exactly what does not work; send us the result.',
     s_loading: 'Loading the terrain…', s_error: 'The terrain did not load. Check your connection and reload the page.', s_scale: 'scale',
   },
   sq: {
@@ -247,6 +249,7 @@ export const STR = {
     s_engine: 'Ndjekja e hapësirës: XR Engine, © 2026 Niantic Spatial, Inc. (8th Wall), pa garanci, sipas',
     s_chromeTitle: 'Hapeni në Chrome', s_chromeWhy: 'Shtigjet malore në AR funksionojnë më mirë në Chrome. Ky shfletues mund të mos e shfaqë terrenin në hapësirë.',
     s_chromeSub: 'Faqja hapet në Chrome, gati për AR.', s_stayHere: 'Vazhdo këtu', s_stayHereSub: 'Provo AR në këtë shfletues.',
+    s_optTest: 'Kontrolli AR i telefonit', s_optTestSub: 'Tregon saktësisht çfarë nuk funksionon; na dërgoni rezultatin.',
     s_loading: 'Po ngarkohet terreni…', s_error: 'Terreni nuk u ngarkua. Kontrolloni internetin dhe rifreskoni faqen.', s_scale: 'shkalla',
   },
 };
