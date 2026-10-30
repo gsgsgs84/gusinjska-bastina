@@ -72,6 +72,8 @@ export const STR = {
     s_slamLost: 'Praćenje je izgubljeno: usmjerite kameru na mjesto sa više detalja i više svjetla.', s_slamFail: 'Praćenje prostora nije pokrenuto na ovom telefonu.',
     s_optSlam: 'Praćenje prostora kamerom', s_optSlamSub: 'Radi bez Googleovih AR usluga: kamera prati prostor, a teren možete obići.',
     s_engine: 'Praćenje prostora: XR Engine, © 2026 Niantic Spatial, Inc. (8th Wall), bez garancije, prema licenci:',
+    s_chromeTitle: 'Otvorite u Chromeu', s_chromeWhy: 'Planinarske staze u AR-u rade najbolje u Chromeu. Ovaj preglednik možda neće prikazati teren u prostoru.',
+    s_chromeSub: 'Stranica se otvara u Chromeu, spremna za AR.', s_stayHere: 'Nastavi ovdje', s_stayHereSub: 'Pokušaj AR u ovom pregledniku.',
     s_loading: 'Učitavanje terena…', s_error: 'Teren se nije učitao. Provjerite internet i osvježite stranicu.', s_scale: 'mjerilo',
   },
   en: {
@@ -146,6 +148,8 @@ export const STR = {
     s_slamLost: 'Tracking lost: point the camera at a place with more detail and more light.', s_slamFail: 'Room tracking did not start on this phone.',
     s_optSlam: 'Room tracking with the camera', s_optSlamSub: 'Works without Google\'s AR services: the camera tracks the room and you can walk around the terrain.',
     s_engine: 'Room tracking: XR Engine, © 2026 Niantic Spatial, Inc. (8th Wall), without warranty, under the',
+    s_chromeTitle: 'Open in Chrome', s_chromeWhy: 'Hiking trails in AR work best in Chrome. This browser may not show the terrain in the room.',
+    s_chromeSub: 'The page opens in Chrome, ready for AR.', s_stayHere: 'Continue here', s_stayHereSub: 'Try AR in this browser.',
     s_loading: 'Loading the terrain…', s_error: 'The terrain did not load. Check your connection and reload the page.', s_scale: 'scale',
   },
   sq: {
@@ -220,6 +224,8 @@ export const STR = {
     s_slamLost: 'Ndjekja humbi: drejtojeni kamerën nga një vend me më shumë detaje dhe më shumë dritë.', s_slamFail: 'Ndjekja e hapësirës nuk u nis në këtë telefon.',
     s_optSlam: 'Ndjekja e hapësirës me kamerë', s_optSlamSub: 'Funksionon pa shërbimet AR të Google: kamera e ndjek hapësirën dhe mund të ecni rreth terrenit.',
     s_engine: 'Ndjekja e hapësirës: XR Engine, © 2026 Niantic Spatial, Inc. (8th Wall), pa garanci, sipas',
+    s_chromeTitle: 'Hapeni në Chrome', s_chromeWhy: 'Shtigjet malore në AR funksionojnë më mirë në Chrome. Ky shfletues mund të mos e shfaqë terrenin në hapësirë.',
+    s_chromeSub: 'Faqja hapet në Chrome, gati për AR.', s_stayHere: 'Vazhdo këtu', s_stayHereSub: 'Provo AR në këtë shfletues.',
     s_loading: 'Po ngarkohet terreni…', s_error: 'Terreni nuk u ngarkua. Kontrolloni internetin dhe rifreskoni faqen.', s_scale: 'shkalla',
   },
 };

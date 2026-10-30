@@ -98,7 +98,9 @@ async function init() {
   resetView(true);
   const pre = decodeURIComponent(location.hash.slice(1));
   if (S.trails.has(pre)) select(pre, false);
-  if (pre !== 'ar-pomoc' && (pre === 'ar' || new URLSearchParams(location.search).has('ar') || matchMedia('(pointer: coarse)').matches)) showCTA();
+  const qs = new URLSearchParams(location.search);
+  if (qs.has('ar') && IS_ANDROID && !IS_CHROME) showChromeSheet();          // Android QR code opened outside Chrome
+  else if (pre !== 'ar-pomoc' && !qs.has('pc') && (pre === 'ar' || qs.has('ar') || matchMedia('(pointer: coarse)').matches)) showCTA();
   renderer.setAnimationLoop(frame);
   wireUI();
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -477,6 +479,7 @@ const UA = navigator.userAgent;
 const IS_ANDROID = /Android/i.test(UA);
 const IS_IOS = /iP(hone|ad|od)/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const IN_APP = IS_ANDROID && /; wv\)|FBAN|FBAV|Instagram|Line\/|MicroMessenger|Telegram|Snapchat|Twitter|GSA\//i.test(UA);
+const IS_CHROME = /Chrome\/\d/.test(UA) && !/SamsungBrowser|EdgA|OPR\/|Firefox|YaBrowser|MiuiBrowser|UCBrowser|HuaweiBrowser|; wv\)|Version\/[\d.]+ Chrome/i.test(UA);
 // Real AR (you can walk around it) in this order: WebXR in Chrome -> Google's AR viewer (Android) -> Quick Look (iPhone).
 // Only if none works: a help sheet with the other ways (open in Chrome, install AR services, the printed cube/card, camera only).
 function startAR() {
@@ -510,6 +513,15 @@ function sceneViewer() {
   // if nothing opened (blocked, or no Google app), offer the other ways
   setTimeout(() => { if (document.visibilityState === 'visible' && !S.xr) showHelp(); }, 2500);
 }
+// QR code for Android (staze.html?ar=1): AR is best in Chrome, so other browsers first offer to reopen it there
+function showChromeSheet() {
+  $('#arHelpH').textContent = t('s_chromeTitle');
+  $('#arHelpWhy').textContent = t('s_chromeWhy');
+  $('#arOpts').innerHTML = `<button class="opt first" data-opt="chrome"><b>${esc(t('s_optChrome'))}</b><small>${esc(t('s_chromeSub'))}</small></button>` +
+    `<button class="opt" data-opt="here"><b>${esc(t('s_stayHere'))}</b><small>${esc(t('s_stayHereSub'))}</small></button>`;
+  $('#arHelpClose').textContent = t('close');
+  $('#arHelp').hidden = false;
+}
 function showHelp() {
   const opts = [];
   if (!slamFailed) opts.push(['slam', 's_optSlam', 's_optSlamSub']);
@@ -526,6 +538,7 @@ function showHelp() {
 function hideHelp() { $('#arHelp').hidden = true; if (location.hash === '#ar-pomoc') history.replaceState(null, '', pageURL()); }
 function helpChoice(id) {
   hideHelp();
+  if (id === 'here') { showCTA(); return; }
   if (id === 'slam') { motionPermissions(); startSlamAR().then(ok => { if (!ok) { toast(t('s_slamFail')); } }); return; }
   if (id === 'scene') return sceneViewer();
   if (id === 'quick') return quickLook();

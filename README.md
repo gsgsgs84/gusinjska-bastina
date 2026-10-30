@@ -36,6 +36,11 @@ Which trails, names, colours and labelled places are used is set in `tools/trail
 
 Data rights: OpenStreetMap (ODbL) and Copernicus DEM (free with credit) are credited on the page. The "Tri vrha" loop still uses a track from peaksofthebalkans.info (all rights reserved) because only half of it is mapped in OpenStreetMap; ask them, record our own track, or map the missing paths before a public launch.
 
+## QR codes
+`print/qr/staze_android.png` and `print/qr/staze_windows.png` (made by `tools/qr/make_qr.py`, Xplore Prokletije mark in the middle, error correction H, each decoded again as a check):
+- **Android** → `staze.html?ar=1`: opens with the AR prompt; if the phone opens it in another browser (Samsung Internet, an app's built-in browser…), it first offers to reopen it in Chrome.
+- **Windows** → `staze.html?pc=1`: the 3D viewer in the browser, without the AR prompt.
+
 ## Adding an exhibit
 1. Put the model in `models/<id>.glb`. Use real height, origin at the bottom, front facing +Z; ideally 2–8 MB.
 2. Add an entry to `data/exhibits.json`:
