@@ -6,7 +6,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STR, detectLang, L, HTML_LANG, NUM_LOCALE } from './i18n.js';
 
-const VERSION = '0.7';
+const VERSION = '0.8';
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const store = { get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } },
@@ -77,7 +77,7 @@ function dayLabel(d = new Date()) {
 }
 
 function renderHome() {
-  document.title = DATA.museum.name;
+  document.title = `${DATA.museum.name} · Xplore Prokletije`;
   const pool = dayPool();
   if (dayI === null) dayI = todayIdx(pool.length);
   const ways = [['cube', 'onCube', 'w1'], ['room', 'inRoom', 'w2'], ['touch', 'w3t', 'w3']];
@@ -86,6 +86,7 @@ function renderHome() {
       <div class="sky" aria-hidden="true"><span class="moon"></span></div>
       <svg class="ridges" id="ridges" aria-hidden="true" preserveAspectRatio="xMidYMax slice"></svg>
       <div class="hero-txt">
+        <p class="xbrand"><svg viewBox="0 0 32 20" aria-hidden="true"><path d="M1 19 L11 5 L15 10 L20 2 L31 19 Z"/><path d="M18.3 4.6 L20 2 L21.8 4.8 L20.6 6 L19.6 5.1 Z" class="snow"/></svg><span>Xplore Prokletije</span></p>
         <p class="kicker">${esc(t('kicker'))}</p>
         <h1>${esc(DATA.museum.name)}</h1>
         <p class="tagline">${esc(tx(DATA.museum.tagline))}</p>
@@ -404,14 +405,18 @@ function normalise(src) {
   return { group: g, size };
 }
 
-const V = { visible: true, io: null, renderer: null, scene: null, camera: null, controls: null, item: null, host: null, ro: null, ground: null, sun: null, interacted: false };
+// render resolution adapts to the phone: lowered a step when frames take too long (see frameLoop)
+let prK = 1;
+const viewerPR = () => Math.max(1, Math.min(devicePixelRatio || 1, 2) * prK);
+const V = { lastT: 0, slow: 0, fast: 0, visible: true, io: null, renderer: null, scene: null, camera: null, controls: null, item: null, host: null, ro: null, ground: null, sun: null, interacted: false };
 function ensureViewer() {
   if (V.renderer) return;
   const r = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  r.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  r.setPixelRatio(viewerPR());
   r.outputColorSpace = THREE.SRGBColorSpace;
   r.toneMapping = THREE.NeutralToneMapping;
   r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFShadowMap;
+  r.shadowMap.autoUpdate = false;      // light and model stand still while the camera orbits: draw the shadow once per model
   r.xr.enabled = true;
   V.renderer = r;
   V.scene = new THREE.Scene();
@@ -451,8 +456,14 @@ async function mountViewer(host, e) {
   try {
     const src = await loadModel(e.model);
     if (V.token !== token) return;
-    if (V.item) V.scene.remove(V.item);
     const { group, size } = normalise(src);
+    // upload textures and compile shaders before the model appears, so the turning doesn't stall on the first frames
+    try {
+      group.traverse(o => { if (o.isMesh) for (const m of [].concat(o.material)) for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'emissiveMap']) if (m[k]) V.renderer.initTexture(m[k]); });
+      await V.renderer.compileAsync(group, V.camera, V.scene);
+    } catch { /* older browsers: compile on first draw */ }
+    if (V.token !== token) return;
+    if (V.item) V.scene.remove(V.item);
     const k = 1 / Math.max(size.x, size.y, size.z);   // viewer works in a unit box
     group.scale.setScalar(k);
     V.item = group; V.scene.add(group);
@@ -469,6 +480,7 @@ async function mountViewer(host, e) {
     V.camera.near = dist / 50; V.camera.far = dist * 20; V.camera.updateProjectionMatrix();
     V.controls.minDistance = dist * 0.35; V.controls.maxDistance = dist * 2.5;
     V.controls.update();
+    V.renderer.shadowMap.needsUpdate = true;
     host.querySelector('.loading')?.remove();
   } catch (err) {
     const l = host.querySelector('.loading'); if (l) l.textContent = t('modelError');
@@ -481,8 +493,17 @@ function leaveViewer() {
 }
 function frameLoop(time, frame) {
   if (V.renderer.xr.isPresenting && XR.session) return xrFrame(frame);
-  if (!V.host || !V.visible) return;
-  V.controls.update();
+  if (!V.host || !V.visible) { V.lastT = 0; return; }
+  const dt = V.lastT ? Math.min(0.1, (time - V.lastT) / 1000) : 1 / 60;
+  // frame pacing: if frames keep taking > 24 ms, draw fewer pixels; go back up when there is headroom
+  if (V.lastT) {
+    if (dt > 0.024) { V.slow++; V.fast = 0; } else if (dt < 0.0175) { V.fast++; V.slow = 0; }
+    if (V.slow > 45 && prK > 0.55) { prK = Math.max(0.55, prK - 0.15); V.renderer.setPixelRatio(viewerPR()); sizeViewer(); V.slow = 0; }
+    else if (V.fast > 240 && prK < 1) { prK = Math.min(1, prK + 0.15); V.renderer.setPixelRatio(viewerPR()); sizeViewer(); V.fast = 0; }
+  }
+  V.lastT = time;
+  if (!V.sun.shadow.map) V.renderer.shadowMap.needsUpdate = true;   // first frame: create the shadow map
+  V.controls.update(dt);              // time-based auto-turn: same speed even when a frame is late
   V.renderer.render(V.scene, V.camera);
 }
 
@@ -579,6 +600,7 @@ function xrFrame(frame) {
       if (!XR.placed) $('#xrMsg').textContent = t('xrTap');
     } else XR.reticle.visible = false;
   }
+  V.renderer.shadowMap.needsUpdate = true;   // the placed model moves in AR
   V.renderer.render(XR.scene, V.camera);
 }
 

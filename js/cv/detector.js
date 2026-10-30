@@ -42,13 +42,18 @@ export class MarkerDetector {
     this.w = 0; this.h = 0;
   }
 
+  // Buffers only grow: the tracking crop changes size every frame, and re-allocating them each time
+  // made the garbage collector pause the camera view on phones.
   _alloc(w, h) {
     if (w === this.w && h === this.h) return;
     this.w = w; this.h = h;
-    this.gray = new Uint8Array(w * h);
-    this.blur = new Uint8Array(w * h);
-    this.tmp = new Uint16Array(w * h);
-    this.bin = new Int32Array((w + 2) * (h + 2));
+    const n = w * h, nb = (w + 2) * (h + 2);
+    if (!this._cap || n > this._cap || nb > this._capB) {
+      this._cap = Math.ceil(n * 1.25); this._capB = Math.ceil(nb * 1.25);
+      this._g = new Uint8Array(this._cap); this._b = new Uint8Array(this._cap); this._t = new Uint16Array(this._cap); this._bin = new Int32Array(this._capB);
+    }
+    this.gray = this._g.subarray(0, n); this.blur = this._b.subarray(0, n); this.tmp = this._t.subarray(0, n);
+    this.bin = this._bin.subarray(0, nb);
   }
 
   // rgba: Uint8ClampedArray (w*h*4). Returns markers [{id, corners:[{x,y}x4], rot, hamming}]

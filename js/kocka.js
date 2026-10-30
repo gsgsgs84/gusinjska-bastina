@@ -10,17 +10,18 @@ import { STR, detectLang, L, HTML_LANG } from './i18n.js';
 let lang = (() => { try { return JSON.parse(localStorage.getItem('gkb.lang')); } catch { return null; } })() || detectLang();
 const T_ = k => STR[lang][k] ?? STR.me[k] ?? k;
 for (const el of document.querySelectorAll('[data-t]')) el.textContent = T_(el.dataset.t);
+for (const el of document.querySelectorAll('[data-t-aria]')) el.setAttribute('aria-label', T_(el.dataset.tAria));
 if (!STR[lang]) lang = 'me';
 document.documentElement.lang = HTML_LANG[lang] || 'sr-ME';
 let showList = [];   // showcase: exhibit ids by cube side
 
-const VERSION = '0.1';
+const VERSION = '0.2';
 const $ = s => document.querySelector(s);
 const D2R = Math.PI / 180;
 const params = new URLSearchParams(location.search);
 
 // ---------------- settings (per-viewer convenience only) ----------------
-const DEFAULTS = { plinth: 'stone', size: 1, upright: true, shadows: true, debug: false, fov: 66, view: 'auto', place: 'top' };
+const DEFAULTS = { plinth: 'stone', size: 1, upright: true, shadows: true, debug: false, fov: 66, view: 'auto', place: 'top', zoomOut: 1 };
 const settings = Object.assign({}, DEFAULTS, readStore('arcube.settings') || {});
 if (params.has('debug')) settings.debug = true;
 if (params.has('fov')) settings.fov = +params.get('fov');
@@ -53,7 +54,15 @@ const bgCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 let videoTex = null;
 const bgMat = new THREE.MeshBasicMaterial({ toneMapped: false, depthTest: false, depthWrite: false });
 const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), bgMat);
-bgScene.add(bgMesh);
+// soft, darkened copy of the camera picture fills the screen around it when zoomed out (instead of black bars)
+const blurSmall = document.createElement('canvas'), blurTiny = document.createElement('canvas');
+const bsx = blurSmall.getContext('2d', { alpha: false }), btx = blurTiny.getContext('2d', { alpha: false });
+let blurTex = null;
+const CANVAS_BLUR = 'filter' in bsx && (() => { bsx.filter = 'blur(2px)'; return bsx.filter === 'blur(2px)'; })();
+const bgBlurMat = new THREE.MeshBasicMaterial({ toneMapped: false, depthTest: false, depthWrite: false, color: 0x8c8c8c });
+const bgBlur = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), bgBlurMat);
+bgBlur.renderOrder = 0; bgMesh.renderOrder = 1; bgBlur.visible = false;
+bgScene.add(bgBlur, bgMesh);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.55;
@@ -117,8 +126,11 @@ async function start() {
   videoTex.colorSpace = THREE.SRGBColorSpace;
   videoTex.generateMipmaps = false; videoTex.minFilter = THREE.LinearFilter;
   bgMat.map = videoTex; bgMat.needsUpdate = true;
+  blurTex = new THREE.CanvasTexture(CANVAS_BLUR ? blurSmall : blurTiny);
+  blurTex.colorSpace = THREE.SRGBColorSpace; blurTex.generateMipmaps = false; blurTex.minFilter = THREE.LinearFilter;
+  bgBlurMat.map = blurTex; bgBlurMat.needsUpdate = true;
   $('#start').classList.add('hidden');
-  for (const id of ['#hud', '#dock', '#hint']) $(id).hidden = false;
+  for (const id of ['#hud', '#dock', '#hint', '#zoomRail']) $(id).hidden = false;
   keepAwake();
   resize();
   runLoop();
@@ -142,7 +154,7 @@ async function openCamera(deviceId) {
   cam.label = cam.track.label || '';
   cam.zoom = 1;
   if (cam.caps.zoom) {
-    const want = clamp(settings.zoom || 1, cam.caps.zoom.min, cam.caps.zoom.max);
+    const want = clamp(hwZoomWanted(), cam.caps.zoom.min, cam.caps.zoom.max);
     try { await cam.track.applyConstraints({ advanced: [{ zoom: want }] }); } catch { /* not supported */ }
     cam.zoom = (cam.track.getSettings().zoom) || want;
   }
@@ -417,8 +429,9 @@ function updateInfo() {
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 300));
 video.addEventListener('resize', resize);
+let pixK = 1;                         // lowered when drawing is slow on this phone
 function resize() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2) * pixK);
   renderer.setPixelRatio(dpr);
   renderer.setSize(glCanvas.clientWidth || window.innerWidth, glCanvas.clientHeight || window.innerHeight, false);
   dbgCanvas.width = glCanvas.width; dbgCanvas.height = glCanvas.height;
@@ -436,7 +449,7 @@ function updateProjection() {
   // 'auto' fills unless that would crop away more than ~20 % of the image in one direction.
   const sFill = Math.max(W / vw, H / vh), sFit = Math.min(W / vw, H / vh);
   const mode = settings.view === 'auto' ? (sFill / sFit > 1.25 ? 'fit' : 'fill') : settings.view;
-  const s = mode === 'fit' ? sFit : sFill;
+  const s = (mode === 'fit' ? sFit : sFill) * digitalZoom();
   view.mode = mode;
   const ox = (vw - W / s) / 2, oy = (vh - H / s) / 2;
   Object.assign(view, { W, H, vw, vh, s, ox, oy });
@@ -446,7 +459,65 @@ function updateProjection() {
   camera.projectionMatrix.set(2 * fx / W, 0, 1 - 2 * cx / W, 0, 0, 2 * fy / H, 2 * cy / H - 1, 0, 0, 0, -(f + n) / (f - n), -2 * f * n / (f - n), 0, 0, -1, 0);
   camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
   bgMesh.scale.set(vw * s / W, vh * s / H, 1);   // the camera image keeps its shape; bars or cropping as needed
+  bgBlur.visible = vw * s < W - 2 || vh * s < H - 2;
+  bgBlur.scale.set(vw * sFill / W, vh * sFill / H, 1);
+  const bw = 40, bh = Math.max(8, Math.round(bw * vh / vw));
+  if (blurTiny.width !== bw || blurTiny.height !== bh) {
+    blurTiny.width = bw; blurTiny.height = bh; blurSmall.width = bw * 4; blurSmall.height = bh * 4;
+    if (blurTex) { blurTex.dispose(); blurTex.needsUpdate = true; }      // texture size changed
+  }
 }
+
+// ---------------- zoom out ----------------
+// One "zoom-out" value (1 = normal, 0.5 = twice as wide). Where the phone offers a wide-angle zoom below 1×,
+// that part is done by the camera itself (a really wider view); the rest shrinks the picture on screen so the
+// exhibit still fits when the cube is held close. The tracker always uses the full camera image.
+const ZMIN = 0.45, ZSTEPS = [1, 0.7, 0.5];
+function hwZoomWanted() {
+  const c = cam.caps && cam.caps.zoom;
+  const base = settings.zoom || 1;                     // the Settings slider (zoom in)
+  if (!c || c.min >= 1 || base > 1) return base;
+  return Math.max(c.min, settings.zoomOut);
+}
+function digitalZoom() {
+  const hw = cam.zoom || 1;
+  return hw < 1 ? clamp(settings.zoomOut / hw, ZMIN, 1) : clamp(settings.zoomOut, ZMIN, 1);
+}
+let hwBusy = false;
+async function applyZoomOut(z, final = true) {
+  settings.zoomOut = clamp(z, ZMIN, 1);
+  updateProjection(); paintZoom();
+  if (!final) return;
+  saveSettings();
+  const c = cam.caps && cam.caps.zoom;
+  if (!c || c.min >= 1 || !cam.track || hwBusy) return;
+  const want = clamp(hwZoomWanted(), c.min, c.max);
+  if (Math.abs(want - cam.zoom) < 0.02) return;
+  hwBusy = true;
+  try { await cam.track.applyConstraints({ advanced: [{ zoom: want }] }); cam.zoom = cam.track.getSettings().zoom || want; } catch { /* keep digital */ }
+  hwBusy = false;
+  updateProjection(); paintZoom();
+}
+function paintZoom() {
+  for (const b of document.querySelectorAll('#zoomRail button')) {
+    const v = +b.dataset.z;
+    b.setAttribute('aria-pressed', String(Math.abs(v - settings.zoomOut) < 0.04));
+  }
+  const lab = $('#zoomNow'); if (lab) lab.textContent = (Math.round(settings.zoomOut * 10) / 10).toString().replace(/^0/, '') + '×';
+}
+// two-finger pinch anywhere on the camera view
+(() => {
+  let d0 = 0, z0 = 1;
+  const dist = e => Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+  const onView = e => !e.target.closest('#dock, #hud, .sheet, #start, #zoomRail, .scrim');
+  document.addEventListener('touchstart', e => { if (e.touches.length === 2 && onView(e)) { d0 = dist(e); z0 = settings.zoomOut; } }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (e.touches.length !== 2 || !d0) return;
+    e.preventDefault();
+    applyZoomOut(z0 * dist(e) / d0, false);
+  }, { passive: false });
+  document.addEventListener('touchend', e => { if (d0 && e.touches.length < 2) { d0 = 0; applyZoomOut(settings.zoomOut, true); } });
+})();
 
 // ---------------- main loop ----------------
 function runLoop() {
@@ -466,7 +537,7 @@ function chooseRegion(K, t) {
   // tracking: crop around the predicted target
   for (const key of ['cube', 'card']) {
     const st = T[key];
-    if (!st.raw || t - st.seen > Math.max(0.25, 2.5 / Math.max(fps, 1)) || !tracker) continue;
+    if (!st.raw || t - st.seen > Math.max(0.3, 3 / Math.max(fps, 1)) || !tracker) continue;
     const tg = tracker.targets[key];
     const b = projectedBox(tg, st.raw, K);
     if (!b) continue;
@@ -502,7 +573,7 @@ function onFrame(nowMs) {
   const K = intrinsics();
   region = chooseRegion(K, t);
   const w = Math.max(16, Math.round(region.sw * region.scale)), h = Math.max(16, Math.round(region.sh * region.scale));
-  if (proc.width !== w || proc.height !== h) { proc.width = w; proc.height = h; }
+  if (proc.width < w || proc.height < h) { proc.width = Math.max(proc.width, w + 64); proc.height = Math.max(proc.height, h + 64); }
   const p0 = performance.now();
   if (disp.width !== vw || disp.height !== vh) { disp.width = vw; disp.height = vh; }
   dctx.drawImage(video, 0, 0, vw, vh);
@@ -524,20 +595,38 @@ function onFrame(nowMs) {
   lastRes = res;
   handleResult(res, t);
   if (videoTex) videoTex.needsUpdate = true;   // draw exactly the frame that was tracked
+  if (blurTex && bgBlur.visible && frameNo % 2 === 0) {
+    if (CANVAS_BLUR) { bsx.filter = 'blur(5px)'; bsx.drawImage(disp, -8, -8, blurSmall.width + 16, blurSmall.height + 16); }
+    else { bsx.drawImage(disp, 0, 0, blurSmall.width, blurSmall.height); btx.drawImage(blurSmall, 0, 0, blurTiny.width, blurTiny.height); }
+    blurTex.needsUpdate = true;
+  }
   const r0 = performance.now();
   render(t);
   timing.render = timing.render * 0.85 + 0.15 * (performance.now() - r0);
+  if (frameNo % 45 === 0 && frameNo > 90) {
+    if (timing.render + procMs > 40 && pixK > 0.6) { pixK = Math.max(0.6, pixK - 0.15); resize(); }
+    else if (timing.render + procMs < 18 && pixK < 1) { pixK = Math.min(1, pixK + 0.1); resize(); }
+  }
 }
 
 const tmpM = new THREE.Matrix4(), tmpQ = new THREE.Quaternion(), tmpV = new THREE.Vector3();
+function quatAngle(a, b) { const d = Math.abs(a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]); return 2 * Math.acos(Math.min(1, d)) / D2R; }
 function handleResult(res, t) {
   for (const key of ['cube', 'card']) {
     const st = T[key], p = res.poses[key];
     const good = p && (p.rms < 3.5 || (p.n >= 2 && p.rms < 6)) && !p.ambiguous;
     if (good) {
+      let q = matToQuat(p.R);
+      // a pose that suddenly turns a lot between two frames is almost always a wrong solution (mirror flip):
+      // accept it only if the next frame agrees
+      if (st.q && t - st.seen < 0.3 && p.n < 4) {
+        const jump = quatAngle(q, st.q);
+        if (jump > 40 && !(st.cand && quatAngle(q, st.cand) < 15 && t - st.candT < 0.2)) { st.cand = q; st.candT = t; continue; }
+        if (jump > 40) { st.filtT.reset(); st.filtQ.reset(); st.prevQ = null; }
+      }
+      st.cand = null;
       if (t - st.seen > 0.6) { st.filtT.reset(); st.filtQ.reset(); st.prevQ = null; st.acquired = true; }
       st.raw = p; st.seen = t;
-      let q = matToQuat(p.R);
       if (st.prevQ && q[0] * st.prevQ[0] + q[1] * st.prevQ[1] + q[2] * st.prevQ[2] + q[3] * st.prevQ[3] < 0) q = q.map(x => -x);
       st.prevQ = q;
       const qf = st.filtQ.filter(q, t), tf = st.filtT.filter(p.t, t);
@@ -545,7 +634,7 @@ function handleResult(res, t) {
       st.q = qf.map(x => x / nq); st.t = tf;
     }
   }
-  const visible = k => T[k].raw && t - T[k].seen < Math.max(0.3, 2.5 / Math.max(fps, 1));
+  const visible = k => T[k].raw && t - T[k].seen < Math.max(0.55, 4 / Math.max(fps, 1));   // hold through short drop-outs
   const next = visible('cube') ? 'cube' : visible('card') ? 'card' : null;
   if (next !== active) switchTarget(next, t);
   for (const key of ['cube', 'card']) {
@@ -754,10 +843,11 @@ function bindSettingsUI() {
   $('#chkShadow').addEventListener('change', e => { settings.shadows = e.target.checked; saveSettings(); });
   $('#chkDebug').addEventListener('change', e => { settings.debug = e.target.checked; saveSettings(); });
   $('#rngFov').addEventListener('input', e => { settings.fov = +e.target.value; saveSettings(); updateProjection(); paint(); });
-  paint();
+  $('#zoomRail').addEventListener('click', e => { const b = e.target.closest('button[data-z]'); if (b) applyZoomOut(+b.dataset.z); });
+  paint(); paintZoom();
 }
 let toastT = 0;
 function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 3200); }
 
 // expose a little for automated tests
-window.__arcube = { T, get active() { return active; }, get lastRes() { return lastRes; }, place, settings, view, intrinsics, timing, get fps() { return fps; }, get procMs() { return procMs; } };
+window.__arcube = { applyZoomOut, get pixK() { return pixK; }, T, get active() { return active; }, get lastRes() { return lastRes; }, place, settings, view, intrinsics, timing, get fps() { return fps; }, get procMs() { return procMs; } };

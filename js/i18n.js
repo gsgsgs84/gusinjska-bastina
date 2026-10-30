@@ -2,7 +2,7 @@
 export const STR = {
   me: {
     c_place: 'Položaj eksponata', c_place2: 'Na vrhu kocke ili umjesto kocke, kao da ga držite u ruci', c_onTop: 'Na kocki', c_inHand: 'U ruci', c_placeHand: '✋ U ruci', c_placeTop: '▣ Na kocki',
-    c_cam: 'Kamera', c_cam2: 'Ako je slika previše uvećana, izaberite drugu kameru', c_zoom: 'Zum kamere',
+    c_cam: 'Kamera', c_cam2: 'Ako je slika previše uvećana, izaberite drugu kameru', c_zoom: 'Zum kamere', c_zoomOut: 'Udalji ili približi prikaz (ili raširite/skupite dva prsta)',
     c_errApi: 'Ovaj preglednik ovdje ne može otvoriti kameru. Otvorite stranicu u Chromeu (Android) ili Safariju (iPhone).',
     c_errBlocked: 'Pristup kameri je blokiran. Dozvolite kameru za ovu stranicu u podešavanjima preglednika i pokušajte ponovo.',
     c_errNoCam: 'Na ovom uređaju nije pronađena kamera.', c_errStart: 'Kamera se nije pokrenula. Ako ste link otvorili u drugoj aplikaciji, otvorite ga u Chromeu ili Safariju.',
@@ -21,7 +21,7 @@ export const STR = {
     c_private: 'Praćenje radi samo na vašem telefonu.', c_looking: 'Tražim kocku…', c_card: 'kartica', c_side: 'Strana',
     c_err: 'Podaci se nisu učitali: ',
     back: 'Nazad', loadError: 'Podaci se nisu učitali. Provjerite internet i osvježite stranicu.',
-    kicker: 'Gusinje · Prokletije', explore: 'Razgledaj zbirku', dayEx: 'Eksponat dana', openEx: 'Otvori', prevEx: 'Prethodni eksponat', nextEx: 'Sljedeći eksponat',
+    kicker: 'Gusinje · Crna Gora', explore: 'Razgledaj zbirku', dayEx: 'Eksponat dana', openEx: 'Otvori', prevEx: 'Prethodni eksponat', nextEx: 'Sljedeći eksponat',
     tap3d: 'Dodirnite za 3D', waysTitle: 'Tri načina da ga vidite', w1: 'Stoji vam na dlanu', w2: 'U prirodnoj veličini', w3t: 'Na ekranu', w3: 'Okrenite ga prstom',
     collection: 'Zbirka', allGalleries: 'Galerije ↓', skyCredit: 'Panorama izračunata iz terena: Copernicus DEM GLO-30, © OpenStreetMap',
     featured: 'Izdvajamo', galleries: 'Galerije', exhibit1: 'eksponat', exhibitN: 'eksponata',
@@ -76,7 +76,7 @@ export const STR = {
   },
   en: {
     c_place: 'Exhibit position', c_place2: 'On top of the cube, or instead of the cube as if you hold it in your hand', c_onTop: 'On the cube', c_inHand: 'In hand', c_placeHand: '✋ In hand', c_placeTop: '▣ On cube',
-    c_cam: 'Camera', c_cam2: 'If the picture is too zoomed in, choose another camera', c_zoom: 'Camera zoom',
+    c_cam: 'Camera', c_cam2: 'If the picture is too zoomed in, choose another camera', c_zoom: 'Camera zoom', c_zoomOut: 'Zoom the view out or in (or pinch with two fingers)',
     c_errApi: 'This browser cannot open the camera here. Open the page in Chrome (Android) or Safari (iPhone).',
     c_errBlocked: 'Camera access was blocked. Allow the camera for this site in the browser settings and try again.',
     c_errNoCam: 'No camera was found on this device.', c_errStart: 'The camera did not start. If you opened this link inside another app, open it in Chrome or Safari instead.',
@@ -95,7 +95,7 @@ export const STR = {
     c_private: 'Tracking runs only on your phone.', c_looking: 'Looking for the cube…', c_card: 'card', c_side: 'Side',
     c_err: 'The data did not load: ',
     back: 'Back', loadError: 'The data did not load. Check your connection and reload the page.',
-    kicker: 'Gusinje · Prokletije', explore: 'Explore the collection', dayEx: 'Exhibit of the day', openEx: 'Open', prevEx: 'Previous exhibit', nextEx: 'Next exhibit',
+    kicker: 'Gusinje · Montenegro', explore: 'Explore the collection', dayEx: 'Exhibit of the day', openEx: 'Open', prevEx: 'Previous exhibit', nextEx: 'Next exhibit',
     tap3d: 'Tap for 3D', waysTitle: 'Three ways to see it', w1: 'Stands in your hand', w2: 'At real size', w3t: 'On screen', w3: 'Turn it with a finger',
     collection: 'The collection', allGalleries: 'Galleries ↓', skyCredit: 'Panorama computed from terrain: Copernicus DEM GLO-30, © OpenStreetMap',
     featured: 'Featured', galleries: 'Galleries', exhibit1: 'exhibit', exhibitN: 'exhibits',
@@ -150,7 +150,7 @@ export const STR = {
   },
   sq: {
     c_place: 'Vendi i eksponatit', c_place2: 'Mbi kub ose në vend të kubit, sikur ta mbani në dorë', c_onTop: 'Mbi kub', c_inHand: 'Në dorë', c_placeHand: '✋ Në dorë', c_placeTop: '▣ Mbi kub',
-    c_cam: 'Kamera', c_cam2: 'Nëse imazhi është shumë i zmadhuar, zgjidhni një kamerë tjetër', c_zoom: 'Zmadhimi i kamerës',
+    c_cam: 'Kamera', c_cam2: 'Nëse imazhi është shumë i zmadhuar, zgjidhni një kamerë tjetër', c_zoom: 'Zmadhimi i kamerës', c_zoomOut: 'Largo ose afro pamjen (ose me dy gishta)',
     c_errApi: 'Ky shfletues nuk mund ta hapë kamerën këtu. Hapeni faqen në Chrome (Android) ose Safari (iPhone).',
     c_errBlocked: 'Qasja në kamerë u bllokua. Lejojeni kamerën për këtë faqe në cilësimet e shfletuesit dhe provoni përsëri.',
     c_errNoCam: 'Në këtë pajisje nuk u gjet asnjë kamerë.', c_errStart: 'Kamera nuk u ndez. Nëse e keni hapur lidhjen brenda një aplikacioni tjetër, hapeni në Chrome ose Safari.',
@@ -169,7 +169,7 @@ export const STR = {
     c_private: 'Ndjekja funksionon vetëm në telefonin tuaj.', c_looking: 'Po kërkoj kubin…', c_card: 'kartë', c_side: 'Ana',
     c_err: 'Të dhënat nuk u ngarkuan: ',
     back: 'Prapa', loadError: 'Të dhënat nuk u ngarkuan. Kontrolloni internetin dhe rifreskoni faqen.',
-    kicker: 'Gucia · Bjeshkët e Nemuna', explore: 'Shfleto koleksionin', dayEx: 'Eksponati i ditës', openEx: 'Hap', prevEx: 'Eksponati i mëparshëm', nextEx: 'Eksponati tjetër',
+    kicker: 'Gucia · Mali i Zi', explore: 'Shfleto koleksionin', dayEx: 'Eksponati i ditës', openEx: 'Hap', prevEx: 'Eksponati i mëparshëm', nextEx: 'Eksponati tjetër',
     tap3d: 'Prekni për 3D', waysTitle: 'Tri mënyra për ta parë', w1: 'Qëndron në pëllëmbën tuaj', w2: 'Në madhësi natyrale', w3t: 'Në ekran', w3: 'Rrotullojeni me gisht',
     collection: 'Koleksioni', allGalleries: 'Galeritë ↓', skyCredit: 'Panorama e llogaritur nga terreni: Copernicus DEM GLO-30, © OpenStreetMap',
     featured: 'E veçuar', galleries: 'Galeritë', exhibit1: 'eksponat', exhibitN: 'eksponate',
