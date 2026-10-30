@@ -1,0 +1,33 @@
+package:
+total 40
+drwxr-xr-x 3 runner runner  4096 Oct 30 03:08 .
+drwxr-xr-x 3 runner runner  4096 Oct 30 03:08 ..
+-rw-r--r-- 1 runner runner 16010 Oct 26  1985 LICENSE
+-rw-r--r-- 1 runner runner  2111 Oct 26  1985 README.md
+drwxr-xr-x 3 runner runner  4096 Oct 30 03:08 dist
+-rw-r--r-- 1 runner runner   225 Oct 26  1985 index.js
+-rw-r--r-- 1 runner runner   660 Oct 26  1985 package.json
+
+package/dist:
+total 13956
+drwxr-xr-x 3 runner runner    4096 Oct 30 03:08 .
+drwxr-xr-x 3 runner runner    4096 Oct 30 03:08 ..
+-rwxr-xr-x 1 runner runner   15994 Oct 26  1985 LICENSE
+drwxr-xr-x 2 runner runner    4096 Oct 30 03:08 resources
+-rwxr-xr-x 1 runner runner 7676552 Oct 26  1985 xr-face.js
+-rwxr-xr-x 1 runner runner 5538007 Oct 26  1985 xr-slam.js
+-rwxr-xr-x 1 runner runner 1036695 Oct 26  1985 xr.js
+
+package/dist/resources:
+total 16336
+drwxr-xr-x 2 runner runner    4096 Oct 30 03:08 .
+drwxr-xr-x 3 runner runner    4096 Oct 30 03:08 ..
+-rw-r--r-- 1 runner runner   38236 Oct 26  1985 dom-tablet-button.glb
+-rw-r--r-- 1 runner runner   43028 Oct 26  1985 dom-tablet-frame.glb
+-rw-r--r-- 1 runner runner 1173520 Oct 26  1985 face-ear-model.tflite
+-rw-r--r-- 1 runner runner 2495920 Oct 26  1985 face-mesh-model.tflite
+-rw-r--r-- 1 runner runner  423340 Oct 26  1985 face-model.tflite
+-rw-r--r-- 1 runner runner 4995543 Oct 26  1985 media-worker.js
+-rw-r--r-- 1 runner runner    6056 Oct 26  1985 powered-by.svg
+-rw-r--r-- 1 runner runner 2526160 Oct 26  1985 semantics-model.tflite
+-rw-r--r-- 1 runner runner 4998145 Oct 26  1985 semantics-worker.js
