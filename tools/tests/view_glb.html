@@ -1,0 +1,24 @@
+<!doctype html><meta charset="utf-8"><title>GLB check</title>
+<style>html,body{margin:0;height:100%;background:#9aa6a0}canvas{display:block;width:100%;height:100%}</style>
+<script type="importmap">{"imports":{"three":"../../js/vendor/three/three.module.min.js","three/addons/":"../../js/vendor/three/addons/"}}</script>
+<script type="module">
+// Dev check: renders a GLB the way a plain viewer (e.g. Scene Viewer) would. ?file=../../models/staze/teren_ar.glb&az=0
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+const q = new URLSearchParams(location.search);
+const r = new THREE.WebGLRenderer({ antialias: true }); r.setSize(innerWidth, innerHeight); r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.NeutralToneMapping;
+document.body.appendChild(r.domElement);
+const s = new THREE.Scene(); s.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture;
+const l = new THREE.DirectionalLight(0xffffff, 1.6); l.position.set(-1, 2, 1); s.add(l, new THREE.HemisphereLight(0xffffff, 0x555555, 0.6));
+const c = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.01, 50);
+const g = await new GLTFLoader().loadAsync(q.get('file') || '../../models/staze/teren_ar.glb');
+s.add(g.scene);
+const box = new THREE.Box3().setFromObject(g.scene), size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+const az = +(q.get('az') || 0) * Math.PI / 180, d = Math.max(size.x, size.z) * 1.25;
+c.position.set(ctr.x + Math.sin(az) * d, ctr.y + d * 0.75, ctr.z + Math.cos(az) * d); c.lookAt(ctr);
+r.render(s, c);
+let tris = 0; g.scene.traverse(o => { if (o.isMesh) tris += o.geometry.index.count / 3; });
+document.title = JSON.stringify({ size: size.toArray().map(v => +v.toFixed(3)), tris, materials: g.parser.json.materials.length });
+window.done = true;
+</script>

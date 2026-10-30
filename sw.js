@@ -1,5 +1,5 @@
 // Offline support: the app shell is cached on install; models and thumbnails are cached the first time they are opened.
-const VERSION = 'gkb-v0.6.1';
+const VERSION = 'gkb-v0.6.2';
 const SHELL = [
   './', 'index.html', 'kocka.html', 'staze.html', 'css/staze.css', 'js/staze.js', 'manifest.webmanifest', 'css/museum.css', 'css/kocka.css',
   'js/museum.js', 'js/kocka.js', 'js/i18n.js', 'js/cv/detector.js', 'js/cv/pose.js', 'js/cv/tracker.js',

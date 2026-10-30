@@ -64,12 +64,14 @@ GX, GZ = np.meshgrid(gx, gz)
 glon, glat = to_lonlat(GX, GZ)
 HE = elev(glon, glat, DEM_SMOOTH)
 BASE = math.floor((HE.min() - 150) / 10) * 10
-HY = (HE - BASE) / WIDTH_M
+HY = HY_MAIN = (HE - BASE) / WIDTH_M
 print(f"area {WIDTH_M:.0f} x {DEPTH_M:.0f} m, grid {NX}x{NZ}, elevation {HE.min():.0f}-{HE.max():.0f} m, base {BASE} m")
 
 
-def surface_y(x, z):
+def surface_y(x, z, HY=None):
     """Exact height of the triangulated terrain surface (same split as the mesh indices)."""
+    HY = HY_MAIN if HY is None else HY
+    NZ, NX = HY.shape
     fx = (np.asarray(x) + 0.5) * (NX - 1)
     fz = (np.asarray(z) + D / 2) / D * (NZ - 1)
     j = np.clip(np.floor(fx).astype(int), 0, NX - 2)
@@ -461,7 +463,8 @@ sides = dict(pos=np.vstack([wp_a, bottom_p]), nrm=np.vstack([wn_a, np.tile([[0, 
              uv=None, idx=np.vstack([wi_a, bottom_i]).ravel(), material=1)
 
 
-def write_glb(path, prims, materials, jpeg):
+def write_glb(path, prims, materials, images, extensions=()):
+    """prims: dicts with pos, nrm, uv (or None), idx, material. images: [(bytes, mime)], one texture each."""
     bufs, views, acc = [], [], []
 
     def add_view(data, target=None):
@@ -491,13 +494,15 @@ def write_glb(path, prims, materials, jpeg):
         idx = pr["idx"].astype(np.uint16 if pr["pos"].shape[0] < 65535 else np.uint32)
         ia = add_acc(idx.reshape(-1, 1), "SCALAR", 5123 if idx.dtype == np.uint16 else 5125, 34963)
         meshes.append({"attributes": attrs, "indices": ia, "material": pr["material"]})
-    img_view = add_view(jpeg)
+    imgs = [{"bufferView": add_view(data), "mimeType": mime} for data, mime in images]
     g = {"asset": {"version": "2.0", "generator": "gusinjska-bastina trails relief"},
          "scene": 0, "scenes": [{"nodes": [0]}], "nodes": [{"mesh": 0, "name": "teren"}],
          "meshes": [{"name": "teren", "primitives": meshes}], "materials": materials,
-         "textures": [{"source": 0, "sampler": 0}], "samplers": [{"magFilter": 9729, "minFilter": 9987, "wrapS": 33071, "wrapT": 33071}],
-         "images": [{"bufferView": img_view, "mimeType": "image/jpeg"}],
-         "buffers": [{"byteLength": sum(len(b) for b in bufs)}], "bufferViews": views, "accessors": acc}
+         "textures": [{"source": k, "sampler": 0} for k in range(len(imgs))],
+         "samplers": [{"magFilter": 9729, "minFilter": 9987, "wrapS": 33071, "wrapT": 33071}],
+         "images": imgs, "buffers": [{"byteLength": sum(len(b) for b in bufs)}], "bufferViews": views, "accessors": acc}
+    if extensions:
+        g["extensionsUsed"] = list(extensions)
     js = json.dumps(g, separators=(",", ":")).encode()
     js += b" " * ((4 - len(js) % 4) % 4)
     blob = b"".join(bufs)
@@ -511,12 +516,174 @@ mats = [{"name": "karta", "pbrMetallicRoughness": {"baseColorTexture": {"index":
         {"name": "zemlja", "pbrMetallicRoughness": {"baseColorFactor": CFG["side_color"], "metallicFactor": 0, "roughnessFactor": 1}}]
 os.makedirs(os.path.join(REPO, "models", "staze"), exist_ok=True)
 glb_path = os.path.join(REPO, "models", "staze", "teren.glb")
-write_glb(glb_path, [top, sides], mats, JPEG)
+write_glb(glb_path, [top, sides], mats, [(JPEG, "image/jpeg")])
 print(f"terrain {os.path.getsize(glb_path) / 1e6:.2f} MB")
+
+# ---------------------------------------------------------------- AR model (Scene Viewer, Quick Look, AR cube)
+# One self-contained GLB at real size: 60 cm wide, heights ×1.5, trails as tubes, names on small signs.
+# Scene Viewer limits: 1 unit = 1 m, about 100k triangles, ≤10 materials, one mesh per material, no vertex colours.
+from PIL import ImageFont
+AR_W, AR_EX = CFG.get("ar_width", 0.6), CFG.get("ar_exaggeration", 1.5)
+NXA = 161
+NZA = round((NXA - 1) * D) + 1
+GXA, GZA = np.meshgrid(np.linspace(-0.5, 0.5, NXA), np.linspace(-D / 2, D / 2, NZA))
+alon, alat = to_lonlat(GXA, GZA)
+HYA = (elev(alon, alat, gaussian_filter(DEM, 1.4)) - BASE) / WIDTH_M
+
+
+def fin(x, y, z):                          # model units -> metres in the AR model
+    return np.stack([np.asarray(x) * AR_W, np.asarray(y) * AR_EX * AR_W, np.asarray(z) * AR_W], -1)
+
+
+def grid_mesh(HYg, material):
+    nz, nx = HYg.shape
+    gx, gz = np.meshgrid(np.linspace(-0.5, 0.5, nx), np.linspace(-D / 2, D / 2, nz))
+    Pg = fin(gx, HYg, gz)
+    dyz, dyx = np.gradient(Pg[..., 1], D * AR_W / (nz - 1), AR_W / (nx - 1))
+    Ng = np.stack([-dyx, np.ones_like(dyx), -dyz], -1); Ng /= np.linalg.norm(Ng, axis=-1, keepdims=True)
+    UVg = np.stack([gx + 0.5, (gz + D / 2) / D], -1)
+    ii, jj = np.meshgrid(np.arange(nz - 1), np.arange(nx - 1), indexing="ij")
+    a = (ii * nx + jj).ravel()
+    idx = np.stack([a, a + nx, a + 1, a + 1, a + nx, a + nx + 1], -1).ravel()
+    return Pg, dict(pos=Pg.reshape(-1, 3), nrm=Ng.reshape(-1, 3), uv=UVg.reshape(-1, 2), idx=idx, material=material)
+
+
+def block_sides(Pg, material):
+    pos, nrm, idx = [], [], []
+    def wall_(edge, normal):
+        b = len(pos)
+        for p in edge:
+            pos.extend([[p[0], p[1], p[2]], [p[0], 0.0, p[2]]]); nrm.extend([normal, normal])
+        for k in range(len(edge) - 1):
+            q = b + 2 * k
+            idx.extend([q, q + 1, q + 2, q + 2, q + 1, q + 3])
+    wall_(Pg[0, ::-1], [0, 0, -1]); wall_(Pg[-1, :], [0, 0, 1]); wall_(Pg[:, 0], [-1, 0, 0]); wall_(Pg[::-1, -1], [1, 0, 0])
+    pos, nrm, idx = np.array(pos, np.float32), np.array(nrm, np.float32), np.array(idx, np.uint32).reshape(-1, 3)
+    tri = pos[idx]; fn = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    flip = (fn * nrm[idx[:, 0]]).sum(1) < 0
+    idx[flip] = idx[flip][:, [0, 2, 1]]
+    hx, hz = AR_W / 2, D * AR_W / 2
+    b0 = len(pos)
+    pos = np.vstack([pos, [[-hx, 0, -hz], [hx, 0, -hz], [hx, 0, hz], [-hx, 0, hz]]])
+    nrm = np.vstack([nrm, np.tile([[0, -1, 0]], (4, 1))])
+    idx = np.vstack([idx, [[b0, b0 + 1, b0 + 2], [b0, b0 + 2, b0 + 3]]])
+    return dict(pos=pos, nrm=nrm, uv=None, idx=idx.ravel(), material=material)
+
+
+def tube_mesh(lines, r, radial, material):
+    pos, nrm, idx = [], [], []
+    up = np.array([0.0, 1.0, 0.0])
+    ang = np.linspace(0, 2 * np.pi, radial, endpoint=False)
+    for P in lines:
+        n = len(P)
+        if n < 2:
+            continue
+        tng = np.gradient(P, axis=0); tng /= np.linalg.norm(tng, axis=1, keepdims=True) + 1e-12
+        side = np.cross(tng, up); side /= np.linalg.norm(side, axis=1, keepdims=True) + 1e-12
+        nup = np.cross(side, tng)
+        off = np.cos(ang)[None, :, None] * side[:, None, :] + np.sin(ang)[None, :, None] * nup[:, None, :]
+        b = sum(len(p) for p in pos)
+        pos.append((P[:, None, :] + r * off).reshape(-1, 3)); nrm.append(off.reshape(-1, 3))
+        k = np.arange(n - 1)[:, None]; rr = np.arange(radial)[None, :]
+        a0 = b + k * radial + rr; a1 = b + k * radial + (rr + 1) % radial
+        idx.append(np.stack([a0, a0 + radial, a1, a1, a0 + radial, a1 + radial], -1).reshape(-1))
+    return dict(pos=np.vstack(pos), nrm=np.vstack(nrm), uv=None, idx=np.concatenate(idx), material=material)
+
+
+def hex_rgb(h):
+    return [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+
+
+PA, ar_top = grid_mesh(HYA, 0)
+ar_prims = [ar_top]
+ar_mats = [{"name": "karta", "pbrMetallicRoughness": {"baseColorTexture": {"index": 0}, "metallicFactor": 0, "roughnessFactor": 0.95}},
+           {"name": "zemlja", "pbrMetallicRoughness": {"baseColorFactor": CFG["side_color"], "metallicFactor": 0, "roughnessFactor": 1}}]
+# trails, one mesh per difficulty colour
+R_AR = 0.0017
+for style, col in COLORS.items():
+    lines = []
+    for tr in trails_out:
+        if tr["style"] != style:
+            continue
+        for sgm in tr["segs"]:
+            a3 = np.array(sgm).reshape(-1, 3)
+            pm = np.c_[(a3[:, 0] + 0.5) * WIDTH_M, (a3[:, 2] + D / 2) * WIDTH_M]
+            pm = resample(pm, 40.0)
+            x = pm[:, 0] / WIDTH_M - 0.5; z = pm[:, 1] / WIDTH_M - D / 2
+            P3 = fin(x, surface_y(x, z, HYA), z); P3[:, 1] += R_AR * 0.55
+            lines.append(P3)
+    if not lines:
+        continue
+    rgb = hex_rgb(col)
+    ar_mats.append({"name": "staza-" + style, "pbrMetallicRoughness": {"baseColorFactor": rgb + [1], "metallicFactor": 0, "roughnessFactor": 0.5},
+                    "emissiveFactor": [c * 0.3 for c in rgb]})
+    ar_prims.append(tube_mesh(lines, R_AR, 5, len(ar_mats) - 1))
+
+# name signs: a label atlas on upright two-sided cards, with a thin post
+FONT_B = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+labels = []
+for p in places_out:
+    big = p["kind"] == "town"
+    pre = "▲ " if p["kind"] in ("peak", "pass") else "◆ " if p["kind"] == "sight" else ""
+    txt = pre + p["name"]["me"] + (f" {p['ele']}" if p.get("ele") else "")
+    font = ImageFont.truetype(FONT_B, 54 if big else 44)
+    w = int(font.getlength(txt)) + 36; h = (54 if big else 44) + 26
+    labels.append((p, txt, font, w, h))
+AW = 2048
+x_, y_, rowh, slots = 0, 0, 0, []
+for (p, txt, font, w, h) in labels:
+    if x_ + w > AW:
+        x_, y_ = 0, y_ + rowh + 4; rowh = 0
+    slots.append((x_, y_)); x_ += w + 4; rowh = max(rowh, h)
+AH = 1 << int(math.ceil(math.log2(y_ + rowh + 4)))
+atlas = Image.new("RGBA", (AW, AH), (0, 0, 0, 0))
+da = ImageDraw.Draw(atlas)
+INK = {"town": (34, 30, 25), "village": (34, 30, 25), "valley": (44, 59, 51), "sight": (31, 95, 139), "peak": (90, 58, 26), "pass": (90, 58, 26)}
+lp, ln, lu, li, sp, sn, si = [], [], [], [], [], [], []
+for (p, txt, font, w, h), (ax, ay) in zip(labels, slots):
+    da.rounded_rectangle([ax, ay, ax + w - 1, ay + h - 1], radius=h // 2, fill=(255, 252, 246, 238) if p["kind"] != "valley" else (255, 255, 255, 170))
+    da.text((ax + 18, ay + h / 2), txt, font=font, fill=INK.get(p["kind"], (34, 30, 25)) + (255,), anchor="lm")
+    u0, u1, v0, v1 = ax / AW, (ax + w) / AW, ay / AH, (ay + h) / AH
+    x, yu, z = p["pos"]
+    base = fin(x, surface_y(x, z, HYA), z)
+    hm = 0.016 if p["kind"] == "town" else 0.012
+    post = {"town": 0.028, "valley": 0.006}.get(p["kind"], 0.02)
+    wm = hm * w / h
+    yb = base[1] + post
+    cx, cz = base[0], base[2]
+    b = len(lp)
+    quad = [[cx - wm / 2, yb, cz], [cx + wm / 2, yb, cz], [cx + wm / 2, yb + hm, cz], [cx - wm / 2, yb + hm, cz]]
+    lp += quad + quad
+    ln += [[0, 0, 1]] * 4 + [[0, 0, -1]] * 4
+    lu += [[u0, v1], [u1, v1], [u1, v0], [u0, v0]] + [[u1, v1], [u0, v1], [u0, v0], [u1, v0]]
+    li += [b, b + 1, b + 2, b, b + 2, b + 3, b + 4, b + 6, b + 5, b + 4, b + 7, b + 6]
+    if p["kind"] != "valley":                 # post: a thin square stick
+        t = 0.0006
+        corners = [(-t, -t), (t, -t), (t, t), (-t, t)]
+        for k in range(4):
+            (ax0, az0), (ax1, az1) = corners[k], corners[(k + 1) % 4]
+            nrm_ = np.array([az1 - az0, 0, -(ax1 - ax0)]); nrm_ = (nrm_ / np.linalg.norm(nrm_)).tolist()
+            q = len(sp)
+            sp += [[cx + ax0, base[1] - 0.002, cz + az0], [cx + ax1, base[1] - 0.002, cz + az1], [cx + ax1, yb, cz + az1], [cx + ax0, yb, cz + az0]]
+            sn += [nrm_] * 4
+            si += [q, q + 2, q + 1, q, q + 3, q + 2]
+buf = io.BytesIO(); atlas.save(buf, "PNG", optimize=True); LABEL_PNG = buf.getvalue()
+ar_mats.append({"name": "nazivi", "pbrMetallicRoughness": {"baseColorTexture": {"index": 1}, "metallicFactor": 0, "roughnessFactor": 1},
+                "alphaMode": "BLEND", "extensions": {"KHR_materials_unlit": {}}})
+ar_prims.append(dict(pos=np.array(lp, np.float32), nrm=np.array(ln, np.float32), uv=np.array(lu, np.float32), idx=np.array(li, np.uint32), material=len(ar_mats) - 1))
+sides_ar = block_sides(PA, 1)
+off = len(sides_ar["pos"])
+sides_ar = dict(pos=np.vstack([sides_ar["pos"], np.array(sp, np.float32)]), nrm=np.vstack([sides_ar["nrm"], np.array(sn, np.float32)]), uv=None,
+                idx=np.concatenate([sides_ar["idx"], np.array(si, np.uint32) + off]), material=1)
+ar_prims.insert(1, sides_ar)
+ar_path = os.path.join(REPO, "models", "staze", "teren_ar.glb")
+write_glb(ar_path, ar_prims, ar_mats, [(JPEG, "image/jpeg"), (LABEL_PNG, "image/png")], extensions=["KHR_materials_unlit"])
+ntri = sum(len(pr["idx"]) for pr in ar_prims) // 3
+print(f"AR model {os.path.getsize(ar_path) / 1e6:.2f} MB, {ntri} triangles, {len(ar_mats)} materials")
 
 meta = {"version": 1, "bbox": [W, S, E, N], "widthM": round(WIDTH_M, 1), "depthM": round(DEPTH_M, 1), "depth": round(D, 5),
         "base": BASE, "minEle": round(float(HE.min())), "maxEle": round(float(HE.max())),
-        "model": "models/staze/teren.glb", "colors": COLORS, "groups": CFG["groups"], "styles": CFG["styles"],
+        "model": "models/staze/teren.glb", "arModel": "models/staze/teren_ar.glb", "arWidth": AR_W, "arExaggeration": AR_EX, "colors": COLORS, "groups": CFG["groups"], "styles": CFG["styles"],
         "trails": trails_out, "places": places_out,
         "credits": CFG["credits_always"] + [f"{src}: {', '.join(x['name']['me'] for x in trails_out if x['source'] == src)}"
                                             for src in sorted(credits) if src != "OpenStreetMap"]}

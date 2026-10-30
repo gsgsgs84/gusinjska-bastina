@@ -64,6 +64,19 @@
         "en": "A telephone, a soldier's helmet and other traces of a new age.",
         "sq": "Telefoni, helmeta ushtarake dhe gjurmë të tjera të kohës së re."
       }
+    },
+    {
+      "id": "priroda",
+      "name": {
+        "me": "Priroda i staze",
+        "en": "Nature and trails",
+        "sq": "Natyra dhe shtigjet"
+      },
+      "description": {
+        "me": "Prokletije oko Gusinja: doline, vrhovi i planinarske staze u 3D.",
+        "en": "Prokletije around Gusinje: valleys, peaks and hiking trails in 3D.",
+        "sq": "Bjeshkët e Nemuna rreth Gucisë: lugina, maja dhe shtigje malore në 3D."
+      }
     }
   ],
   "exhibits": [
@@ -939,6 +952,62 @@
             "me": "oko 30 cm (procjena)",
             "en": "about 30 cm (estimate)",
             "sq": "rreth 30 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "staze-teren",
+      "gallery": "priroda",
+      "model": "models/staze/teren_ar.glb",
+      "thumb": "thumbs/staze.jpg",
+      "kind": "object",
+      "size": {
+        "long": 0.6,
+        "label": {
+          "me": "Širina makete",
+          "en": "Model width",
+          "sq": "Gjerësia e maketës"
+        }
+      },
+      "name": {
+        "me": "Gusinje i Prokletije",
+        "en": "Gusinje and Prokletije",
+        "sq": "Gucia dhe Bjeshkët e Nemuna"
+      },
+      "subtitle": {
+        "me": "Reljef 17 × 17 km sa planinarskim stazama",
+        "en": "17 × 17 km relief with hiking trails",
+        "sq": "Reliev 17 × 17 km me shtigje malore"
+      },
+      "description": {
+        "me": "Maketa terena oko Gusinja: Gusinjsko polje, Grebaje, Ropojana, Karanfili i Kolata, sa 18 planinarskih i biciklističkih staza i nazivima vrhova. Visine su naglašene 1,5 puta. Na stranici „Planinarske staze“ možete izabrati svaku stazu i vidjeti njen visinski profil.",
+        "en": "A model of the terrain around Gusinje: the Gusinje plain, Grebaje, Ropojana, Karanfili and Kolata, with 18 hiking and cycling routes and the names of the peaks. Heights are exaggerated 1.5 times. On the “Hiking trails” page you can choose each trail and see its elevation profile.",
+        "sq": "Maketë e terrenit rreth Gucisë: fusha e Gucisë, Grebaja, Ropojana, Karanfilët dhe Kollatat, me 18 shtigje malore dhe biçiklete dhe emrat e majave. Lartësitë janë theksuar 1,5 herë. Në faqen „Shtigjet malore“ mund të zgjidhni çdo shteg dhe të shihni profilin e lartësisë."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Područje",
+            "en": "Area",
+            "sq": "Zona"
+          },
+          "v": {
+            "me": "17 × 17 km, Gusinje i okolina",
+            "en": "17 × 17 km, Gusinje and surroundings",
+            "sq": "17 × 17 km, Gucia dhe rrethina"
+          }
+        },
+        {
+          "k": {
+            "me": "Podaci",
+            "en": "Data",
+            "sq": "Të dhënat"
+          },
+          "v": {
+            "me": "Copernicus DEM, OpenStreetMap",
+            "en": "Copernicus DEM, OpenStreetMap",
+            "sq": "Copernicus DEM, OpenStreetMap"
           }
         }
       ]

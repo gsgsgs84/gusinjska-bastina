@@ -98,7 +98,7 @@ async function init() {
   resetView(true);
   const pre = decodeURIComponent(location.hash.slice(1));
   if (S.trails.has(pre)) select(pre, false);
-  if (pre === 'ar' || matchMedia('(pointer: coarse)').matches) showCTA();
+  if (pre !== 'ar-pomoc' && (pre === 'ar' || new URLSearchParams(location.search).has('ar') || matchMedia('(pointer: coarse)').matches)) showCTA();
   renderer.setAnimationLoop(frame);
   wireUI();
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -128,7 +128,7 @@ function paintText() {
   $('#creditsH').textContent = t('s_credits');
   $('#northTxt').textContent = t('s_north');
   $('#xrClose').textContent = t('close');
-  $('#xrFront').textContent = t('s_front'); $('#xrTable').textContent = t('s_toTable'); $('#xrQuick').textContent = 'Quick Look';
+  $('#xrFront').textContent = t('s_front'); $('#xrTable').textContent = t('s_toTable'); $('#xrQuick').textContent = t('s_moreAR');
   if (!S.data) return;
   const styles = S.data.styles, colors = S.data.colors;
   $('#legend').innerHTML = Object.keys(styles).map(k => `<li><span class="line" style="background:${colors[k]}"></span>${esc(tx(styles[k]))}</li>`).join('') +
@@ -426,6 +426,10 @@ function showCTA() { const c = $('#arCta'); if (c) c.hidden = false; }
 function hideCTA() { const c = $('#arCta'); if (c) c.hidden = true; }
 function wireUI() {
   $('#ctaStart').addEventListener('click', startAR);
+  $('#arOpts').addEventListener('click', e => { const b = e.target.closest('[data-opt]'); if (b) helpChoice(b.dataset.opt); });
+  $('#arHelpClose').addEventListener('click', hideHelp);
+  $('#arHelp').addEventListener('click', e => { if (e.target.id === 'arHelp') hideHelp(); });
+  if (location.hash === '#ar-pomoc') showHelp();
   $('#ctaSkip').addEventListener('click', hideCTA);
   $('#btnHeight').addEventListener('click', () => {
     S.exag = EXAGS[(EXAGS.indexOf(S.exag) + 1) % EXAGS.length] || 1.5; store.set('gkb.staze.exag', S.exag);
@@ -465,17 +469,61 @@ let shadowMesh = null;
 holder.traverse(o => { if (o.isMesh && o.material?.map && o.renderOrder === -1) shadowMesh = o; });
 const quickLookOK = (() => { const a = document.createElement('a'); return !!(a.relList && a.relList.supports && a.relList.supports('ar')); })();
 
+const UA = navigator.userAgent;
+const IS_ANDROID = /Android/i.test(UA);
+const IS_IOS = /iP(hone|ad|od)/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IN_APP = IS_ANDROID && /; wv\)|FBAN|FBAV|Instagram|Line\/|MicroMessenger|Telegram|Snapchat|Twitter|GSA\//i.test(UA);
+// Real AR (you can walk around it) in this order: WebXR in Chrome -> Google's AR viewer (Android) -> Quick Look (iPhone).
+// Only if none works: a help sheet with the other ways (open in Chrome, install AR services, the printed cube/card, camera only).
 function startAR() {
-  // iPhone asks for motion-sensor permission; the request must start inside the tap, before anything is awaited
-  const orientPerm = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'
-    ? DeviceOrientationEvent.requestPermission().catch(() => 'denied') : null;
   hideCTA();
   (async () => {
     let ok = false;
     try { ok = !!(navigator.xr && await navigator.xr.isSessionSupported('immersive-ar')); } catch { ok = false; }
     if (ok && await startWebXR()) return;
-    startCamAR(orientPerm);
+    if (IS_IOS && quickLookOK) return quickLook();
+    if (IS_ANDROID && !IN_APP) return sceneViewer();
+    showHelp();
   })();
+}
+function arModelURL() { return new URL(S.data.arModel, location.href).href; }
+function pageURL(hash = '') { return location.href.split('#')[0] + hash; }
+function sceneViewer() {
+  const q = `file=${encodeURIComponent(arModelURL())}&mode=ar_preferred&resizable=true` +
+    `&title=${encodeURIComponent(t('s_title') + ' – Gusinje')}&link=${encodeURIComponent(pageURL())}`;
+  const url = `intent://arvr.google.com/scene-viewer/1.0?${q}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;` +
+    `action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(pageURL('#ar-pomoc'))};end;`;
+  toast(t('s_opening'));
+  location.href = url;
+  // if nothing opened (blocked, or no Google app), offer the other ways
+  setTimeout(() => { if (document.visibilityState === 'visible' && !S.xr) showHelp(); }, 2500);
+}
+function showHelp() {
+  const opts = [];
+  if (IS_ANDROID && !IN_APP) opts.push(['scene', 's_optScene', 's_optSceneSub']);
+  if (IS_ANDROID) opts.push(['chrome', 's_optChrome', 's_optChromeSub'], ['arcore', 's_optArcore', 's_optArcoreSub']);
+  if (IS_IOS && quickLookOK) opts.push(['quick', 's_optQuick', 's_optQuickSub']);
+  opts.push(['cube', 's_optCube', 's_optCubeSub'], ['cam', 's_optCam', 's_optCamSub']);
+  $('#arHelpH').textContent = t('s_helpTitle');
+  $('#arHelpWhy').textContent = t(IN_APP ? 's_helpInApp' : 's_helpWhy');
+  $('#arOpts').innerHTML = opts.map(([id, h, sub], i) => `<button class="opt${i ? '' : ' first'}" data-opt="${id}"><b>${esc(t(h))}</b><small>${esc(t(sub))}</small></button>`).join('');
+  $('#arHelpClose').textContent = t('close');
+  $('#arHelp').hidden = false;
+}
+function hideHelp() { $('#arHelp').hidden = true; if (location.hash === '#ar-pomoc') history.replaceState(null, '', pageURL()); }
+function helpChoice(id) {
+  hideHelp();
+  if (id === 'scene') return sceneViewer();
+  if (id === 'quick') return quickLook();
+  if (id === 'chrome') { location.href = `intent://${location.host}${location.pathname}?ar=1#Intent;scheme=https;package=com.android.chrome;end`; return; }
+  if (id === 'arcore') { location.href = 'https://play.google.com/store/apps/details?id=com.google.ar.core'; return; }
+  if (id === 'cube') { location.href = 'kocka.html?id=staze-teren'; return; }
+  if (id === 'cam') {
+    // iPhone asks for motion-sensor permission; the request must start inside the tap
+    const perm = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'
+      ? DeviceOrientationEvent.requestPermission().catch(() => 'denied') : null;
+    startCamAR(perm);
+  }
 }
 function sizeLabel() {
   const m = SIZES[S.sizeIdx], scale = Math.round(S.data.widthM / m / 100) * 100;
@@ -508,9 +556,9 @@ function openOverlay(kind) {
     if (!S.xr.hit) { toast(t('s_noTable')); return; }
     S.xr.mode = 'table'; S.xr.placed = false; holder.visible = false; msg('s_arTable');
   };
-  $('#xrQuick').onclick = () => quickLook();
+  $('#xrQuick').onclick = () => { stopAR(); showHelp(); };
   $('#xrTable').hidden = kind !== 'webxr';
-  $('#xrQuick').hidden = !(kind === 'cam' && quickLookOK);
+  $('#xrQuick').hidden = kind !== 'cam';
   const ids = S.data.trails.map(x => x.id);
   const step = d => { const i = S.sel ? ids.indexOf(S.sel) : (d > 0 ? -1 : 0); select(ids[(i + d + ids.length) % ids.length]); };
   $('#xrPrev').onclick = () => step(-1); $('#xrNext').onclick = () => step(1);
@@ -676,23 +724,27 @@ function stopCamAR() {
   closeOverlay();
 }
 
+let usdzURL = null;
 async function quickLook() {
+  // Apple's AR viewer: the same real-size model as Google's (terrain, trails and name signs), converted on the phone
   toast(t('preparing'));
   try {
-    const { USDZExporter } = await import('three/addons/exporters/USDZExporter.js');
-    const g = new THREE.Group();
-    const terr = terrainWrap.clone(true); g.add(terr);
-    for (const { mesh } of S.trails.values()) {
-      const m = new THREE.Mesh(mesh.geometry, new THREE.MeshStandardMaterial({ color: mesh.material.color, roughness: 0.55 }));
-      g.add(m);
+    if (!usdzURL) {
+      const { USDZExporter } = await import('three/addons/exporters/USDZExporter.js');
+      const gltf = await new GLTFLoader().loadAsync(S.data.arModel);
+      gltf.scene.traverse(o => {
+        if (o.isMesh && o.material.isMeshBasicMaterial) {     // the unlit name signs -> a material Quick Look accepts
+          const m = o.material;
+          o.material = new THREE.MeshStandardMaterial({ map: m.map, emissiveMap: m.map, emissive: 0xffffff, transparent: true, roughness: 1, metalness: 0 });
+        }
+      });
+      const s = new THREE.Scene(); s.add(gltf.scene); s.updateMatrixWorld(true);
+      const buf = await new USDZExporter().parseAsync(s, { quickLookCompatible: true, maxTextureSize: 2048 });
+      usdzURL = URL.createObjectURL(new Blob([buf], { type: 'model/vnd.usdz+zip' }));
     }
-    g.scale.setScalar(SIZES[S.sizeIdx]);
-    const s = new THREE.Scene(); s.add(g); s.updateMatrixWorld(true);
-    const buf = await new USDZExporter().parseAsync(s, { quickLookCompatible: true, maxTextureSize: 2048 });
-    const url = URL.createObjectURL(new Blob([buf], { type: 'model/vnd.usdz+zip' }));
-    const a = document.createElement('a'); a.rel = 'ar'; a.href = url; a.appendChild(document.createElement('img'));
+    const a = document.createElement('a'); a.rel = 'ar'; a.href = usdzURL; a.appendChild(document.createElement('img'));
     document.body.appendChild(a); a.click(); a.remove();
-  } catch (e) { console.warn(e); toast(t('s_noAR')); }
+  } catch (e) { console.warn(e); showHelp(); }
 }
 
 window.__staze = { S, scene, camera, controls, renderer, holder, select, arCam, startAR, stopAR, orient };   // for tests

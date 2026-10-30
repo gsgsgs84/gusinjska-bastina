@@ -68,3 +68,16 @@
 .cam-ar video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .cam-ar canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
 body.in-ar { overflow: hidden; }
+
+/* "real AR" help sheet */
+.ar-help { position: fixed; inset: 0; z-index: 70; background: rgba(20,18,15,.45); display: flex; align-items: flex-end; justify-content: center; }
+.ar-help[hidden] { display: none; }
+.ar-help .sheet { width: min(100%, 520px); background: var(--bg); border-radius: 18px 18px 0 0; padding: 18px 16px calc(14px + var(--safe-b)); display: grid; gap: 10px; max-height: 88dvh; overflow: auto; }
+.ar-help h2 { font-size: 21px; }
+.ar-help p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.ar-help .opts { display: grid; gap: 8px; }
+.ar-help .opt { text-align: left; border: 1px solid var(--line); background: var(--paper); border-radius: 14px; padding: 11px 14px; cursor: pointer; display: grid; gap: 2px; }
+.ar-help .opt b { font-size: 15.5px; }
+.ar-help .opt small { color: var(--muted); font-size: 13px; }
+.ar-help .opt.first { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
+.ar-help .opt.first small { color: inherit; opacity: .85; }

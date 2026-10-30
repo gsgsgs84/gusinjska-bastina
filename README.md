@@ -18,9 +18,12 @@ A 3D museum in your hand: buildings and objects of Gusinje and Prokletije that y
 ## Hiking trails (`staze.html`)
 A 3D relief of the Gusinje area (19.74–19.95 E, 42.45–42.60 N, about 17 × 17 km) with 18 hiking and cycling routes.
 - **Touch viewer:** drag to turn, pinch to zoom, tap a trail (on the terrain or in the list) for its card, elevation profile and a walking marker. `staze.html#<trail-id>` opens a trail directly, e.g. for a QR code.
-- **AR in front of me** (big button; offered automatically on phones, or open `staze.html#ar`): the terrain appears about a metre in front of you, a little below eye level, sized to fit the view.
-  - Android Chrome with Google Play Services for AR: WebXR (`immersive-ar`, optional hit-test and dom-overlay). Walk around it, drag across the screen to turn it, tap a trail to select it, ± to resize (30–150 cm, scale shown), *On a table* puts it down on a real surface.
-  - Other phones, including iPhone: the camera picture is shown behind the 3D and the motion sensors keep the terrain in front of you as you turn the phone (rotation only, no walking around). Without a motion sensor, drag to turn it. On iPhone a *Quick Look* button opens Apple's world-tracked AR (terrain and trails, no names).
+- **AR in front of me** (big button; offered automatically on phones, or open `staze.html#ar` / `staze.html?ar=1`). It always tries real, room-tracked AR first, so you can walk around the terrain:
+  1. Chrome on Android with Google Play Services for AR: WebXR (`immersive-ar`). The terrain appears in front of you at once (45 cm, sized to fit the view); drag across the screen to turn it, tap a trail to select it, ± 30–150 cm, *On a table* puts it on a detected surface.
+  2. Other Android browsers, or no WebXR: Google's AR viewer (Scene Viewer intent) with `models/staze/teren_ar.glb`.
+  3. iPhone: AR Quick Look with a USDZ made on the phone from the same model.
+  4. If none opens (`#ar-pomoc`): a sheet with *Open in Chrome*, *Install Google Play Services for AR*, *On the AR cube or card* (`kocka.html?id=staze-teren`, works on any phone) and *Camera only* (camera picture + motion sensors, rotation only; you cannot walk around it).
+- `models/staze/teren_ar.glb`: one self-contained real-size model (60 cm wide, heights ×1.5) with the trails as tubes and the place names on small two-sided signs, within Scene Viewer's limits (about 97k triangles, 9 materials, 2.8 MB). It is also the museum exhibit `staze-teren` (gallery *Priroda i staze*), so it works on the AR cube and with the museum's *In your room*.
 - **Height** button: vertical exaggeration ×1, ×1.5 (default), ×2.
 
 Files: `models/staze/teren.glb` (terrain block with a painted map texture), `data/staze.json` (trails, places, credits), `js/staze.js`, `css/staze.css`.
