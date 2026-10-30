@@ -252,3 +252,8 @@ body { overflow-x: clip; }
   .ways-row { gap: 14px; } .gals2 { grid-template-columns: repeat(4, 1fr); } .strip { margin: 0 0 30px; padding: 4px 0 12px; }
   .dstage { aspect-ratio: 16 / 9; }
 }
+@media (max-width: 699px) {
+  .gal2:last-child:nth-child(odd) { grid-column: 1 / -1; display: grid; grid-template-columns: 46% 1fr; align-items: center; }
+  .gal2:last-child:nth-child(odd) .gt { padding: 12px 14px; } .gal2:last-child:nth-child(odd) h3 { font-size: 19px; }
+}
+@media (min-width: 700px) { .gals2 { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); } }
