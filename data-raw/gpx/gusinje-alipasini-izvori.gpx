@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="traveltomontenegro.com" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <metadata>
+    <name>Gusinje – Ali Pasha&apos;s Springs</name>
+    <desc>A short and easy one-way trail from Gusinje to Ali-pašini izvori. The length is 2.4 km, with 218 m of ascent and an estimated duration of 1 h without breaks. Route data © OpenStreetMap contributors, ODbL (https://www.openstreetmap.org/copyright). Elevation produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.</desc>
+    <copyright author="OpenStreetMap contributors">
+      <year>2026</year>
+      <license>https://opendatacommons.org/licenses/odbl/1-0/</license>
+    </copyright>
+    <link href="https://traveltomontenegro.com/en/trails/gusinje-ali-pasini-izvori"><text>traveltomontenegro.com</text></link>
+    <time>2026-10-02T10:00:25.924036Z</time>
+  </metadata>
+  <trk>
+    <name>Gusinje – Ali Pasha&apos;s Springs</name>
+    <trkseg>
+      <trkpt lat="42.562139" lon="19.833758"><ele>922.0</ele></trkpt>
+      <trkpt lat="42.561639" lon="19.834064"><ele>922.1</ele></trkpt>
+      <trkpt lat="42.561013" lon="19.834327"><ele>923.4</ele></trkpt>
+      <trkpt lat="42.560776" lon="19.834404"><ele>921.4</ele></trkpt>
+      <trkpt lat="42.560630" lon="19.834285"><ele>922.7</ele></trkpt>
+      <trkpt lat="42.560515" lon="19.834144"><ele>923.9</ele></trkpt>
+      <trkpt lat="42.560414" lon="19.833968"><ele>923.3</ele></trkpt>
+      <trkpt lat="42.560348" lon="19.834026"><ele>923.5</ele></trkpt>
+      <trkpt lat="42.560238" lon="19.833632"><ele>923.9</ele></trkpt>
+      <trkpt lat="42.560232" lon="19.832801"><ele>924.2</ele></trkpt>
+      <trkpt lat="42.560346" lon="19.832191"><ele>925.2</ele></trkpt>
+      <trkpt lat="42.560524" lon="19.831408"><ele>925.7</ele></trkpt>
+      <trkpt lat="42.560683" lon="19.831060"><ele>926.1</ele></trkpt>
+      <trkpt lat="42.561060" lon="19.830448"><ele>926.9</ele></trkpt>
+      <trkpt lat="42.561450" lon="19.829725"><ele>928.0</ele></trkpt>
+      <trkpt lat="42.561715" lon="19.829304"><ele>928.2</ele></trkpt>
+      <trkpt lat="42.560813" lon="19.828369"><ele>927.9</ele></trkpt>
+      <trkpt lat="42.560508" lon="19.828023"><ele>928.2</ele></trkpt>
+      <trkpt lat="42.560414" lon="19.827931"><ele>928.3</ele></trkpt>
+      <trkpt lat="42.560238" lon="19.827801"><ele>928.2</ele></trkpt>
+      <trkpt lat="42.560131" lon="19.827673"><ele>928.7</ele></trkpt>
+      <trkpt lat="42.559862" lon="19.827206"><ele>929.0</ele></trkpt>
+      <trkpt lat="42.558697" lon="19.825536"><ele>932.0</ele></trkpt>
+      <trkpt lat="42.558420" lon="19.824891"><ele>933.7</ele></trkpt>
+      <trkpt lat="42.558227" lon="19.824593"><ele>934.0</ele></trkpt>
+      <trkpt lat="42.557404" lon="19.823831"><ele>935.5</ele></trkpt>
+      <trkpt lat="42.557063" lon="19.823577"><ele>936.6</ele></trkpt>
+      <trkpt lat="42.556965" lon="19.823483"><ele>936.9</ele></trkpt>
+      <trkpt lat="42.556875" lon="19.823387"><ele>936.1</ele></trkpt>
+      <trkpt lat="42.556685" lon="19.823118"><ele>934.3</ele></trkpt>
+      <trkpt lat="42.556360" lon="19.822780"><ele>934.2</ele></trkpt>
+      <trkpt lat="42.556196" lon="19.822585"><ele>937.2</ele></trkpt>
+      <trkpt lat="42.555939" lon="19.822131"><ele>943.1</ele></trkpt>
+      <trkpt lat="42.555783" lon="19.821796"><ele>945.9</ele></trkpt>
+      <trkpt lat="42.555625" lon="19.821386"><ele>950.0</ele></trkpt>
+      <trkpt lat="42.555327" lon="19.820936"><ele>953.7</ele></trkpt>
+      <trkpt lat="42.555274" lon="19.820892"><ele>955.2</ele></trkpt>
+      <trkpt lat="42.554925" lon="19.820108"><ele>969.1</ele></trkpt>
+      <trkpt lat="42.554838" lon="19.820055"><ele>971.4</ele></trkpt>
+      <trkpt lat="42.554575" lon="19.820065"><ele>976.2</ele></trkpt>
+      <trkpt lat="42.554364" lon="19.819921"><ele>981.4</ele></trkpt>
+      <trkpt lat="42.554217" lon="19.819741"><ele>984.8</ele></trkpt>
+      <trkpt lat="42.553982" lon="19.819583"><ele>989.7</ele></trkpt>
+      <trkpt lat="42.553658" lon="19.819454"><ele>997.0</ele></trkpt>
+      <trkpt lat="42.553188" lon="19.819433"><ele>1006.7</ele></trkpt>
+      <trkpt lat="42.553091" lon="19.819451"><ele>1008.1</ele></trkpt>
+      <trkpt lat="42.552840" lon="19.819341"><ele>1020.3</ele></trkpt>
+      <trkpt lat="42.552542" lon="19.818872"><ele>1045.8</ele></trkpt>
+      <trkpt lat="42.552332" lon="19.818722"><ele>1059.7</ele></trkpt>
+      <trkpt lat="42.552190" lon="19.818802"><ele>1061.9</ele></trkpt>
+      <trkpt lat="42.552113" lon="19.818791"><ele>1064.0</ele></trkpt>
+      <trkpt lat="42.552010" lon="19.818529"><ele>1073.4</ele></trkpt>
+      <trkpt lat="42.551963" lon="19.818357"><ele>1078.3</ele></trkpt>
+      <trkpt lat="42.551913" lon="19.818314"><ele>1080.4</ele></trkpt>
+      <trkpt lat="42.551971" lon="19.818078"><ele>1085.1</ele></trkpt>
+      <trkpt lat="42.551858" lon="19.817646"><ele>1099.6</ele></trkpt>
+      <trkpt lat="42.551876" lon="19.817399"><ele>1104.4</ele></trkpt>
+      <trkpt lat="42.552135" lon="19.817075"><ele>1113.9</ele></trkpt>
+      <trkpt lat="42.552216" lon="19.816903"><ele>1122.0</ele></trkpt>
+      <trkpt lat="42.552279" lon="19.816536"><ele>1130.5</ele></trkpt>
+      <trkpt lat="42.552236" lon="19.816136"><ele>1138.5</ele></trkpt>
+      <trkpt lat="42.552098" lon="19.815790"><ele>1141.7</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="traveltomontenegro.com" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <metadata>
+    <name>Karanfili Ridge: viewpoint – Mali Karanfil</name>
+    <desc>A short but highly demanding ridge trail, 1.7 km long, leading through the rocky terrain of Prokletije. Suitable exclusively for experienced hikers with appropriate equipment. Route data © OpenStreetMap contributors, ODbL (https://www.openstreetmap.org/copyright). Elevation produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.</desc>
+    <copyright author="OpenStreetMap contributors">
+      <year>2026</year>
+      <license>https://opendatacommons.org/licenses/odbl/1-0/</license>
+    </copyright>
+    <link href="https://traveltomontenegro.com/en/trails/karanfili-ridge-viewpoint-mali-karanfil"><text>traveltomontenegro.com</text></link>
+    <time>2026-10-11T07:24:41.187349Z</time>
+  </metadata>
+  <trk>
+    <name>Karanfili Ridge: viewpoint – Mali Karanfil</name>
+    <trkseg>
+      <trkpt lat="42.521171" lon="19.814878"><ele>1960.2</ele></trkpt>
+      <trkpt lat="42.521133" lon="19.814824"><ele>1961.3</ele></trkpt>
+      <trkpt lat="42.521085" lon="19.814849"><ele>1963.1</ele></trkpt>
+      <trkpt lat="42.521044" lon="19.814776"><ele>1965.2</ele></trkpt>
+      <trkpt lat="42.520986" lon="19.814733"><ele>1968.2</ele></trkpt>
+      <trkpt lat="42.520951" lon="19.814749"><ele>1969.9</ele></trkpt>
+      <trkpt lat="42.520921" lon="19.814840"><ele>1970.4</ele></trkpt>
+      <trkpt lat="42.520872" lon="19.814902"><ele>1971.8</ele></trkpt>
+      <trkpt lat="42.520812" lon="19.814897"><ele>1974.7</ele></trkpt>
+      <trkpt lat="42.520773" lon="19.814846"><ele>1977.6</ele></trkpt>
+      <trkpt lat="42.520727" lon="19.814685"><ele>1982.9</ele></trkpt>
+      <trkpt lat="42.520709" lon="19.814519"><ele>1987.7</ele></trkpt>
+      <trkpt lat="42.520751" lon="19.814140"><ele>1990.9</ele></trkpt>
+      <trkpt lat="42.520731" lon="19.814057"><ele>1989.6</ele></trkpt>
+      <trkpt lat="42.520539" lon="19.813848"><ele>1987.3</ele></trkpt>
+      <trkpt lat="42.520332" lon="19.813845"><ele>1990.1</ele></trkpt>
+      <trkpt lat="42.520194" lon="19.813813"><ele>1991.2</ele></trkpt>
+      <trkpt lat="42.520069" lon="19.813762"><ele>1991.8</ele></trkpt>
+      <trkpt lat="42.519948" lon="19.813655"><ele>1991.0</ele></trkpt>
+      <trkpt lat="42.519899" lon="19.813556"><ele>1989.1</ele></trkpt>
+      <trkpt lat="42.519614" lon="19.813153"><ele>1989.8</ele></trkpt>
+      <trkpt lat="42.519189" lon="19.812585"><ele>1991.3</ele></trkpt>
+      <trkpt lat="42.518927" lon="19.812341"><ele>1991.5</ele></trkpt>
+      <trkpt lat="42.518773" lon="19.812260"><ele>1990.1</ele></trkpt>
+      <trkpt lat="42.518680" lon="19.812164"><ele>1989.7</ele></trkpt>
+      <trkpt lat="42.518471" lon="19.811853"><ele>1992.4</ele></trkpt>
+      <trkpt lat="42.518348" lon="19.811761"><ele>1992.7</ele></trkpt>
+      <trkpt lat="42.517768" lon="19.811472"><ele>1994.8</ele></trkpt>
+      <trkpt lat="42.517693" lon="19.811491"><ele>1995.0</ele></trkpt>
+      <trkpt lat="42.517593" lon="19.811609"><ele>1997.2</ele></trkpt>
+      <trkpt lat="42.517520" lon="19.811631"><ele>1999.4</ele></trkpt>
+      <trkpt lat="42.517433" lon="19.811594"><ele>1999.1</ele></trkpt>
+      <trkpt lat="42.517371" lon="19.811623"><ele>2000.4</ele></trkpt>
+      <trkpt lat="42.517299" lon="19.811616"><ele>2000.5</ele></trkpt>
+      <trkpt lat="42.517193" lon="19.811682"><ele>2003.7</ele></trkpt>
+      <trkpt lat="42.517001" lon="19.811713"><ele>2004.8</ele></trkpt>
+      <trkpt lat="42.516826" lon="19.811786"><ele>2009.0</ele></trkpt>
+      <trkpt lat="42.516732" lon="19.811746"><ele>2010.9</ele></trkpt>
+      <trkpt lat="42.516666" lon="19.811656"><ele>2011.6</ele></trkpt>
+      <trkpt lat="42.516532" lon="19.811610"><ele>2014.3</ele></trkpt>
+      <trkpt lat="42.516095" lon="19.811224"><ele>2018.4</ele></trkpt>
+      <trkpt lat="42.515924" lon="19.810886"><ele>2024.1</ele></trkpt>
+      <trkpt lat="42.515841" lon="19.810820"><ele>2030.0</ele></trkpt>
+      <trkpt lat="42.515597" lon="19.810737"><ele>2035.5</ele></trkpt>
+      <trkpt lat="42.515331" lon="19.810769"><ele>2041.4</ele></trkpt>
+      <trkpt lat="42.515198" lon="19.810948"><ele>2040.9</ele></trkpt>
+      <trkpt lat="42.515052" lon="19.811004"><ele>2039.9</ele></trkpt>
+      <trkpt lat="42.514922" lon="19.810876"><ele>2042.5</ele></trkpt>
+      <trkpt lat="42.514871" lon="19.810675"><ele>2042.5</ele></trkpt>
+      <trkpt lat="42.514863" lon="19.810395"><ele>2041.7</ele></trkpt>
+      <trkpt lat="42.514597" lon="19.810354"><ele>2048.2</ele></trkpt>
+      <trkpt lat="42.514448" lon="19.810230"><ele>2055.0</ele></trkpt>
+      <trkpt lat="42.514156" lon="19.809432"><ele>2067.6</ele></trkpt>
+      <trkpt lat="42.514018" lon="19.809276"><ele>2063.9</ele></trkpt>
+      <trkpt lat="42.513646" lon="19.809006"><ele>2062.2</ele></trkpt>
+      <trkpt lat="42.513489" lon="19.808967"><ele>2071.5</ele></trkpt>
+      <trkpt lat="42.513440" lon="19.808901"><ele>2072.9</ele></trkpt>
+      <trkpt lat="42.513315" lon="19.808927"><ele>2084.2</ele></trkpt>
+      <trkpt lat="42.513265" lon="19.808868"><ele>2085.7</ele></trkpt>
+      <trkpt lat="42.513193" lon="19.808845"><ele>2090.2</ele></trkpt>
+      <trkpt lat="42.513000" lon="19.808599"><ele>2099.4</ele></trkpt>
+      <trkpt lat="42.512836" lon="19.808495"><ele>2107.4</ele></trkpt>
+      <trkpt lat="42.512713" lon="19.808326"><ele>2112.2</ele></trkpt>
+      <trkpt lat="42.512425" lon="19.807859"><ele>2113.7</ele></trkpt>
+      <trkpt lat="42.512334" lon="19.807556"><ele>2111.5</ele></trkpt>
+      <trkpt lat="42.512310" lon="19.807373"><ele>2107.7</ele></trkpt>
+      <trkpt lat="42.512342" lon="19.806912"><ele>2093.1</ele></trkpt>
+      <trkpt lat="42.512328" lon="19.806341"><ele>2076.5</ele></trkpt>
+      <trkpt lat="42.512110" lon="19.805995"><ele>2067.8</ele></trkpt>
+      <trkpt lat="42.511978" lon="19.805879"><ele>2067.1</ele></trkpt>
+      <trkpt lat="42.511490" lon="19.805649"><ele>2065.7</ele></trkpt>
+      <trkpt lat="42.511383" lon="19.805579"><ele>2061.9</ele></trkpt>
+      <trkpt lat="42.511290" lon="19.805437"><ele>2052.4</ele></trkpt>
+      <trkpt lat="42.511161" lon="19.805179"><ele>2038.6</ele></trkpt>
+      <trkpt lat="42.511088" lon="19.805083"><ele>2034.7</ele></trkpt>
+      <trkpt lat="42.510819" lon="19.804874"><ele>2028.1</ele></trkpt>
+      <trkpt lat="42.510724" lon="19.804718"><ele>2023.8</ele></trkpt>
+      <trkpt lat="42.510590" lon="19.804578"><ele>2022.6</ele></trkpt>
+      <trkpt lat="42.510410" lon="19.804337"><ele>2020.6</ele></trkpt>
+      <trkpt lat="42.510283" lon="19.803991"><ele>2017.5</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>
