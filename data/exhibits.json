@@ -3,11 +3,13 @@
     "name": "Gusinjska kulturna baština",
     "tagline": {
       "me": "Muzej na dlanu",
-      "en": "A museum in your hand"
+      "en": "A museum in your hand",
+      "sq": "Muze në pëllëmbë të dorës"
     },
     "intro": {
-      "me": "Zgrade, predmeti i priče Gusinja i Prokletija u 3D. Okrenite ih prstom, držite ih na kocki ili ih postavite u prirodnoj veličini u prostor oko sebe.",
-      "en": "Buildings, objects and stories of Gusinje and Prokletije in 3D. Turn them with a finger, hold them on the cube, or place them at real size in the room around you."
+      "me": "Predmeti i priče Gusinja i Prokletija u 3D. Okrenite ih prstom, držite ih na kocki ili ih postavite u prirodnoj veličini u prostor oko sebe.",
+      "en": "Objects and stories of Gusinje and Prokletije in 3D. Turn them with a finger, hold them on the cube, or place them at real size in the room around you.",
+      "sq": "Sende dhe tregime të Gucisë dhe Bjeshkëve të Nemuna në 3D. Rrotullojini me gisht, mbajini mbi kub ose vendosini në madhësi natyrore në hapësirën përreth jush."
     }
   },
   "galleries": [
@@ -15,55 +17,52 @@
       "id": "dom",
       "name": {
         "me": "Kuća i porodica",
-        "en": "Home and family"
+        "en": "Home and family",
+        "sq": "Shtëpia dhe familja"
       },
       "description": {
         "me": "Posuđe, kolijevka, kopanja i stap: predmeti koji su držali kuću na okupu.",
-        "en": "Vessels, a cradle, a trough and a churn: the objects that kept a household going."
+        "en": "Vessels, a cradle, a trough and a churn: the objects that kept a household going.",
+        "sq": "Ena, djepi, magjja dhe tundësi: sendet që e mbanin gjallë shtëpinë."
       }
     },
     {
       "id": "polje",
       "name": {
         "me": "Polje i planina",
-        "en": "Field and mountain"
+        "en": "Field and mountain",
+        "sq": "Fusha dhe mali"
       },
       "description": {
         "me": "Kosidba, žetva, samar i kola: rad na zemlji i put do katuna.",
-        "en": "Mowing, harvest, the pack saddle and the cart: work on the land and the road to the summer pastures."
+        "en": "Mowing, harvest, the pack saddle and the cart: work on the land and the road to the summer pastures.",
+        "sq": "Kositja, korrja, samari dhe qerrja: puna në tokë dhe rruga për në bjeshkë."
       }
     },
     {
       "id": "vuna",
       "name": {
         "me": "Vuna i tkanje",
-        "en": "Wool and weaving"
+        "en": "Wool and weaving",
+        "sq": "Leshi dhe endja"
       },
       "description": {
         "me": "Od runa do ćilima: preslica i razboj.",
-        "en": "From fleece to rug: the distaff and the loom."
+        "en": "From fleece to rug: the distaff and the loom.",
+        "sq": "Nga leshi te qilimi: furka dhe vegja."
       }
     },
     {
       "id": "vijek",
       "name": {
         "me": "Dvadeseti vijek",
-        "en": "The 20th century"
+        "en": "The 20th century",
+        "sq": "Shekulli XX"
       },
       "description": {
         "me": "Telefon, vojnički šljem i drugi tragovi novog doba.",
-        "en": "A telephone, a soldier's helmet and other traces of a new age."
-      }
-    },
-    {
-      "id": "arhitektura",
-      "name": {
-        "me": "Arhitektura",
-        "en": "Architecture"
-      },
-      "description": {
-        "me": "Kule, kuće, džamije i javne zgrade Gusinja.",
-        "en": "Towers, houses, mosques and public buildings of Gusinje."
+        "en": "A telephone, a soldier's helmet and other traces of a new age.",
+        "sq": "Telefoni, helmeta ushtarake dhe gjurmë të tjera të kohës së re."
       }
     }
   ],
@@ -80,45 +79,54 @@
       },
       "name": {
         "me": "Ibrik",
-        "en": "Ibrik (metal ewer)"
+        "en": "Ibrik (metal ewer)",
+        "sq": "Ibriku"
       },
       "subtitle": {
         "me": "Posuda za vodu",
-        "en": "Water vessel"
+        "en": "Water vessel",
+        "sq": "Enë për ujë"
       },
       "description": {
         "me": "Ibrik je metalna posuda s drškom i poklopcem, u koju se sipala voda za pranje ruku i lica. U kućama Gusinja stajao je uz leđen (lavor), pa se gostu i ukućanima polivalo po rukama prije i poslije jela, a voda iz ibrika služila je i za abdest.",
-        "en": "An ibrik is a metal vessel with a handle and a lid, filled with water for washing hands and face. In Gusinje homes it stood beside a basin (leđen): water was poured over the hands of guests and family before and after meals, and it was also used for the ritual washing before prayer."
+        "en": "An ibrik is a metal vessel with a handle and a lid, filled with water for washing hands and face. In Gusinje homes it stood beside a basin (leđen): water was poured over the hands of guests and family before and after meals, and it was also used for the ritual washing before prayer.",
+        "sq": "Ibriku është enë metalike me dorezë dhe kapak, ku hidhej uji për larjen e duarve dhe të fytyrës. Në shtëpitë e Gucisë qëndronte pranë legenit: mysafirëve dhe të shtëpisë u derdhej ujë në duar para dhe pas buke, ndërsa uji i ibrikut përdorej edhe për abdes."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "posuđe, domaćinstvo",
-            "en": "household vessel"
+            "en": "household vessel",
+            "sq": "enë shtëpiake"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "metal",
-            "en": "metal"
+            "en": "metal",
+            "sq": "metal"
           }
         },
         {
           "k": {
             "me": "Visina",
-            "en": "Height"
+            "en": "Height",
+            "sq": "Lartësia"
           },
           "v": {
             "me": "oko 40 cm (procjena)",
-            "en": "about 40 cm (estimate)"
+            "en": "about 40 cm (estimate)",
+            "sq": "rreth 40 cm (vlerësim)"
           }
         }
       ]
@@ -134,45 +142,54 @@
       },
       "name": {
         "me": "Sječivo kose",
-        "en": "Scythe blade"
+        "en": "Scythe blade",
+        "sq": "Tehu i kosës"
       },
       "subtitle": {
         "me": "Alat za kosidbu",
-        "en": "Mowing tool"
+        "en": "Mowing tool",
+        "sq": "Vegël për kositje"
       },
       "description": {
         "me": "Sječivo kose, kovano od gvožđa. Nasađivalo se na dugo drveno kosište, a prije kosidbe otkivalo se čekićem na babici i oštrilo brusom koji je kosac nosio za pasom. Kosom se kosila trava za sijeno na livadama i katunima ispod Prokletija.",
-        "en": "A forged iron scythe blade. It was fixed to a long wooden shaft; before mowing it was hammered thin on a small anvil and sharpened with a whetstone the mower carried at his belt. Scythes cut the grass for hay on the meadows and summer pastures below Prokletije."
+        "en": "A forged iron scythe blade. It was fixed to a long wooden shaft; before mowing it was hammered thin on a small anvil and sharpened with a whetstone the mower carried at his belt. Scythes cut the grass for hay on the meadows and summer pastures below Prokletije.",
+        "sq": "Teh kose i farkëtuar prej hekuri. Vendosej në një bisht të gjatë druri; para kositjes rrihej me çekan mbi një kudhër të vogël dhe mprehej me gurin që kositësi e mbante në brez. Me kosë kositej bari për sanë në livadhet dhe bjeshkët nën Bjeshkët e Nemuna."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "poljoprivredni alat",
-            "en": "farming tool"
+            "en": "farming tool",
+            "sq": "vegël bujqësore"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "kovano gvožđe",
-            "en": "forged iron"
+            "en": "forged iron",
+            "sq": "hekur i farkëtuar"
           }
         },
         {
           "k": {
             "me": "Dužina",
-            "en": "Length"
+            "en": "Length",
+            "sq": "Gjatësia"
           },
           "v": {
             "me": "oko 75 cm (procjena)",
-            "en": "about 75 cm (estimate)"
+            "en": "about 75 cm (estimate)",
+            "sq": "rreth 75 cm (vlerësim)"
           }
         }
       ]
@@ -188,45 +205,54 @@
       },
       "name": {
         "me": "Kosa (drugi primjerak)",
-        "en": "Scythe (second example)"
+        "en": "Scythe (second example)",
+        "sq": "Kosa (shembulli i dytë)"
       },
       "subtitle": {
         "me": "Ručno rađena kosa",
-        "en": "Handmade scythe"
+        "en": "Handmade scythe",
+        "sq": "Kosë e punuar me dorë"
       },
       "description": {
         "me": "Još jedna kosa iz zbirke, s dugim drvenim kosištem i dvije ručice. Oblik sječiva, kosišta i ručica razlikovao se od majstora do majstora i prilagođavao se visini i ruci kosca.",
-        "en": "Another scythe from the collection, with a long wooden shaft and two grips. The shape of the blade, shaft and grips varied from smith to smith and was fitted to the height and hand of the mower."
+        "en": "Another scythe from the collection, with a long wooden shaft and two grips. The shape of the blade, shaft and grips varied from smith to smith and was fitted to the height and hand of the mower.",
+        "sq": "Një kosë tjetër nga koleksioni, me bisht të gjatë druri dhe dy doreza. Forma e tehut, e bishtit dhe e dorezave ndryshonte nga mjeshtri te mjeshtri dhe i përshtatej gjatësisë dhe dorës së kositësit."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "poljoprivredni alat",
-            "en": "farming tool"
+            "en": "farming tool",
+            "sq": "vegël bujqësore"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "drvo i kovano gvožđe",
-            "en": "wood and forged iron"
+            "en": "wood and forged iron",
+            "sq": "dru dhe hekur i farkëtuar"
           }
         },
         {
           "k": {
             "me": "Dužina",
-            "en": "Length"
+            "en": "Length",
+            "sq": "Gjatësia"
           },
           "v": {
             "me": "oko 1,65 m (procjena)",
-            "en": "about 1.65 m (estimate)"
+            "en": "about 1.65 m (estimate)",
+            "sq": "rreth 1,65 m (vlerësim)"
           }
         }
       ]
@@ -242,45 +268,54 @@
       },
       "name": {
         "me": "Srp",
-        "en": "Sickle"
+        "en": "Sickle",
+        "sq": "Drapri"
       },
       "subtitle": {
         "me": "Alat za žetvu",
-        "en": "Harvest tool"
+        "en": "Harvest tool",
+        "sq": "Vegël për korrje"
       },
       "description": {
         "me": "Srpom se žnjelo žito, rukovet po rukovet, a snopovi su se vezali i slagali u krstine da se osuše. Žetva je bila zajednički posao porodice i komšija.",
-        "en": "The sickle was used to reap grain one handful at a time; the sheaves were tied and stacked to dry. Harvest was shared work for the family and the neighbours."
+        "en": "The sickle was used to reap grain one handful at a time; the sheaves were tied and stacked to dry. Harvest was shared work for the family and the neighbours.",
+        "sq": "Me drapër korrej drithi, grusht pas grushti, ndërsa duajt lidheshin dhe vendoseshin kapica që të thaheshin. Korrja ishte punë e përbashkët e familjes dhe e fqinjëve."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "poljoprivredni alat",
-            "en": "farming tool"
+            "en": "farming tool",
+            "sq": "vegël bujqësore"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "drvo i kovano gvožđe",
-            "en": "wood and forged iron"
+            "en": "wood and forged iron",
+            "sq": "dru dhe hekur i farkëtuar"
           }
         },
         {
           "k": {
             "me": "Dužina",
-            "en": "Length"
+            "en": "Length",
+            "sq": "Gjatësia"
           },
           "v": {
             "me": "oko 45 cm (procjena)",
-            "en": "about 45 cm (estimate)"
+            "en": "about 45 cm (estimate)",
+            "sq": "rreth 45 cm (vlerësim)"
           }
         }
       ]
@@ -296,45 +331,54 @@
       },
       "name": {
         "me": "Samar",
-        "en": "Pack saddle (samar)"
+        "en": "Pack saddle (samar)",
+        "sq": "Samari"
       },
       "subtitle": {
         "me": "Tovarno sedlo za konja",
-        "en": "Pack saddle for a horse"
+        "en": "Pack saddle for a horse",
+        "sq": "Shalë ngarkese për kalin"
       },
       "description": {
         "me": "Samar je drveno tovarno sedlo koje se stavljalo na konja ili mazgu. Po strmim planinskim stazama, gdje kola nijesu mogla proći, na samaru se prenosilo sve: drva, sijeno, žito i so, sir i kajmak s katuna.",
-        "en": "A samar is a wooden pack saddle for a horse or mule. On steep mountain paths where no cart could pass, everything travelled on it: firewood, hay, grain and salt, and cheese and kajmak brought down from the summer pastures."
+        "en": "A samar is a wooden pack saddle for a horse or mule. On steep mountain paths where no cart could pass, everything travelled on it: firewood, hay, grain and salt, and cheese and kajmak brought down from the summer pastures.",
+        "sq": "Samari është shalë druri për ngarkesë që i vihej kalit ose mushkës. Nëpër shtigjet e pjerrëta malore, ku qerrja nuk kalonte, mbi samar bartej gjithçka: druri, bari, drithi dhe kripa, djathi dhe kajmaku nga bjeshka."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "prevoz, stočarstvo",
-            "en": "transport, herding"
+            "en": "transport, herding",
+            "sq": "transport, blegtori"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "drvo",
-            "en": "wood"
+            "en": "wood",
+            "sq": "dru"
           }
         },
         {
           "k": {
             "me": "Dužina",
-            "en": "Length"
+            "en": "Length",
+            "sq": "Gjatësia"
           },
           "v": {
             "me": "oko 70 cm (procjena)",
-            "en": "about 70 cm (estimate)"
+            "en": "about 70 cm (estimate)",
+            "sq": "rreth 70 cm (vlerësim)"
           }
         }
       ]
@@ -349,50 +393,60 @@
         "long": 1.0,
         "label": {
           "me": "Promjer",
-          "en": "Diameter"
+          "en": "Diameter",
+          "sq": "Diametri"
         }
       },
       "name": {
         "me": "Točak",
-        "en": "Cart wheel"
+        "en": "Cart wheel",
+        "sq": "Rrota"
       },
       "subtitle": {
         "me": "Točak drvenih kola",
-        "en": "Wheel of a wooden cart"
+        "en": "Wheel of a wooden cart",
+        "sq": "Rrotë e qerres prej druri"
       },
       "description": {
         "me": "Drveni točak sa žbicama, glavčinom i obručem bio je djelo vještog kolara, a gvozdeni obruč navlačio je kovač dok je bio vruć. Kola su se koristila u ravnici oko Gusinja, za sijeno, drva i odlazak na pazar.",
-        "en": "A wooden wheel with spokes, a hub and a rim was the work of a skilled wheelwright; the iron tyre was fitted by the smith while still hot. Carts were used on the flat land around Gusinje for hay, firewood and trips to the market."
+        "en": "A wooden wheel with spokes, a hub and a rim was the work of a skilled wheelwright; the iron tyre was fitted by the smith while still hot. Carts were used on the flat land around Gusinje for hay, firewood and trips to the market.",
+        "sq": "Rrota prej druri me rreze, bucelë dhe rreth ishte vepër e një mjeshtri të aftë, ndërsa rrethin e hekurt ia vinte farkëtari derisa ishte ende i nxehtë. Qerret përdoreshin në fushën rreth Gucisë për sanë, dru dhe për të shkuar në pazar."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "prevoz",
-            "en": "transport"
+            "en": "transport",
+            "sq": "transport"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "drvo i gvožđe",
-            "en": "wood and iron"
+            "en": "wood and iron",
+            "sq": "dru dhe hekur"
           }
         },
         {
           "k": {
             "me": "Promjer",
-            "en": "Diameter"
+            "en": "Diameter",
+            "sq": "Diametri"
           },
           "v": {
             "me": "oko 1 m (procjena)",
-            "en": "about 1 m (estimate)"
+            "en": "about 1 m (estimate)",
+            "sq": "rreth 1 m (vlerësim)"
           }
         }
       ]
@@ -408,45 +462,54 @@
       },
       "name": {
         "me": "Kolijevka",
-        "en": "Cradle"
+        "en": "Cradle",
+        "sq": "Djepi"
       },
       "subtitle": {
         "me": "Drvena kolijevka za ljuljanje",
-        "en": "Wooden rocking cradle"
+        "en": "Wooden rocking cradle",
+        "sq": "Djep druri që lëkundet"
       },
       "description": {
         "me": "Drvena kolijevka na lučnim nogama, pa se mogla ljuljati. Stranice su ukrašene rezbarijom, a dijete je ležalo na vezenoj posteljini. Kolijevka se često prenosila s generacije na generaciju.",
-        "en": "A wooden cradle on curved runners so it could be rocked. The ends are decorated with carving, and the baby lay on embroidered bedding. Cradles were often handed down from one generation to the next."
+        "en": "A wooden cradle on curved runners so it could be rocked. The ends are decorated with carving, and the baby lay on embroidered bedding. Cradles were often handed down from one generation to the next.",
+        "sq": "Djep druri mbi këmbë të harkuara, që të mund të lëkundej. Anët janë zbukuruar me gdhendje, ndërsa fëmija flinte në shtroje të qëndisura. Djepi shpesh trashëgohej brez pas brezi."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "namještaj, porodica",
-            "en": "furniture, family"
+            "en": "furniture, family",
+            "sq": "orendi, familja"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "drvo, tekstil",
-            "en": "wood, textile"
+            "en": "wood, textile",
+            "sq": "dru, tekstil"
           }
         },
         {
           "k": {
             "me": "Dužina",
-            "en": "Length"
+            "en": "Length",
+            "sq": "Gjatësia"
           },
           "v": {
             "me": "oko 95 cm (procjena)",
-            "en": "about 95 cm (estimate)"
+            "en": "about 95 cm (estimate)",
+            "sq": "rreth 95 cm (vlerësim)"
           }
         }
       ]
@@ -462,45 +525,54 @@
       },
       "name": {
         "me": "Kopanja",
-        "en": "Wooden trough (kopanja)"
+        "en": "Wooden trough (kopanja)",
+        "sq": "Magjja (kopanja)"
       },
       "subtitle": {
         "me": "Korito izdubljeno iz drveta",
-        "en": "Trough carved from wood"
+        "en": "Trough carved from wood",
+        "sq": "Govatë e gdhendur nga druri"
       },
       "description": {
         "me": "Kopanja je duguljasto korito izdubljeno iz jednog komada drveta. U kući je služila za miješenje tijesta, pranje i druge poslove, a slične posude koristile su se i za hranjenje stoke.",
-        "en": "A kopanja is a long trough hollowed out of a single piece of wood. In the house it was used for kneading dough, washing and other chores, and similar troughs were used to feed livestock."
+        "en": "A kopanja is a long trough hollowed out of a single piece of wood. In the house it was used for kneading dough, washing and other chores, and similar troughs were used to feed livestock.",
+        "sq": "Kopanja është govatë e zgjatur, e gdhendur nga një copë e vetme druri. Në shtëpi përdorej për gatimin e brumit, për larje dhe punë të tjera, ndërsa enë të ngjashme përdoreshin edhe për ushqimin e bagëtisë."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "domaćinstvo",
-            "en": "household"
+            "en": "household",
+            "sq": "shtëpiake"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "drvo",
-            "en": "wood"
+            "en": "wood",
+            "sq": "dru"
           }
         },
         {
           "k": {
             "me": "Dužina",
-            "en": "Length"
+            "en": "Length",
+            "sq": "Gjatësia"
           },
           "v": {
             "me": "oko 1 m (procjena)",
-            "en": "about 1 m (estimate)"
+            "en": "about 1 m (estimate)",
+            "sq": "rreth 1 m (vlerësim)"
           }
         }
       ]
@@ -516,45 +588,54 @@
       },
       "name": {
         "me": "Mlatilica",
-        "en": "Butter churn"
+        "en": "Butter churn",
+        "sq": "Tundësi"
       },
       "subtitle": {
         "me": "Posuda za mućenje maslaca",
-        "en": "Vessel for making butter"
+        "en": "Vessel for making butter",
+        "sq": "Enë për bërjen e gjalpit"
       },
       "description": {
         "me": "Visoka drvena posuda od dužica stegnutih obručima, s motkom koja prolazi kroz poklopac. Mlijeko ili pavlaka mutili su se pomjeranjem motke gore-dolje dok se ne izdvoji maslac, jedan od glavnih proizvoda stočarskih domaćinstava.",
-        "en": "A tall wooden vessel made of staves held by hoops, with a plunger passing through the lid. Milk or cream was churned by moving the plunger up and down until the butter separated, one of the main products of herding households."
+        "en": "A tall wooden vessel made of staves held by hoops, with a plunger passing through the lid. Milk or cream was churned by moving the plunger up and down until the butter separated, one of the main products of herding households.",
+        "sq": "Enë e lartë druri prej dogash të shtrënguara me rrathë, me një shkop që kalon nëpër kapak. Qumështi ose ajka tundeshin duke e lëvizur shkopin lart e poshtë derisa ndahej gjalpi, një nga prodhimet kryesore të shtëpive blegtorale."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "domaćinstvo, mljekarstvo",
-            "en": "household, dairy"
+            "en": "household, dairy",
+            "sq": "shtëpiake, bulmetore"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "drvo, metalni obruči",
-            "en": "wood, metal hoops"
+            "en": "wood, metal hoops",
+            "sq": "dru, rrathë metalikë"
           }
         },
         {
           "k": {
             "me": "Visina",
-            "en": "Height"
+            "en": "Height",
+            "sq": "Lartësia"
           },
           "v": {
             "me": "oko 90 cm (procjena)",
-            "en": "about 90 cm (estimate)"
+            "en": "about 90 cm (estimate)",
+            "sq": "rreth 90 cm (vlerësim)"
           }
         }
       ]
@@ -570,35 +651,42 @@
       },
       "name": {
         "me": "Cijev za vodu",
-        "en": "Water pipe"
+        "en": "Water pipe",
+        "sq": "Gypi i ujit"
       },
       "subtitle": {
         "me": "Dio starog vodovoda",
-        "en": "Part of an old water supply"
+        "en": "Part of an old water supply",
+        "sq": "Pjesë e një ujësjellësi të vjetër"
       },
       "description": {
         "me": "Dio stare cijevi kojom se voda dovodila sa izvora do česmi i kuća. Cijevi su se nastavljale jedna na drugu i polagale u zemlju.",
-        "en": "A section of an old pipe that carried water from a spring to fountains and houses. The pipes were joined end to end and laid in the ground."
+        "en": "A section of an old pipe that carried water from a spring to fountains and houses. The pipes were joined end to end and laid in the ground.",
+        "sq": "Pjesë e një gypi të vjetër që e sillte ujin nga burimi te çezmat dhe shtëpitë. Gypat lidheshin njëri pas tjetrit dhe shtroheshin në tokë."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "vodovod",
-            "en": "water supply"
+            "en": "water supply",
+            "sq": "ujësjellës"
           }
         },
         {
           "k": {
             "me": "Dužina",
-            "en": "Length"
+            "en": "Length",
+            "sq": "Gjatësia"
           },
           "v": {
             "me": "oko 1 m (procjena)",
-            "en": "about 1 m (estimate)"
+            "en": "about 1 m (estimate)",
+            "sq": "rreth 1 m (vlerësim)"
           }
         }
       ]
@@ -614,45 +702,54 @@
       },
       "name": {
         "me": "Preslica",
-        "en": "Distaff (preslica)"
+        "en": "Distaff (preslica)",
+        "sq": "Furka"
       },
       "subtitle": {
         "me": "Za predenje vune",
-        "en": "For spinning wool"
+        "en": "For spinning wool",
+        "sq": "Për tjerrjen e leshit"
       },
       "description": {
         "me": "Na račvasti vrh preslice stavljala se očešljana vuna, a donja daska držala je preslicu uspravno. Prelja je izvlačila vlakna i vretenom ih uvijala u pređu, od koje su se tkali ćilimi, ponjave i odjeća.",
-        "en": "Combed wool was placed on the forked top of the distaff, and the board at the bottom held it upright. The spinner drew out the fibres and twisted them into yarn with a spindle; the yarn was woven into rugs, blankets and clothing."
+        "en": "Combed wool was placed on the forked top of the distaff, and the board at the bottom held it upright. The spinner drew out the fibres and twisted them into yarn with a spindle; the yarn was woven into rugs, blankets and clothing.",
+        "sq": "Në majën me degë të furkës vihej leshi i krehur, ndërsa dërrasa poshtë e mbante furkën drejt. Tjerrësja i tërhiqte fijet dhe me boshtin i përdridhte në fill, prej të cilit endeshin qilima, mbulesa dhe veshje."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "predenje",
-            "en": "spinning"
+            "en": "spinning",
+            "sq": "tjerrje"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "drvo",
-            "en": "wood"
+            "en": "wood",
+            "sq": "dru"
           }
         },
         {
           "k": {
             "me": "Visina",
-            "en": "Height"
+            "en": "Height",
+            "sq": "Lartësia"
           },
           "v": {
             "me": "oko 1 m (procjena)",
-            "en": "about 1 m (estimate)"
+            "en": "about 1 m (estimate)",
+            "sq": "rreth 1 m (vlerësim)"
           }
         }
       ]
@@ -668,45 +765,54 @@
       },
       "name": {
         "me": "Razboj",
-        "en": "Loom (razboj)"
+        "en": "Loom (razboj)",
+        "sq": "Vegja"
       },
       "subtitle": {
         "me": "Uspravni tkalački stan",
-        "en": "Upright loom"
+        "en": "Upright loom",
+        "sq": "Vegjë vertikale për endje"
       },
       "description": {
         "me": "Na uspravnom razboju tkali su se ćilimi, ponjave i torbe. Osnova se zatezala između gornje i donje grede, a tkalja je potkom provlačila vunu u bojama i stvarala šare koje su se prenosile s majke na kćer.",
-        "en": "Rugs, blankets and bags were woven on the upright loom. The warp was stretched between the top and bottom beams, and the weaver passed coloured wool through it to make patterns handed down from mother to daughter."
+        "en": "Rugs, blankets and bags were woven on the upright loom. The warp was stretched between the top and bottom beams, and the weaver passed coloured wool through it to make patterns handed down from mother to daughter.",
+        "sq": "Në vegjën vertikale endeshin qilima, mbulesa dhe trasta. Fijet e gjata tendoseshin mes traut të sipërm dhe të poshtëm, ndërsa endësja fuste nëpër to leshin me ngjyra dhe krijonte motive që kalonin nga nëna te vajza."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "tkanje",
-            "en": "weaving"
+            "en": "weaving",
+            "sq": "endje"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "drvo, vuna",
-            "en": "wood, wool"
+            "en": "wood, wool",
+            "sq": "dru, lesh"
           }
         },
         {
           "k": {
             "me": "Visina",
-            "en": "Height"
+            "en": "Height",
+            "sq": "Lartësia"
           },
           "v": {
             "me": "oko 1,6 m (procjena)",
-            "en": "about 1.6 m (estimate)"
+            "en": "about 1.6 m (estimate)",
+            "sq": "rreth 1,6 m (vlerësim)"
           }
         }
       ]
@@ -722,45 +828,54 @@
       },
       "name": {
         "me": "Telefon",
-        "en": "Telephone"
+        "en": "Telephone",
+        "sq": "Telefoni"
       },
       "subtitle": {
         "me": "Stari stoni telefon",
-        "en": "Old candlestick telephone"
+        "en": "Old candlestick telephone",
+        "sq": "Telefon i vjetër tavoline"
       },
       "description": {
         "me": "Stoni telefon s uspravnim stalkom, slušalicom na kuki i brojčanikom. Ovakvi aparati pojavili su se početkom 20. vijeka i bili su rijetkost, obično u poštama, opštinama i rijetkim kućama.",
-        "en": "A candlestick telephone with an upright stand, an earpiece on a hook and a dial. Phones like this appeared in the early 20th century and were rare, usually found in post offices, town halls and a few homes."
+        "en": "A candlestick telephone with an upright stand, an earpiece on a hook and a dial. Phones like this appeared in the early 20th century and were rare, usually found in post offices, town halls and a few homes.",
+        "sq": "Telefon tavoline me këmbëz vertikale, dëgjuese në grep dhe disk për numrat. Aparate të tilla u shfaqën në fillim të shekullit XX dhe ishin të rralla, zakonisht në posta, komuna dhe në pak shtëpi."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "komunikacija",
-            "en": "communication"
+            "en": "communication",
+            "sq": "komunikim"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "metal, bakelit",
-            "en": "metal, Bakelite"
+            "en": "metal, Bakelite",
+            "sq": "metal, bakelit"
           }
         },
         {
           "k": {
             "me": "Visina",
-            "en": "Height"
+            "en": "Height",
+            "sq": "Lartësia"
           },
           "v": {
             "me": "oko 33 cm (procjena)",
-            "en": "about 33 cm (estimate)"
+            "en": "about 33 cm (estimate)",
+            "sq": "rreth 33 cm (vlerësim)"
           }
         }
       ]
@@ -776,90 +891,54 @@
       },
       "name": {
         "me": "Šljem",
-        "en": "Steel helmet"
+        "en": "Steel helmet",
+        "sq": "Helmeta"
       },
       "subtitle": {
         "me": "Vojnički čelični šljem",
-        "en": "Soldier's steel helmet"
+        "en": "Soldier's steel helmet",
+        "sq": "Helmetë ushtarake prej çeliku"
       },
       "description": {
         "me": "Čelični vojnički šljem iz prve polovine 20. vijeka, s karakterističnim obodom koji štiti vrat i uši. Ovakvi predmeti svjedoče o ratovima koji su prošli i kroz ovaj kraj.",
-        "en": "A steel soldier's helmet from the first half of the 20th century, with the characteristic flared rim that protects the neck and ears. Objects like this bear witness to the wars that also passed through this region."
+        "en": "A steel soldier's helmet from the first half of the 20th century, with the characteristic flared rim that protects the neck and ears. Objects like this bear witness to the wars that also passed through this region.",
+        "sq": "Helmetë ushtarake prej çeliku nga gjysma e parë e shekullit XX, me buzën karakteristike që mbron qafën dhe veshët. Sende të tilla dëshmojnë për luftërat që kaluan edhe nëpër këtë krahinë."
       },
       "facts": [
         {
           "k": {
             "me": "Vrsta",
-            "en": "Type"
+            "en": "Type",
+            "sq": "Lloji"
           },
           "v": {
             "me": "vojna oprema",
-            "en": "military equipment"
+            "en": "military equipment",
+            "sq": "pajisje ushtarake"
           }
         },
         {
           "k": {
             "me": "Materijal",
-            "en": "Material"
+            "en": "Material",
+            "sq": "Materiali"
           },
           "v": {
             "me": "čelik",
-            "en": "steel"
+            "en": "steel",
+            "sq": "çelik"
           }
         },
         {
           "k": {
             "me": "Dužina",
-            "en": "Length"
+            "en": "Length",
+            "sq": "Gjatësia"
           },
           "v": {
             "me": "oko 30 cm (procjena)",
-            "en": "about 30 cm (estimate)"
-          }
-        }
-      ]
-    },
-    {
-      "id": "kula-rasica",
-      "gallery": "arhitektura",
-      "model": "models/kula-rasica.glb",
-      "thumb": "thumbs/kula-rasica.png",
-      "placeholder": true,
-      "kind": "building",
-      "size": {
-        "h": 17.5
-      },
-      "name": {
-        "me": "Kula Rašića",
-        "en": "Rašić Tower"
-      },
-      "subtitle": {
-        "me": "Gusinje",
-        "en": "Gusinje"
-      },
-      "description": {
-        "me": "Ovo je privremeni, pojednostavljeni model za isprobavanje aplikacije. Detaljan 3D model kule i njena priča dodaju se uskoro.",
-        "en": "This is a temporary, simplified model for trying out the app. The detailed 3D model of the tower and its story are coming soon."
-      },
-      "facts": [
-        {
-          "k": {
-            "me": "Mjesto",
-            "en": "Place"
-          },
-          "v": {
-            "me": "Gusinje",
-            "en": "Gusinje"
-          }
-        },
-        {
-          "k": {
-            "me": "Visina",
-            "en": "Height"
-          },
-          "v": {
-            "me": "oko 17,5 m",
-            "en": "about 17.5 m"
+            "en": "about 30 cm (estimate)",
+            "sq": "rreth 30 cm (vlerësim)"
           }
         }
       ]

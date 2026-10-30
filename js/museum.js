@@ -4,15 +4,16 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { STR, detectLang, L } from './i18n.js';
+import { STR, detectLang, L, HTML_LANG, NUM_LOCALE } from './i18n.js';
 
-const VERSION = '0.3';
+const VERSION = '0.4';
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const store = { get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } } };
 
 let lang = store.get('gkb.lang', null) || detectLang();
+if (!STR[lang]) lang = 'me';
 const t = k => STR[lang][k] ?? STR.me[k] ?? k;
 const tx = o => L(o, lang);
 let DATA = null;
@@ -37,7 +38,7 @@ async function init() {
 }
 function setLang(l) { lang = l; store.set('gkb.lang', l); paintLang(); route(); }
 function paintLang() {
-  document.documentElement.lang = lang === 'en' ? 'en' : 'sr-ME';
+  document.documentElement.lang = HTML_LANG[lang] || 'sr-ME';
   for (const b of document.querySelectorAll('.lang button')) b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
   $('#back').setAttribute('aria-label', t('back'));
 }
@@ -121,7 +122,7 @@ function sizeChip(e) {
   return '';
 }
 function fmtSize(m) {
-  if (m >= 1) return (Math.round(m * 10) / 10).toLocaleString(lang === 'en' ? 'en' : 'sr-Latn-ME') + ' m';
+  if (m >= 1) return (Math.round(m * 10) / 10).toLocaleString(NUM_LOCALE[lang] || 'sr-Latn-ME') + ' m';
   return Math.round(m * 100) + ' cm';
 }
 

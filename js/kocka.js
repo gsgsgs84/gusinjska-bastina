@@ -5,12 +5,13 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { Tracker, projectedBox } from './cv/tracker.js';
 import { OneEuro, matToQuat, mulv } from './cv/pose.js';
-import { STR, detectLang, L } from './i18n.js';
+import { STR, detectLang, L, HTML_LANG } from './i18n.js';
 
 let lang = (() => { try { return JSON.parse(localStorage.getItem('gkb.lang')); } catch { return null; } })() || detectLang();
 const T_ = k => STR[lang][k] ?? STR.me[k] ?? k;
 for (const el of document.querySelectorAll('[data-t]')) el.textContent = T_(el.dataset.t);
-document.documentElement.lang = lang === 'en' ? 'en' : 'sr-ME';
+if (!STR[lang]) lang = 'me';
+document.documentElement.lang = HTML_LANG[lang] || 'sr-ME';
 let showList = [];   // showcase: exhibit ids by cube side
 
 const VERSION = '0.1';
@@ -99,21 +100,17 @@ async function start() {
   err.style.display = 'none';
   const sensorP = enableSensors();          // must run inside the tap (iOS permission prompt)
   if (!navigator.mediaDevices?.getUserMedia) {
-    return fail('This browser cannot open the camera here. Open the page in Safari (iPhone) or Chrome (Android), over https.');
+    return fail(T_('c_errApi'));
   }
   $('#go').disabled = true; $('#go').textContent = '…';
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: false,
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } } });
-    video.srcObject = stream;
-    await video.play();
+    await openCamera(settings.camId || null);
   } catch (e) {
     $('#go').disabled = false; $('#go').textContent = T_('c_start');
     const name = e && e.name;
-    return fail(name === 'NotAllowedError' ? 'Camera access was blocked. Allow the camera for this site in the browser settings and try again.'
-      : name === 'NotFoundError' ? 'No camera was found on this device.'
-      : 'The camera could not start (' + (e && e.message || e) + '). If you opened this link inside another app, open it in Safari or Chrome instead.');
+    return fail(name === 'NotAllowedError' ? T_('c_errBlocked') : name === 'NotFoundError' ? T_('c_errNoCam') : T_('c_errStart') + ' (' + (e && e.message || e) + ')');
   }
+  listCameras();
   await sensorP;
   videoTex = new THREE.CanvasTexture(disp);
   videoTex.colorSpace = THREE.SRGBColorSpace;
@@ -124,6 +121,65 @@ async function start() {
   keepAwake();
   resize();
   runLoop();
+}
+// ---------------- camera: full 4:3 sensor image, zoom reset to 1x, choice of back camera ----------------
+const cam = { stream: null, track: null, zoom: 1, caps: null, label: '', list: [] };
+async function openCamera(deviceId) {
+  if (cam.stream) for (const tr of cam.stream.getTracks()) tr.stop();
+  // 4:3 is the sensor's native shape on almost every phone; 16:9 requests are served by cropping (= zoomed in).
+  const v = { width: { ideal: 1440 }, height: { ideal: 1080 }, aspectRatio: { ideal: 4 / 3 }, frameRate: { ideal: 30 } };
+  if (deviceId) v.deviceId = { exact: deviceId }; else v.facingMode = { ideal: 'environment' };
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: v }); }
+  catch (e) {
+    if (!deviceId || e.name === 'NotAllowedError') throw e;
+    delete v.deviceId; v.facingMode = { ideal: 'environment' };          // saved camera vanished: fall back
+    stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: v });
+  }
+  cam.stream = stream; cam.track = stream.getVideoTracks()[0];
+  cam.caps = cam.track.getCapabilities ? cam.track.getCapabilities() : {};
+  cam.label = cam.track.label || '';
+  cam.zoom = 1;
+  if (cam.caps.zoom) {
+    const want = clamp(settings.zoom || 1, cam.caps.zoom.min, cam.caps.zoom.max);
+    try { await cam.track.applyConstraints({ advanced: [{ zoom: want }] }); } catch { /* not supported */ }
+    cam.zoom = (cam.track.getSettings().zoom) || want;
+  }
+  video.srcObject = stream;
+  await video.play();
+  if (lastFrameT) updateProjection();
+}
+async function listCameras() {
+  try {
+    const all = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
+    const back = all.filter(d => !/front|user|prednj|selfie/i.test(d.label));
+    cam.list = back.length ? back : all;
+  } catch { cam.list = []; }
+  paintCameraUI();
+}
+function paintCameraUI() {
+  const row = $('#rowCam'), seg = $('#segCam');
+  if (row && cam.list.length > 1) {
+    row.hidden = false; seg.innerHTML = '';
+    const cur = cam.track && cam.track.getSettings().deviceId;
+    cam.list.forEach((d, i) => {
+      const b = document.createElement('button'); b.textContent = String(i + 1); b.title = d.label || '';
+      b.setAttribute('aria-pressed', String(d.deviceId === cur));
+      b.onclick = async () => { settings.camId = d.deviceId; saveSettings(); await openCamera(d.deviceId); paintCameraUI(); };
+      seg.append(b);
+    });
+  }
+  const zr = $('#rowZoom'), rz = $('#rngZoom');
+  if (zr && cam.caps && cam.caps.zoom && cam.caps.zoom.max > cam.caps.zoom.min) {
+    zr.hidden = false;
+    rz.min = cam.caps.zoom.min; rz.max = Math.min(cam.caps.zoom.max, 3); rz.step = cam.caps.zoom.step || 0.1; rz.value = cam.zoom;
+    $('#zoomVal').textContent = (+cam.zoom).toFixed(1) + '×';
+    rz.oninput = async () => {
+      const z = +rz.value; settings.zoom = z; saveSettings();
+      try { await cam.track.applyConstraints({ advanced: [{ zoom: z }] }); cam.zoom = cam.track.getSettings().zoom || z; } catch { /* ignore */ }
+      $('#zoomVal').textContent = (+cam.zoom).toFixed(1) + '×'; updateProjection();
+    };
+  } else if (zr) zr.hidden = true;
 }
 function fail(msg) { const e = $('#err'); e.textContent = msg; e.style.display = 'block'; }
 
@@ -344,7 +400,7 @@ function resize() {
 }
 function intrinsics() {
   const vw = video.videoWidth, vh = video.videoHeight, L = Math.max(vw, vh);
-  const f = (L / 2) / Math.tan(settings.fov * D2R / 2);
+  const f = (L / 2) / Math.tan(settings.fov * D2R / 2) * (cam.zoom || 1);
   return { fx: f, fy: f, cx: vw / 2, cy: vh / 2 };
 }
 function updateProjection() {
@@ -627,9 +683,9 @@ function drawDebug() {
   const lines = [
     `fps ${fps.toFixed(0)}  track ${procMs.toFixed(1)} ms  ${region ? region.mode : ''} r${region ? region.radius : ''}`,
     `capture ${timing.capture.toFixed(1)}  read ${timing.read.toFixed(1)}  cv ${timing.track.toFixed(1)}  draw ${timing.render.toFixed(1)} ms`,
-    `video ${view.vw}x${view.vh} ${view.mode || ''}  screen ${view.W}x${view.H}  proc ${PROC}  fov ${settings.fov}°  markers ${lastRes.markers.length}`,
+    `video ${view.vw}x${view.vh} zoom ${(+cam.zoom).toFixed(2)} ${view.mode || ''}  screen ${view.W}x${view.H}  proc ${PROC}  fov ${settings.fov}°  markers ${lastRes.markers.length}`,
     p ? `${active}: n ${p.n}  rms ${p.rms.toFixed(2)} px  z ${p.t[2].toFixed(0)} mm  base ${T.cube.base}` : 'no pose',
-    `tilt sensor ${sensor.ok ? 'on' : 'off'}`,
+    `tilt sensor ${sensor.ok ? 'on' : 'off'}  cam ${cam.list.length}: ${(cam.label || '').slice(0, 28)}`,
   ];
   const lh = 16 * (window.devicePixelRatio || 1), y0 = 64 * (window.devicePixelRatio || 1) + lh;
   dbg.fillStyle = 'rgba(0,0,0,0.55)'; dbg.fillRect(8, y0 - lh, Math.min(W - 16, 420 * (window.devicePixelRatio || 1)), lh * (lines.length + 0.6));

@@ -1,6 +1,10 @@
-// Interface text: Montenegrin (latinica) and English. Exhibit texts live in data/exhibits.json.
+// Interface text: Montenegrin (latinica), English and Albanian. Exhibit texts live in data/exhibits.json.
 export const STR = {
   me: {
+    c_cam: 'Kamera', c_cam2: 'Ako je slika previše uvećana, izaberite drugu kameru', c_zoom: 'Zum kamere',
+    c_errApi: 'Ovaj preglednik ovdje ne može otvoriti kameru. Otvorite stranicu u Chromeu (Android) ili Safariju (iPhone).',
+    c_errBlocked: 'Pristup kameri je blokiran. Dozvolite kameru za ovu stranicu u podešavanjima preglednika i pokušajte ponovo.',
+    c_errNoCam: 'Na ovom uređaju nije pronađena kamera.', c_errStart: 'Kamera se nije pokrenula. Ako ste link otvorili u drugoj aplikaciji, otvorite ga u Chromeu ili Safariju.',
     c_title: 'AR kocka', c_lead: 'Držite odštampanu kocku ispred telefona (ili položite papirnu karticu na sto). Eksponat se pojavi na njoj i okreće se zajedno s njom.',
     c_start: 'Uključi kameru', c_pdf: 'Papirna kartica i kocka (PDF)', c_3mf: 'Kocka za 3D štampu (3MF)', c_stl: 'Kocka – STL (zip)',
     c_note: 'Radi u Chromeu na Androidu i Safariju na iPhoneu. Pomaže dobro, ravnomjerno svjetlo bez odsjaja na kocki. Slika s kamere se obrađuje samo na telefonu.',
@@ -36,6 +40,10 @@ export const STR = {
     xrPlaced: 'Obiđite ga! Dodirnite ponovo da ga pomjerite.', xrRealSize: 'Prirodna veličina', xrModelSize: 'Maketa 1:50',
   },
   en: {
+    c_cam: 'Camera', c_cam2: 'If the picture is too zoomed in, choose another camera', c_zoom: 'Camera zoom',
+    c_errApi: 'This browser cannot open the camera here. Open the page in Chrome (Android) or Safari (iPhone).',
+    c_errBlocked: 'Camera access was blocked. Allow the camera for this site in the browser settings and try again.',
+    c_errNoCam: 'No camera was found on this device.', c_errStart: 'The camera did not start. If you opened this link inside another app, open it in Chrome or Safari instead.',
     c_title: 'AR cube', c_lead: 'Hold the printed cube (or lay the paper card on a table) in front of your phone. The exhibit appears on it and turns with it.',
     c_start: 'Start camera', c_pdf: 'Paper card and cube (PDF)', c_3mf: 'Cube for 3D printing (3MF)', c_stl: 'Cube – STL (zip)',
     c_note: 'Works in Chrome on Android and Safari on iPhone. Good, even light without glare on the cube helps. The camera image is processed only on your phone.',
@@ -70,9 +78,50 @@ export const STR = {
     xrFind: 'Move the phone slowly so it finds the floor or a table…', xrTap: 'Tap the screen to place the exhibit',
     xrPlaced: 'Walk around it! Tap again to move it.', xrRealSize: 'Real size', xrModelSize: 'Model 1:50',
   },
+  sq: {
+    c_cam: 'Kamera', c_cam2: 'Nëse imazhi është shumë i zmadhuar, zgjidhni një kamerë tjetër', c_zoom: 'Zmadhimi i kamerës',
+    c_errApi: 'Ky shfletues nuk mund ta hapë kamerën këtu. Hapeni faqen në Chrome (Android) ose Safari (iPhone).',
+    c_errBlocked: 'Qasja në kamerë u bllokua. Lejojeni kamerën për këtë faqe në cilësimet e shfletuesit dhe provoni përsëri.',
+    c_errNoCam: 'Në këtë pajisje nuk u gjet asnjë kamerë.', c_errStart: 'Kamera nuk u ndez. Nëse e keni hapur lidhjen brenda një aplikacioni tjetër, hapeni në Chrome ose Safari.',
+    c_title: 'Kubi AR', c_lead: 'Mbajeni kubin e printuar para telefonit (ose vendoseni kartën prej letre mbi tavolinë). Eksponati shfaqet mbi të dhe rrotullohet bashkë me të.',
+    c_start: 'Ndize kamerën', c_pdf: 'Karta dhe kubi prej letre (PDF)', c_3mf: 'Kubi për printim 3D (3MF)', c_stl: 'Kubi – STL (zip)',
+    c_note: 'Funksionon në Chrome në Android dhe në Safari në iPhone. Ndihmon drita e mirë dhe e njëtrajtshme, pa shkëlqim mbi kub. Imazhi i kamerës përpunohet vetëm në telefon.',
+    c_museum: '← Kthehu në muze', c_hint: 'Drejtojeni kamerën nga kubi', c_back: '← Muzeu', c_turn: '⟳ Rrotullo', c_face: 'Drejt meje', c_about: 'Rreth eksponatit',
+    c_settings: 'Cilësimet', c_base: 'Baza nën eksponat', c_base2: 'E mbulon kubin në imazh', c_stone: 'Gur', c_grass: 'Bar', c_off: 'Pa bazë',
+    c_view: 'Pamja e kamerës', c_view2: '„E plotë" shfaq tërë imazhin, prandaj kubi duket më i vogël', c_auto: 'Auto', c_whole: 'E plotë', c_fill: 'Mbush',
+    c_size: 'Madhësia e eksponatit', c_upright: 'Eksponati gjithmonë drejt', c_upright2: 'Kalon në anën e kubit që shikon lart (përdor sensorin e pjerrësisë)',
+    c_shadows: 'Hijet', c_fov: 'Këndi i kamerës', c_debug: 'Detajet e ndjekjes', c_debug2: 'Kornizat e shenjave, shpejtësia dhe saktësia',
+    c_how: 'Si përdoret', c_h1: 'Printoni kubin (dy ngjyra: trup i bardhë, katrorë të zinj) ose kartën/kubin prej letre nga PDF-ja në 100 %.',
+    c_h2: 'Mbajeni kubin 20–50 cm larg telefonit, në dritë të mirë. Të paktën një anë duhet të shihet plotësisht.',
+    c_h3: 'Rrotulloni kubin për të rrotulluar eksponatin. Prekni një eksponat tjetër më poshtë për ta ndërruar.',
+    c_h4: 'Nëse eksponati dridhet, shmangni shkëlqimin mbi kub dhe afrojeni pak.',
+    c_private: 'Ndjekja funksionon vetëm në telefonin tuaj.', c_looking: 'Po kërkoj kubin…', c_card: 'kartë', c_side: 'Ana',
+    c_err: 'Të dhënat nuk u ngarkuan: ',
+    back: 'Prapa', loadError: 'Të dhënat nuk u ngarkuan. Kontrolloni internetin dhe rifreskoni faqen.',
+    featured: 'E veçuar', galleries: 'Galeritë', exhibit1: 'eksponat', exhibitN: 'eksponate',
+    cubeTitle: 'Kubi AR', cubeText: 'Mbajeni kubin e printuar para telefonit dhe eksponati do të qëndrojë mbi të. Rrotullojeni kubin për ta parë nga të gjitha anët.',
+    openCube: 'Hap kamerën', showcase: 'Vitrina', getCube: 'Merrni kubin',
+    placeholder: 'Model zëvendësues', loading: 'Po ngarkohet modeli 3D…', modelError: 'Modeli 3D nuk u ngarkua.',
+    height: 'Lartësia', length: 'Gjatësia', dragHint: 'Rrëshqitni gishtin për ta rrotulluar · hapni gishtat për ta zmadhuar',
+    onCube: 'Në kub', inRoom: 'Në hapësirë', addShowcase: 'Në vitrinë', inShowcase: 'Në vitrinë ✓', share: 'Ndaje',
+    showcaseFull: 'Vitrina ka vend për 6 eksponate – një për secilën anë të kubit.',
+    addedShowcase: 'U shtua në vitrinë', removedShowcase: 'U hoq nga vitrina', linkCopied: 'Lidhja u kopjua',
+    showcaseText: 'Zgjidhni deri në 6 eksponate. Secili merr anën e vet të kubit – rrotulloni kubin dhe sipër shfaqet një eksponat tjetër.',
+    showcaseEmpty: 'Vitrina është bosh. Shtoni eksponate më poshtë ose nga faqja e eksponatit.',
+    openShowcase: 'Hap vitrinën në kub', addFrom: 'Shtoni eksponate', add: 'shto', remove: 'Hiqe', face: 'Ana',
+    cubeInfo: 'Kubi është 7 cm, me shenja bardh e zi që telefoni i njeh. Mund ta printoni në printer 3D ose ta bëni prej letre.',
+    print3d: 'Printim 3D (dy ngjyra)', print3dText: 'Trup i bardhë dhe shenja të zeza, PLA mat. Pa mbështetëse.',
+    printPaper: 'Kub ose kartë prej letre', printPaperText: 'Printojeni në madhësi 100 % në letër më të trashë mat.',
+    noAR: 'Ky telefon nuk mund ta vendosë modelin në hapësirë nga shfletuesi. Provoni Chrome në Android ose Safari në iPhone.',
+    preparing: 'Po përgatitet modeli…', close: 'Mbyll',
+    xrFind: 'Lëvizeni telefonin ngadalë që të gjejë dyshemenë ose tavolinën…', xrTap: 'Prekni ekranin për ta vendosur eksponatin',
+    xrPlaced: 'Ecni rreth tij! Prekni përsëri për ta zhvendosur.', xrRealSize: 'Madhësia natyrore', xrModelSize: 'Maketë 1:50',
+  },
 };
 export function detectLang() {
   const l = (navigator.languages && navigator.languages[0]) || navigator.language || 'me';
-  return /^en\b/i.test(l) ? 'en' : 'me';
+  return /^en\b/i.test(l) ? 'en' : /^(sq|al)\b/i.test(l) ? 'sq' : 'me';
 }
 export const L = (o, lang) => o == null ? '' : typeof o === 'string' ? o : (o[lang] ?? o.me ?? o.en ?? '');
+export const HTML_LANG = { me: 'sr-ME', en: 'en', sq: 'sq' };
+export const NUM_LOCALE = { me: 'sr-Latn-ME', en: 'en', sq: 'sq-AL' };
