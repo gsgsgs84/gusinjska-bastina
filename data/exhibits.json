@@ -21,9 +21,9 @@
         "sq": "Shtëpia dhe familja"
       },
       "description": {
-        "me": "Posuđe, kolijevka, kopanja, stap, mlin za kafu i mašice: predmeti koji su držali kuću na okupu.",
-        "en": "Vessels, a cradle, a trough, a churn, a coffee mill and hearth tongs: the objects that kept a household going.",
-        "sq": "Ena, djepi, magjja, tundësi, mulli i kafesë dhe mashat: sendet që e mbanin gjallë shtëpinë."
+        "me": "Posuđe, kolijevka, sofra, mlin i džezva za kafu, fenjer i pegla na žar: predmeti koji su držali kuću na okupu.",
+        "en": "Vessels, a cradle, the sofra, a coffee mill and pot, a lantern and a charcoal iron: the objects that kept a household going.",
+        "sq": "Ena, djepi, sofra, mulli dhe xhezvja e kafesë, feneri dhe hekuri me prush: sendet që e mbanin gjallë shtëpinë."
       }
     },
     {
@@ -47,9 +47,9 @@
         "sq": "Leshi dhe endja"
       },
       "description": {
-        "me": "Od runa do ćilima: preslica, vreteno i razboj.",
-        "en": "From fleece to rug: the distaff, the spindle and the loom.",
-        "sq": "Nga leshi te qilimi: furka, boshti dhe vegja."
+        "me": "Od runa do ćilima: preslice, vreteno, razboj i tkana torba.",
+        "en": "From fleece to rug: distaffs, a spindle, the loom and a woven bag.",
+        "sq": "Nga leshi te qilimi: furkat, boshti, vegja dhe trasta e endur."
       }
     },
     {
@@ -60,9 +60,9 @@
         "sq": "Veshja dhe stolitë"
       },
       "description": {
-        "me": "Svečana nošnja i nakit: zlatovez, biseri i ukrasi za praznike i svadbe.",
-        "en": "Festive costume and jewellery: gold embroidery, pearls and wedding finery.",
-        "sq": "Veshja festive dhe stolitë: qëndisje ari, margaritarë dhe stoli dasme."
+        "me": "Svečana nošnja i nakit: jeleci sa zlatovezom i srebrovezom i svadbena kruna.",
+        "en": "Festive costume and jewellery: vests embroidered in gold and silver, and a bridal crown.",
+        "sq": "Veshja festive dhe stolitë: jelekë të qëndisur me ar e argjend dhe kurora e nusës."
       }
     },
     {
@@ -856,6 +856,268 @@
       ]
     },
     {
+      "id": "fenjer",
+      "gallery": "dom",
+      "model": "models/fenjer.glb",
+      "thumb": "thumbs/fenjer.png",
+      "kind": "object",
+      "size": {
+        "h": 0.35
+      },
+      "name": {
+        "me": "Fenjer",
+        "en": "Kerosene lantern",
+        "sq": "Feneri"
+      },
+      "subtitle": {
+        "me": "Petrolejska svjetiljka",
+        "en": "Hurricane lamp",
+        "sq": "Llambë me vajguri"
+      },
+      "description": {
+        "me": "Fenjer na petrolej sa staklenim cilindrom i ručkom za nošenje. Prije struje svijetlio je u kući, u štali i na putu kroz noć, a plamen se pojačavao i smanjivao okretanjem fitilja.",
+        "en": "A kerosene lantern with a glass globe and a carrying handle. Before electricity it lit the house, the stable and the road at night; the flame was raised or lowered by turning the wick.",
+        "sq": "Fener me vajguri, me xham dhe dorezë për ta mbajtur. Para dritës elektrike ndriçonte shtëpinë, stallën dhe rrugën natën; flaka rritej ose ulej duke rrotulluar fitilin."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "rasvjeta",
+            "en": "lighting",
+            "sq": "ndriçim"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "lim, staklo",
+            "en": "sheet metal, glass",
+            "sq": "llamarinë, xham"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height",
+            "sq": "Lartësia"
+          },
+          "v": {
+            "me": "oko 35 cm (procjena)",
+            "en": "about 35 cm (estimate)",
+            "sq": "rreth 35 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "pegla",
+      "gallery": "dom",
+      "model": "models/pegla.glb",
+      "thumb": "thumbs/pegla.png",
+      "kind": "object",
+      "size": {
+        "long": 0.22
+      },
+      "name": {
+        "me": "Pegla na žar",
+        "en": "Charcoal iron",
+        "sq": "Hekuri me prush"
+      },
+      "subtitle": {
+        "me": "Gvozdena pegla s poklopcem",
+        "en": "Cast-iron box iron",
+        "sq": "Hekur rrobash prej gize"
+      },
+      "description": {
+        "me": "Gvozdena pegla u koju se stavljao užareni ugalj s ognjišta. Otvori sa strane puštali su vazduh da žar ne bi zgasnuo, a drvena ručka štitila je ruku od toplote.",
+        "en": "A cast-iron box iron filled with glowing charcoal from the hearth. The holes in the sides let in air so the embers kept burning, and the wooden handle protected the hand from the heat.",
+        "sq": "Hekur rrobash prej gize, në të cilin vihej prush nga vatra. Vrimat anash lejonin ajrin të hynte që prushi të mos shuhej, ndërsa doreza prej druri e mbronte dorën nga nxehtësia."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "kućni alat",
+            "en": "household tool",
+            "sq": "vegël shtëpiake"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "liveno gvožđe, drvo",
+            "en": "cast iron, wood",
+            "sq": "gizë, dru"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 22 cm (procjena)",
+            "en": "about 22 cm (estimate)",
+            "sq": "rreth 22 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "dzezva",
+      "gallery": "dom",
+      "model": "models/dzezva.glb",
+      "thumb": "thumbs/dzezva.png",
+      "kind": "object",
+      "size": {
+        "long": 0.3,
+        "label": {
+          "me": "Dužina s drškom",
+          "en": "Length with handle",
+          "sq": "Gjatësia me bisht"
+        }
+      },
+      "name": {
+        "me": "Džezva",
+        "en": "Coffee pot (džezva)",
+        "sq": "Xhezvja"
+      },
+      "subtitle": {
+        "me": "Za tursku kafu, od mesinga",
+        "en": "For Turkish coffee, made of brass",
+        "sq": "Për kafe turke, prej tunxhi"
+      },
+      "description": {
+        "me": "Džezva od mesinga s ugraviranim ukrasima i dugom drškom. U njoj se kafa kuvala na žaru ili na šporetu i služila u fildžanima, uz rahat-lokum i razgovor.",
+        "en": "A brass coffee pot with engraved decoration and a long handle. Coffee was brewed in it over embers or on the stove and served in small cups, with Turkish delight and conversation.",
+        "sq": "Xhezve prej tunxhi me zbukurime të gdhendura dhe bisht të gjatë. Në të zihej kafeja mbi prush ose në sobë dhe shërbehej në filxhanë, me llokume dhe bisedë."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "kuhinjski pribor",
+            "en": "kitchenware",
+            "sq": "vegël kuzhine"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "mesing",
+            "en": "brass",
+            "sq": "tunxh"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina s drškom",
+            "en": "Length with handle",
+            "sq": "Gjatësia me bisht"
+          },
+          "v": {
+            "me": "oko 30 cm (procjena)",
+            "en": "about 30 cm (estimate)",
+            "sq": "rreth 30 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sofra",
+      "gallery": "dom",
+      "model": "models/sofra.glb",
+      "thumb": "thumbs/sofra.png",
+      "kind": "object",
+      "size": {
+        "long": 0.9,
+        "label": {
+          "me": "Promjer",
+          "en": "Diameter",
+          "sq": "Diametri"
+        }
+      },
+      "name": {
+        "me": "Sofra",
+        "en": "Sofra (low round table)",
+        "sq": "Sofra"
+      },
+      "subtitle": {
+        "me": "Niski okrugli sto za obrok",
+        "en": "Low round dining table",
+        "sq": "Tryezë e ulët e rrumbullakët"
+      },
+      "description": {
+        "me": "Niski okrugli drveni sto oko kojeg je porodica jela sjedeći na podu ili na niskim stoličicama. Kad se ne koristi, sofra se kačila o zid, za ovaj obruč, da ne zauzima prostor u sobi.",
+        "en": "A low round wooden table around which the family ate, sitting on the floor or on low stools. When not in use, the sofra was hung on the wall by this ring so it took up no space in the room.",
+        "sq": "Tryezë e ulët e rrumbullakët prej druri, rreth së cilës familja hante ulur në dysheme ose në stola të ulët. Kur nuk përdorej, sofra varej në mur nga kjo hallkë, që të mos zinte vend në dhomë."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "namještaj",
+            "en": "furniture",
+            "sq": "mobilje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "drvo",
+            "en": "wood",
+            "sq": "dru"
+          }
+        },
+        {
+          "k": {
+            "me": "Promjer",
+            "en": "Diameter",
+            "sq": "Diametri"
+          },
+          "v": {
+            "me": "oko 90 cm (procjena)",
+            "en": "about 90 cm (estimate)",
+            "sq": "rreth 90 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
       "id": "cijev",
       "gallery": "polje",
       "model": "models/cijev.glb",
@@ -1097,6 +1359,137 @@
       ]
     },
     {
+      "id": "preslica-2",
+      "gallery": "vuna",
+      "model": "models/preslica-2.glb",
+      "thumb": "thumbs/preslica-2.png",
+      "kind": "object",
+      "size": {
+        "long": 0.9
+      },
+      "name": {
+        "me": "Preslica (drugi primjerak)",
+        "en": "Distaff (second example)",
+        "sq": "Furka (shembulli i dytë)"
+      },
+      "subtitle": {
+        "me": "Ručna preslica s vunom i vretenom",
+        "en": "Hand distaff with wool and spindle",
+        "sq": "Furkë dore me lesh dhe bosht"
+      },
+      "description": {
+        "me": "Još jedna ručna preslica s povjesmom bijele vune i vretenom. Preslice su se često ukrašavale rezbarijom ili tkanim trakama; bile su lični predmet svake žene, a ponekad i poklon.",
+        "en": "Another hand distaff with a tuft of white wool and a spindle. Distaffs were often decorated with carving or woven bands; each woman had her own, and sometimes they were given as gifts.",
+        "sq": "Një tjetër furkë dore me shtëllungë leshi të bardhë dhe bosht. Furkat shpesh zbukuroheshin me gdhendje ose shirita të endur; çdo grua kishte të sajën, dhe ndonjëherë ato jepeshin si dhuratë."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "predenje",
+            "en": "spinning",
+            "sq": "tjerrje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "drvo, vuna",
+            "en": "wood, wool",
+            "sq": "dru, lesh"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 90 cm (procjena)",
+            "en": "about 90 cm (estimate)",
+            "sq": "rreth 90 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "torba",
+      "gallery": "vuna",
+      "model": "models/torba.glb",
+      "thumb": "thumbs/torba.png",
+      "kind": "object",
+      "size": {
+        "long": 0.6,
+        "label": {
+          "me": "Visina s kaišem",
+          "en": "Height with strap",
+          "sq": "Lartësia me rrip"
+        }
+      },
+      "name": {
+        "me": "Tkana torba",
+        "en": "Woven bag",
+        "sq": "Trasta"
+      },
+      "subtitle": {
+        "me": "Vunena torba s pletenim kaišem",
+        "en": "Wool bag with a braided strap",
+        "sq": "Trastë leshi me rrip të thurur"
+      },
+      "description": {
+        "me": "Torba istkana od crvene vune, s ukrasnim motivom i pletenim kaišem za nošenje preko ramena. U njoj se nosio hljeb, sitne stvari ili poklon, a boja i motivi pokazivali su vještinu tkalje.",
+        "en": "A bag woven from red wool, with a decorative motif and a braided strap for carrying over the shoulder. It held bread, small things or a gift, and its colour and motifs showed the weaver's skill.",
+        "sq": "Trastë e endur nga leshi i kuq, me motiv zbukurues dhe rrip të thurur për ta mbajtur në sup. Në të mbahej buka, gjëra të vogla ose një dhuratë, dhe ngjyra e motivet tregonin mjeshtërinë e endëses."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "tkanje",
+            "en": "weaving",
+            "sq": "endje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "vuna",
+            "en": "wool",
+            "sq": "lesh"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina s kaišem",
+            "en": "Height with strap",
+            "sq": "Lartësia me rrip"
+          },
+          "v": {
+            "me": "oko 60 cm (procjena)",
+            "en": "about 60 cm (estimate)",
+            "sq": "rreth 60 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
       "id": "jelek",
       "gallery": "nosnja",
       "model": "models/jelek.glb",
@@ -1229,6 +1622,143 @@
             "me": "oko 28 cm (procjena)",
             "en": "about 28 cm (estimate)",
             "sq": "rreth 28 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "jelek-2",
+      "gallery": "nosnja",
+      "model": "models/jelek-2.glb",
+      "thumb": "thumbs/jelek-2.png",
+      "kind": "object",
+      "size": {
+        "long": 0.55,
+        "label": {
+          "me": "Širina",
+          "en": "Width",
+          "sq": "Gjerësia"
+        }
+      },
+      "name": {
+        "me": "Jelek (drugi primjerak)",
+        "en": "Embroidered vest (second example)",
+        "sq": "Jeleku (shembulli i dytë)"
+      },
+      "subtitle": {
+        "me": "Prsluk sa zlatovezom",
+        "en": "Vest with gold embroidery",
+        "sq": "Jelek me qëndisje ari"
+      },
+      "description": {
+        "me": "Još jedan svečani prsluk sa zlatovezom, s krupnim kružnim motivima i bijelom postavom. Poređenje dva jeleka pokazuje koliko je vez bio lični: svaka vezilja imala je svoj raspored motiva.",
+        "en": "Another festive vest with gold embroidery, with large circular motifs and a white lining. Comparing the two vests shows how personal the embroidery was: each embroiderer had her own arrangement of motifs.",
+        "sq": "Një tjetër jelek festiv me qëndisje ari, me motive të mëdha rrethore dhe astar të bardhë. Krahasimi i dy jelekëve tregon sa personale ishte qëndisja: çdo qëndistare kishte rregullimin e vet të motiveve."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "ženska nošnja",
+            "en": "women's costume",
+            "sq": "veshje grash"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "čoha, zlatni vez",
+            "en": "wool broadcloth, gold embroidery",
+            "sq": "shajak, qëndisje ari"
+          }
+        },
+        {
+          "k": {
+            "me": "Širina",
+            "en": "Width",
+            "sq": "Gjerësia"
+          },
+          "v": {
+            "me": "oko 55 cm (procjena)",
+            "en": "about 55 cm (estimate)",
+            "sq": "rreth 55 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "jelek-srebro",
+      "gallery": "nosnja",
+      "model": "models/jelek-srebro.glb",
+      "thumb": "thumbs/jelek-srebro.png",
+      "kind": "object",
+      "heavy": true,
+      "size": {
+        "long": 0.55,
+        "label": {
+          "me": "Širina",
+          "en": "Width",
+          "sq": "Gjerësia"
+        }
+      },
+      "name": {
+        "me": "Jelek sa srebrovezom",
+        "en": "Silver-embroidered vest",
+        "sq": "Jelek me qëndisje argjendi"
+      },
+      "subtitle": {
+        "me": "Prsluk vezen srebrnim nitima",
+        "en": "Vest embroidered with silver thread",
+        "sq": "Jelek i qëndisur me fije argjendi"
+      },
+      "description": {
+        "me": "Prsluk ukrašen vezom od srebrnih niti, sitnim viticama i cvjetovima duž ivica. Vez se radio ručno, a ovakav jelek nosio se za praznike i posjete.",
+        "en": "A vest decorated with silver-thread embroidery, with fine tendrils and flowers along the edges. The embroidery was done by hand, and a vest like this was worn on holidays and for visits.",
+        "sq": "Jelek i zbukuruar me qëndisje me fije argjendi, me dredha të holla dhe lule përgjatë skajeve. Qëndisja bëhej me dorë, dhe një jelek i tillë vishej në festa e vizita."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "ženska nošnja",
+            "en": "women's costume",
+            "sq": "veshje grash"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "čoha, srebrni vez",
+            "en": "wool broadcloth, silver embroidery",
+            "sq": "shajak, qëndisje argjendi"
+          }
+        },
+        {
+          "k": {
+            "me": "Širina",
+            "en": "Width",
+            "sq": "Gjerësia"
+          },
+          "v": {
+            "me": "oko 55 cm (procjena)",
+            "en": "about 55 cm (estimate)",
+            "sq": "rreth 55 cm (vlerësim)"
           }
         }
       ]
