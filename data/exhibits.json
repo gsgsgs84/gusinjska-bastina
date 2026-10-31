@@ -21,9 +21,9 @@
         "sq": "Shtëpia dhe familja"
       },
       "description": {
-        "me": "Posuđe, kolijevka, sofra, kafa iz džezve i fildžana, mangal, fenjer i pegla na žar: predmeti koji su držali kuću na okupu.",
-        "en": "Vessels, a cradle, the sofra, coffee from the džezva and fildžan, a brazier, a lantern and a charcoal iron: the objects that kept a household going.",
-        "sq": "Ena, djepi, sofra, kafeja në xhezve e filxhan, mangalli, feneri dhe hekuri me prush: sendet që e mbanin gjallë shtëpinë."
+        "me": "Kolijevka, sanduk, kopanja, stap, testija, fenjer, pegla i mašice: predmeti koji su držali kuću na okupu.",
+        "en": "A cradle, a chest, a trough, a churn, a water jug, a lantern, an iron and hearth tongs: the objects that kept a household going.",
+        "sq": "Djepi, sënduku, magjja, tundësi, shtamba, feneri, hekuri dhe mashat: sendet që e mbanin gjallë shtëpinë."
       }
     },
     {
@@ -40,16 +40,29 @@
       }
     },
     {
-      "id": "vuna",
+      "id": "kafa",
       "name": {
-        "me": "Vuna i tkanje",
-        "en": "Wool and weaving",
-        "sq": "Leshi dhe endja"
+        "me": "Kafa i sofra",
+        "en": "Coffee and the table",
+        "sq": "Kafeja dhe sofra"
       },
       "description": {
-        "me": "Od runa do ćilima: preslice, vreteno, razboj i tkana torba.",
-        "en": "From fleece to rug: distaffs, a spindle, the loom and a woven bag.",
-        "sq": "Nga leshi te qilimi: furkat, boshti, vegja dhe trasta e endur."
+        "me": "Od zrna do fildžana: pržionik, mlinovi, džezva i fildžan, mangal, tabla, čanak i sofra.",
+        "en": "From bean to cup: roasters, grinders, the džezva and fildžan, a brazier, a tray, a bowl and the sofra.",
+        "sq": "Nga kokrra te filxhani: pjekëset, mullinjtë, xhezvja dhe filxhani, mangalli, tabakaja, tasi dhe sofra."
+      }
+    },
+    {
+      "id": "vuna",
+      "name": {
+        "me": "Vuna, tkanje i vez",
+        "en": "Wool, weaving and embroidery",
+        "sq": "Leshi, endja dhe qëndisja"
+      },
+      "description": {
+        "me": "Od runa do ćilima i veza: grebeni, preslice, vretena, razboj, đerđef i tkana torba.",
+        "en": "From fleece to rug and embroidery: wool cards, distaffs, spindles, the loom, embroidery hoops and a woven bag.",
+        "sq": "Nga leshi te qilimi e qëndisja: krehrat, furkat, boshtet, vegja, gjergjefi dhe trasta e endur."
       }
     },
     {
@@ -60,9 +73,9 @@
         "sq": "Veshja dhe stolitë"
       },
       "description": {
-        "me": "Svečana nošnja i nakit: jeleci sa zlatovezom i srebrovezom, svadbena kruna, dukati, fes i lutka u nošnji.",
-        "en": "Festive costume and jewellery: vests embroidered in gold and silver, a bridal crown, coins, a fez and a doll in costume.",
-        "sq": "Veshja festive dhe stolitë: jelekë të qëndisur me ar e argjend, kurora e nusës, dukate, festja dhe një kukull me veshje popullore."
+        "me": "Svečana nošnja i nakit: jeleci, pojas sa zlatovezom, šarene čarape, svadbena kruna, dukati, fes i lutka u nošnji.",
+        "en": "Festive costume and jewellery: vests, a gold-embroidered belt, patterned socks, a bridal crown, coins, a fez and a doll in costume.",
+        "sq": "Veshja festive dhe stolitë: jelekë, brez i qëndisur me ar, çorape të punuara, kurora e nusës, dukate, festja dhe një kukull me veshje popullore."
       }
     },
     {
@@ -86,9 +99,9 @@
         "sq": "Shekulli XX"
       },
       "description": {
-        "me": "Telefon, vojnički šljem i drugi tragovi novog doba.",
-        "en": "A telephone, a soldier's helmet and other traces of a new age.",
-        "sq": "Telefoni, helmeta ushtarake dhe gjurmë të tjera të kohës së re."
+        "me": "Telefoni, vojnički šljem, bajonet i drugi tragovi novog doba.",
+        "en": "Telephones, a soldier's helmet, a bayonet and other traces of a new age.",
+        "sq": "Telefonat, helmeta ushtarake, bajoneta dhe gjurmë të tjera të kohës së re."
       }
     },
     {
@@ -681,7 +694,7 @@
     },
     {
       "id": "mlin",
-      "gallery": "dom",
+      "gallery": "kafa",
       "model": "models/mlin.glb",
       "thumb": "thumbs/mlin.png",
       "kind": "object",
@@ -996,7 +1009,7 @@
     },
     {
       "id": "dzezva",
-      "gallery": "dom",
+      "gallery": "kafa",
       "model": "models/dzezva.glb",
       "thumb": "thumbs/dzezva.png",
       "kind": "object",
@@ -1064,7 +1077,7 @@
     },
     {
       "id": "sofra",
-      "gallery": "dom",
+      "gallery": "kafa",
       "model": "models/sofra.glb",
       "thumb": "thumbs/sofra.png",
       "kind": "object",
@@ -1194,8 +1207,71 @@
       ]
     },
     {
-      "id": "mangal",
+      "id": "sanduk",
       "gallery": "dom",
+      "model": "models/sanduk.glb",
+      "thumb": "thumbs/sanduk.png",
+      "kind": "object",
+      "size": {
+        "long": 0.8
+      },
+      "name": {
+        "me": "Sanduk",
+        "en": "Wooden chest",
+        "sq": "Sënduku"
+      },
+      "subtitle": {
+        "me": "Drveni kovčeg za ruho",
+        "en": "Wooden chest for the dowry",
+        "sq": "Arkë druri për pajën"
+      },
+      "description": {
+        "me": "Drveni sanduk obojen zeleno, s bravom sprijeda. U ovakvim sanducima čuvali su se ruho, posteljina i svečana odjeća, a mlada je u sanduku donosila spremu u novu kuću.",
+        "en": "A wooden chest painted green, with a lock at the front. Chests like this held linen, bedding and festive clothes, and a bride brought her dowry to her new home in one.",
+        "sq": "Sënduk druri i lyer jeshil, me bravë përpara. Në sëndukë të tillë ruheshin pëlhurat, shtroja dhe rrobat e festës, dhe nusja e sillte pajën në shtëpinë e re në një sënduk."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "namještaj",
+            "en": "furniture",
+            "sq": "mobilje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "drvo, boja",
+            "en": "painted wood",
+            "sq": "dru i lyer"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 80 cm (procjena)",
+            "en": "about 80 cm (estimate)",
+            "sq": "rreth 80 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "mangal",
+      "gallery": "kafa",
       "model": "models/mangal.glb",
       "thumb": "thumbs/mangal.png",
       "kind": "object",
@@ -1258,7 +1334,7 @@
     },
     {
       "id": "fildzan",
-      "gallery": "dom",
+      "gallery": "kafa",
       "model": "models/fildzan.glb",
       "thumb": "thumbs/fildzan.png",
       "kind": "object",
@@ -1320,6 +1396,326 @@
             "me": "oko 14 cm (procjena)",
             "en": "about 14 cm (estimate)",
             "sq": "rreth 14 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "przionik",
+      "gallery": "kafa",
+      "model": "models/przionik.glb",
+      "thumb": "thumbs/przionik.png",
+      "kind": "object",
+      "size": {
+        "long": 0.8
+      },
+      "name": {
+        "me": "Pržionik za kafu",
+        "en": "Drum coffee roaster",
+        "sq": "Pjekëse kafeje me cilindër"
+      },
+      "subtitle": {
+        "me": "Bubanj na dugoj ručki",
+        "en": "A drum on a long crank",
+        "sq": "Cilindër në dorezë të gjatë"
+      },
+      "description": {
+        "me": "Zatvoreni limeni bubanj na dugoj gvozdenoj ručki, s malim postoljem. Zrna kafe sipala su se u bubanj, koji se okretao iznad žara dok kafa ne bi dobila boju; miris prženja širio se cijelom kućom.",
+        "en": "A closed tin drum on a long iron crank, with a small stand. Green coffee beans went into the drum, which was turned over the embers until the coffee took on its colour; the smell of roasting filled the whole house.",
+        "sq": "Cilindër i mbyllur llamarine në një dorezë të gjatë hekuri, me një mbajtëse të vogël. Kokrrat e kafesë hidheshin në cilindër, i cili rrotullohej mbi prush derisa kafeja të merrte ngjyrë; aroma e pjekjes përhapej në gjithë shtëpinë."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "pribor za kafu",
+            "en": "coffee equipment",
+            "sq": "vegla kafeje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "lim, gvožđe",
+            "en": "tinplate, iron",
+            "sq": "llamarinë, hekur"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 80 cm (procjena)",
+            "en": "about 80 cm (estimate)",
+            "sq": "rreth 80 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "przilica",
+      "gallery": "kafa",
+      "model": "models/przilica.glb",
+      "thumb": "thumbs/przilica.png",
+      "kind": "object",
+      "size": {
+        "long": 0.45
+      },
+      "name": {
+        "me": "Pržilica s ručicom",
+        "en": "Pan coffee roaster",
+        "sq": "Tigan për pjekjen e kafesë"
+      },
+      "subtitle": {
+        "me": "Tava s poklopcem i miješalicom",
+        "en": "A covered pan with a stirrer",
+        "sq": "Tigan me kapak dhe përzierëse"
+      },
+      "description": {
+        "me": "Gvozdena tava s poklopcem i ručicom koja okreće miješalicu unutra, da se zrna kafe prže ravnomjerno i ne zagore. Drvena drška štitila je ruku od vreline.",
+        "en": "An iron pan with a lid and a crank that turns a stirrer inside, so the coffee beans roast evenly and do not burn. The wooden handle protected the hand from the heat.",
+        "sq": "Tigan hekuri me kapak dhe dorezë që rrotullon një përzierëse brenda, që kokrrat e kafesë të piqen njëtrajtshëm e të mos digjen. Bishti prej druri e mbronte dorën nga nxehtësia."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "pribor za kafu",
+            "en": "coffee equipment",
+            "sq": "vegla kafeje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "gvožđe, drvo",
+            "en": "iron, wood",
+            "sq": "hekur, dru"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina s drškom",
+            "en": "Length with handle",
+            "sq": "Gjatësia me bisht"
+          },
+          "v": {
+            "me": "oko 45 cm (procjena)",
+            "en": "about 45 cm (estimate)",
+            "sq": "rreth 45 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "mlin-2",
+      "gallery": "kafa",
+      "model": "models/mlin-2.glb",
+      "thumb": "thumbs/mlin-2.png",
+      "kind": "object",
+      "size": {
+        "h": 0.22
+      },
+      "name": {
+        "me": "Drveni mlin za kafu",
+        "en": "Box coffee grinder",
+        "sq": "Mulli kafeje prej druri"
+      },
+      "subtitle": {
+        "me": "Mlin u drvenoj kutiji s ladicom",
+        "en": "Wooden box mill with a drawer",
+        "sq": "Mulli në kuti druri me sirtar"
+      },
+      "description": {
+        "me": "Mlin za kafu u drvenoj kutiji, s ručicom odozgo i ladicom u koju pada samljevena kafa. Za razliku od cilindričnog mesinganog mlina, ovakav mlin stajao je na stolu ili se držao u krilu.",
+        "en": "A coffee mill in a wooden box, with a crank on top and a drawer that catches the ground coffee. Unlike the cylindrical brass mill, a mill like this stood on the table or was held on the lap.",
+        "sq": "Mulli kafeje në kuti druri, me dorezë sipër dhe sirtar ku bie kafeja e bluar. Ndryshe nga mulliri cilindrik prej tunxhi, ky mulli qëndronte mbi tryezë ose mbahej në prehër."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "pribor za kafu",
+            "en": "coffee equipment",
+            "sq": "vegla kafeje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "drvo, gvožđe",
+            "en": "wood, iron",
+            "sq": "dru, hekur"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height",
+            "sq": "Lartësia"
+          },
+          "v": {
+            "me": "oko 22 cm (procjena)",
+            "en": "about 22 cm (estimate)",
+            "sq": "rreth 22 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tabla",
+      "gallery": "kafa",
+      "model": "models/tabla.glb",
+      "thumb": "thumbs/tabla.png",
+      "kind": "object",
+      "size": {
+        "long": 0.4,
+        "label": {
+          "me": "Promjer",
+          "en": "Diameter",
+          "sq": "Diametri"
+        }
+      },
+      "name": {
+        "me": "Tabla",
+        "en": "Serving tray",
+        "sq": "Tabakaja"
+      },
+      "subtitle": {
+        "me": "Bakarni poslužavnik s ukrasom",
+        "en": "Engraved copper tray",
+        "sq": "Tabaka bakri e gdhendur"
+      },
+      "description": {
+        "me": "Okrugla bakarna tabla s ugraviranim ukrasima, na kojoj su se gostima donosili kafa, voda i slatko. Uglačana tabla bila je ponos kuće i dio svakog dočeka.",
+        "en": "A round copper tray with engraved decoration, on which coffee, water and sweets were brought to guests. A polished tray was the pride of the house and part of every welcome.",
+        "sq": "Tabaka e rrumbullakët bakri me zbukurime të gdhendura, mbi të cilën miqve u sillej kafe, ujë dhe ëmbëlsira. Tabakaja e lëmuar ishte krenaria e shtëpisë dhe pjesë e çdo pritjeje."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "posuđe",
+            "en": "tableware",
+            "sq": "enë tryeze"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "bakar",
+            "en": "copper",
+            "sq": "bakër"
+          }
+        },
+        {
+          "k": {
+            "me": "Promjer",
+            "en": "Diameter",
+            "sq": "Diametri"
+          },
+          "v": {
+            "me": "oko 40 cm (procjena)",
+            "en": "about 40 cm (estimate)",
+            "sq": "rreth 40 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "canak",
+      "gallery": "kafa",
+      "model": "models/canak.glb",
+      "thumb": "thumbs/canak.png",
+      "kind": "object",
+      "size": {
+        "long": 0.35
+      },
+      "name": {
+        "me": "Drveni čanak",
+        "en": "Wooden bowl",
+        "sq": "Tasi i drurit"
+      },
+      "subtitle": {
+        "me": "Izdubljen iz jednog komada drveta",
+        "en": "Carved from one piece of wood",
+        "sq": "I gdhendur nga një copë druri"
+      },
+      "description": {
+        "me": "Izduženi čanak izdubljen iz jednog komada drveta, za hljeb, voće ili jelo na sofri. Pukotina na obodu pokazuje godine upotrebe; ovakve posude pravile su se u svakom domaćinstvu.",
+        "en": "An oval bowl carved from a single piece of wood, for bread, fruit or food on the sofra. The crack in the rim shows years of use; vessels like this were made in every household.",
+        "sq": "Tas i zgjatur, i gdhendur nga një copë e vetme druri, për bukë, fruta ose ushqim në sofër. Plasaritja në buzë tregon vite përdorimi; enë të tilla bëheshin në çdo shtëpi."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "posuđe",
+            "en": "tableware",
+            "sq": "enë tryeze"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "drvo",
+            "en": "wood",
+            "sq": "dru"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 35 cm (procjena)",
+            "en": "about 35 cm (estimate)",
+            "sq": "rreth 35 cm (vlerësim)"
           }
         }
       ]
@@ -1755,6 +2151,263 @@
             "me": "oko 60 cm (procjena)",
             "en": "about 60 cm (estimate)",
             "sq": "rreth 60 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "grebeni",
+      "gallery": "vuna",
+      "model": "models/grebeni.glb",
+      "thumb": "thumbs/grebeni.png",
+      "kind": "object",
+      "size": {
+        "long": 0.35
+      },
+      "name": {
+        "me": "Grebeni",
+        "en": "Wool cards",
+        "sq": "Krehrat e leshit"
+      },
+      "subtitle": {
+        "me": "Daske s gvozdenim zupcima",
+        "en": "Boards with iron teeth",
+        "sq": "Dërrasa me dhëmbë hekuri"
+      },
+      "description": {
+        "me": "Par drvenih grebena s gustim gvozdenim zupcima. Oprana vuna provlačila se između njih dok se vlakna ne bi raščešljala i poravnala, spremna za preslicu.",
+        "en": "A pair of wooden cards with dense iron teeth. Washed wool was drawn between them until the fibres were combed out and aligned, ready for the distaff.",
+        "sq": "Një palë krehra druri me dhëmbë të dendur hekuri. Leshi i larë tërhiqej mes tyre derisa fijet të krehen e të drejtohen, gati për furkën."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "obrada vune",
+            "en": "wool work",
+            "sq": "punimi i leshit"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "drvo, gvožđe",
+            "en": "wood, iron",
+            "sq": "dru, hekur"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 35 cm (procjena)",
+            "en": "about 35 cm (estimate)",
+            "sq": "rreth 35 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cesalj",
+      "gallery": "vuna",
+      "model": "models/cesalj.glb",
+      "thumb": "thumbs/cesalj.png",
+      "kind": "object",
+      "size": {
+        "long": 0.22
+      },
+      "name": {
+        "me": "Gvozdeni češalj",
+        "en": "Iron comb",
+        "sq": "Krehër hekuri"
+      },
+      "subtitle": {
+        "me": "Češalj s drvenom drškom",
+        "en": "Comb with a wooden handle",
+        "sq": "Krehër me dorezë druri"
+      },
+      "description": {
+        "me": "Gvozdeni češalj s jednim redom zubaca i drvenom drškom. Vjerovatno je služio za češljanje vune ili kudelje; slični češljevi korišćeni su i za timarenje konja.",
+        "en": "An iron comb with a single row of teeth and a wooden handle. It was probably used for combing wool or hemp; similar combs were also used for grooming horses.",
+        "sq": "Krehër hekuri me një rresht dhëmbësh dhe dorezë druri. Ka shumë gjasa që të jetë përdorur për krehjen e leshit ose të kërpit; krehra të ngjashëm përdoreshin edhe për kuajt."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "obrada vune",
+            "en": "wool work",
+            "sq": "punimi i leshit"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "gvožđe, drvo",
+            "en": "iron, wood",
+            "sq": "hekur, dru"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 22 cm (procjena)",
+            "en": "about 22 cm (estimate)",
+            "sq": "rreth 22 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "vreteno",
+      "gallery": "vuna",
+      "model": "models/vreteno.glb",
+      "thumb": "thumbs/vreteno.png",
+      "kind": "object",
+      "size": {
+        "long": 0.3
+      },
+      "name": {
+        "me": "Vreteno",
+        "en": "Spindle",
+        "sq": "Boshti"
+      },
+      "subtitle": {
+        "me": "Istokareno drveno vreteno",
+        "en": "Turned wooden spindle",
+        "sq": "Bosht druri i tornuar"
+      },
+      "description": {
+        "me": "Drveno vreteno istokareno s ukrasnim prstenovima. Vretenom se nit uvrtala i namotavala dok je žena prela vunu s preslice; zvuk vretena pratio je duge zimske večeri.",
+        "en": "A wooden spindle turned with decorative rings. The spindle twisted and wound the thread as a woman spun wool from the distaff; its sound went with the long winter evenings.",
+        "sq": "Bosht druri i tornuar me unaza zbukuruese. Me boshtin përdridhej e mblidhej peri ndërsa gruaja tirrte leshin nga furka; zhurma e tij shoqëronte mbrëmjet e gjata të dimrit."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "obrada vune",
+            "en": "wool work",
+            "sq": "punimi i leshit"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "drvo",
+            "en": "wood",
+            "sq": "dru"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 30 cm (procjena)",
+            "en": "about 30 cm (estimate)",
+            "sq": "rreth 30 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "djerdjef",
+      "gallery": "vuna",
+      "model": "models/djerdjef.glb",
+      "thumb": "thumbs/djerdjef.png",
+      "kind": "object",
+      "size": {
+        "long": 0.3,
+        "label": {
+          "me": "Promjer",
+          "en": "Diameter",
+          "sq": "Diametri"
+        }
+      },
+      "name": {
+        "me": "Đerđef",
+        "en": "Embroidery hoops",
+        "sq": "Gjergjefi"
+      },
+      "subtitle": {
+        "me": "Obruči za vez",
+        "en": "Hoops for embroidery",
+        "sq": "Rrathë për qëndisje"
+      },
+      "description": {
+        "me": "Dva drvena obruča u koje se zatezalo platno za vez. Na đerđefu su djevojke i žene vezle košulje, peškire i ruho; vez je bio i vještina i ponos.",
+        "en": "Two wooden hoops that held the fabric taut for embroidery. On the hoop, girls and women embroidered shirts, towels and dowry linen; embroidery was both a skill and a source of pride.",
+        "sq": "Dy rrathë druri ku tendosej pëlhura për qëndisje. Në gjergjef vajzat dhe gratë qëndisnin këmisha, peshqirë dhe pajë; qëndisja ishte njëkohësisht mjeshtëri dhe krenari."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "vez",
+            "en": "embroidery",
+            "sq": "qëndisje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "drvo, mesing",
+            "en": "wood, brass",
+            "sq": "dru, tunxh"
+          }
+        },
+        {
+          "k": {
+            "me": "Promjer",
+            "en": "Diameter",
+            "sq": "Diametri"
+          },
+          "v": {
+            "me": "oko 30 cm (procjena)",
+            "en": "about 30 cm (estimate)",
+            "sq": "rreth 30 cm (vlerësim)"
           }
         }
       ]
@@ -2230,6 +2883,206 @@
       ]
     },
     {
+      "id": "jelek-crni",
+      "gallery": "nosnja",
+      "model": "models/jelek-crni.glb",
+      "thumb": "thumbs/jelek-crni.png",
+      "kind": "object",
+      "heavy": true,
+      "size": {
+        "long": 0.55,
+        "label": {
+          "me": "Širina",
+          "en": "Width",
+          "sq": "Gjerësia"
+        }
+      },
+      "name": {
+        "me": "Crni jelek",
+        "en": "Black embroidered vest",
+        "sq": "Jeleku i zi"
+      },
+      "subtitle": {
+        "me": "Prsluk od crne čohe s vezom",
+        "en": "Black broadcloth vest with embroidery",
+        "sq": "Jelek shajaku të zi me qëndisje"
+      },
+      "description": {
+        "me": "Prsluk od crne čohe ukrašen gajtanima i vezom duž ivica. Tamni jeleci nosili su se za svaki dan i za svečanosti, a bogatstvo ukrasa govorilo je o prilici i o onome ko ga nosi.",
+        "en": "A vest of black broadcloth decorated with braid and embroidery along the edges. Dark vests were worn every day and for celebrations, and the richness of the decoration said something about the occasion and the wearer.",
+        "sq": "Jelek prej shajaku të zi, i zbukuruar me gajtanë dhe qëndisje përgjatë skajeve. Jelekët e errët visheshin për çdo ditë dhe për festa, dhe pasuria e zbukurimit tregonte rastin dhe atë që e mbante."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "nošnja",
+            "en": "costume",
+            "sq": "veshje popullore"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "čoha, gajtani, vez",
+            "en": "broadcloth, braid, embroidery",
+            "sq": "shajak, gajtanë, qëndisje"
+          }
+        },
+        {
+          "k": {
+            "me": "Širina",
+            "en": "Width",
+            "sq": "Gjerësia"
+          },
+          "v": {
+            "me": "oko 55 cm (procjena)",
+            "en": "about 55 cm (estimate)",
+            "sq": "rreth 55 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "pojas",
+      "gallery": "nosnja",
+      "model": "models/pojas.glb",
+      "thumb": "thumbs/pojas.png",
+      "kind": "object",
+      "size": {
+        "long": 0.28,
+        "label": {
+          "me": "Promjer",
+          "en": "Diameter",
+          "sq": "Diametri"
+        }
+      },
+      "name": {
+        "me": "Pojas sa zlatovezom",
+        "en": "Gold-embroidered belt",
+        "sq": "Brezi i qëndisur me ar"
+      },
+      "subtitle": {
+        "me": "Svečani pojas s kopčom",
+        "en": "Festive belt with a clasp",
+        "sq": "Brez festiv me kapëse"
+      },
+      "description": {
+        "me": "Svečani pojas izvezen zlatnim nitima, s kopčom i resama. Pojas je stezao i krasio nošnju u struku i nosio se uz jelek za praznike i svadbe.",
+        "en": "A festive belt embroidered with gold thread, with a clasp and tassels. It cinched and decorated the costume at the waist and was worn with the vest on holidays and at weddings.",
+        "sq": "Brez festiv i qëndisur me fije ari, me kapëse dhe xhufka. Brezi e shtrëngonte dhe e zbukuronte veshjen në mes dhe vishej me jelekun në festa e dasma."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "nošnja",
+            "en": "costume",
+            "sq": "veshje popullore"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "tkanina, zlatni vez",
+            "en": "fabric, gold embroidery",
+            "sq": "pëlhurë, qëndisje ari"
+          }
+        },
+        {
+          "k": {
+            "me": "Promjer",
+            "en": "Diameter",
+            "sq": "Diametri"
+          },
+          "v": {
+            "me": "oko 28 cm (procjena)",
+            "en": "about 28 cm (estimate)",
+            "sq": "rreth 28 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "carape",
+      "gallery": "nosnja",
+      "model": "models/carape.glb",
+      "thumb": "thumbs/carape.png",
+      "kind": "object",
+      "size": {
+        "long": 0.35
+      },
+      "name": {
+        "me": "Šarene čarape",
+        "en": "Patterned knitted socks",
+        "sq": "Çorapet e punuara"
+      },
+      "subtitle": {
+        "me": "Pletene vunene čarape s motivima",
+        "en": "Knitted wool socks with motifs",
+        "sq": "Çorape leshi të thurura me motive"
+      },
+      "description": {
+        "me": "Par vunenih čarapa ispletenih s geometrijskim motivima i uzicama za vezivanje. Šarene čarape bile su dio nošnje, a djevojke su ih plele i za ruho.",
+        "en": "A pair of wool socks knitted with geometric motifs and ties. Patterned socks were part of the costume, and girls also knitted them for their dowry.",
+        "sq": "Një palë çorape leshi të thurura me motive gjeometrike dhe lidhëse. Çorapet e punuara ishin pjesë e veshjes popullore, dhe vajzat i thurnin edhe për pajë."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "nošnja",
+            "en": "costume",
+            "sq": "veshje popullore"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "vuna",
+            "en": "wool",
+            "sq": "lesh"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 35 cm (procjena)",
+            "en": "about 35 cm (estimate)",
+            "sq": "rreth 35 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
       "id": "kljuc",
       "gallery": "brave",
       "model": "models/kljuc.glb",
@@ -2540,6 +3393,132 @@
             "me": "oko 30 cm (procjena)",
             "en": "about 30 cm (estimate)",
             "sq": "rreth 30 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bajonet",
+      "gallery": "vijek",
+      "model": "models/bajonet.glb",
+      "thumb": "thumbs/bajonet.png",
+      "kind": "object",
+      "size": {
+        "long": 0.6
+      },
+      "name": {
+        "me": "Bajonet",
+        "en": "Bayonet",
+        "sq": "Bajoneta"
+      },
+      "subtitle": {
+        "me": "Sablja-bajonet sa zakrivljenim sječivom",
+        "en": "Sword bayonet with a curved blade",
+        "sq": "Bajonetë me teh të lakuar"
+      },
+      "description": {
+        "me": "Bajonet s blago zakrivljenim sječivom i drškom s kukom, koji se pričvršćivao na cijev puške. Bajoneti ovog tipa bili su u upotrebi u vojskama s kraja 19. i početka 20. vijeka.",
+        "en": "A bayonet with a slightly curved blade and a hooked grip, fixed to the muzzle of a rifle. Bayonets of this type were used by armies in the late 19th and early 20th centuries.",
+        "sq": "Bajonetë me teh pak të lakuar dhe dorezë me grep, që mbërthehej në grykën e pushkës. Bajoneta të këtij lloji përdoreshin nga ushtritë në fund të shekullit XIX dhe në fillim të shekullit XX."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "oružje",
+            "en": "weapon",
+            "sq": "armë"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "čelik, mesing",
+            "en": "steel, brass",
+            "sq": "çelik, tunxh"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 60 cm (procjena)",
+            "en": "about 60 cm (estimate)",
+            "sq": "rreth 60 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "telefon-2",
+      "gallery": "vijek",
+      "model": "models/telefon-2.glb",
+      "thumb": "thumbs/telefon-2.png",
+      "kind": "object",
+      "size": {
+        "h": 0.18
+      },
+      "name": {
+        "me": "Telefon s brojčanikom",
+        "en": "Rotary telephone",
+        "sq": "Telefoni me disk"
+      },
+      "subtitle": {
+        "me": "Stoni telefon iz prve polovine 20. vijeka",
+        "en": "Desk telephone, first half of the 20th century",
+        "sq": "Telefon tavoline, gjysma e parë e shekullit XX"
+      },
+      "description": {
+        "me": "Crni stoni telefon s brojčanikom i slušalicom na viljušci. Ovakvi aparati zamijenili su starije telefone s ručicom i dugo su bili rijetkost, obično u poštama, opštinama i rijetkim kućama.",
+        "en": "A black desk telephone with a rotary dial and a handset on the cradle. Phones like this replaced the older crank telephones and long remained rare, usually found in post offices, town halls and a few homes.",
+        "sq": "Telefon i zi tavoline me disk dhe dëgjuese mbi mbajtëse. Aparate të tilla zëvendësuan telefonat e vjetër me dorezë dhe për një kohë të gjatë ishin të rralla, zakonisht në posta, komuna dhe në pak shtëpi."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "komunikacija",
+            "en": "communication",
+            "sq": "komunikim"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "bakelit, metal",
+            "en": "Bakelite, metal",
+            "sq": "bakelit, metal"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height",
+            "sq": "Lartësia"
+          },
+          "v": {
+            "me": "oko 18 cm (procjena)",
+            "en": "about 18 cm (estimate)",
+            "sq": "rreth 18 cm (vlerësim)"
           }
         }
       ]
