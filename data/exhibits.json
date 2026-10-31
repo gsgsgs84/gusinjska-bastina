@@ -21,9 +21,9 @@
         "sq": "Shtëpia dhe familja"
       },
       "description": {
-        "me": "Posuđe, kolijevka, sofra, mlin i džezva za kafu, fenjer i pegla na žar: predmeti koji su držali kuću na okupu.",
-        "en": "Vessels, a cradle, the sofra, a coffee mill and pot, a lantern and a charcoal iron: the objects that kept a household going.",
-        "sq": "Ena, djepi, sofra, mulli dhe xhezvja e kafesë, feneri dhe hekuri me prush: sendet që e mbanin gjallë shtëpinë."
+        "me": "Posuđe, kolijevka, sofra, kafa iz džezve i fildžana, mangal, fenjer i pegla na žar: predmeti koji su držali kuću na okupu.",
+        "en": "Vessels, a cradle, the sofra, coffee from the džezva and fildžan, a brazier, a lantern and a charcoal iron: the objects that kept a household going.",
+        "sq": "Ena, djepi, sofra, kafeja në xhezve e filxhan, mangalli, feneri dhe hekuri me prush: sendet që e mbanin gjallë shtëpinë."
       }
     },
     {
@@ -34,9 +34,9 @@
         "sq": "Fusha dhe mali"
       },
       "description": {
-        "me": "Kosidba, žetva, samar i kola: rad na zemlji i put do katuna.",
-        "en": "Mowing, harvest, the pack saddle and the cart: work on the land and the road to the summer pastures.",
-        "sq": "Kositja, korrja, samari dhe qerrja: puna në tokë dhe rruga për në bjeshkë."
+        "me": "Kosidba, žetva, budak, samar i kola: rad na zemlji i put do katuna.",
+        "en": "Mowing, harvest, the mattock, the pack saddle and the cart: work on the land and the road to the summer pastures.",
+        "sq": "Kositja, korrja, kazma, samari dhe qerrja: puna në tokë dhe rruga për në bjeshkë."
       }
     },
     {
@@ -60,9 +60,22 @@
         "sq": "Veshja dhe stolitë"
       },
       "description": {
-        "me": "Svečana nošnja i nakit: jeleci sa zlatovezom i srebrovezom i svadbena kruna.",
-        "en": "Festive costume and jewellery: vests embroidered in gold and silver, and a bridal crown.",
-        "sq": "Veshja festive dhe stolitë: jelekë të qëndisur me ar e argjend dhe kurora e nusës."
+        "me": "Svečana nošnja i nakit: jeleci sa zlatovezom i srebrovezom, svadbena kruna, dukati, fes i lutka u nošnji.",
+        "en": "Festive costume and jewellery: vests embroidered in gold and silver, a bridal crown, coins, a fez and a doll in costume.",
+        "sq": "Veshja festive dhe stolitë: jelekë të qëndisur me ar e argjend, kurora e nusës, dukate, festja dhe një kukull me veshje popullore."
+      }
+    },
+    {
+      "id": "brave",
+      "name": {
+        "me": "Brave i ključevi",
+        "en": "Locks and keys",
+        "sq": "Drynat dhe çelësat"
+      },
+      "description": {
+        "me": "Kovani ključ, katanac i brava za vrata: kako su se čuvale kuće, ambari i sanduci.",
+        "en": "A forged key, a padlock and a door lock: how houses, granaries and chests were kept safe.",
+        "sq": "Çelës i farkëtuar, dry dhe bravë dere: si ruheshin shtëpitë, hambarët dhe sëndukët."
       }
     },
     {
@@ -1118,6 +1131,200 @@
       ]
     },
     {
+      "id": "testija",
+      "gallery": "dom",
+      "model": "models/testija.glb",
+      "thumb": "thumbs/testija.png",
+      "kind": "object",
+      "size": {
+        "h": 0.35
+      },
+      "name": {
+        "me": "Testija",
+        "en": "Clay water jug",
+        "sq": "Shtamba"
+      },
+      "subtitle": {
+        "me": "Glinena posuda za vodu",
+        "en": "Earthenware water jug",
+        "sq": "Enë balte për ujë"
+      },
+      "description": {
+        "me": "Glinena testija s ručkom i kratkim grlićem za pijenje. Pečena glina hladila je vodu: kroz zidove je isparavalo malo vode, pa je voda u testiji ostajala svježa i ljeti.",
+        "en": "An earthenware jug with a handle and a short spout for drinking. Fired clay kept the water cool: a little water evaporated through the walls, so the water stayed fresh even in summer.",
+        "sq": "Shtambë balte me dorezë dhe lëfyt të shkurtër për të pirë. Balta e pjekur e mbante ujin të freskët: pak ujë avullonte nëpër mure, ndaj uji mbetej i freskët edhe në verë."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "posuda",
+            "en": "vessel",
+            "sq": "enë"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "pečena glina",
+            "en": "fired clay",
+            "sq": "baltë e pjekur"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height",
+            "sq": "Lartësia"
+          },
+          "v": {
+            "me": "oko 35 cm (procjena)",
+            "en": "about 35 cm (estimate)",
+            "sq": "rreth 35 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "mangal",
+      "gallery": "dom",
+      "model": "models/mangal.glb",
+      "thumb": "thumbs/mangal.png",
+      "kind": "object",
+      "size": {
+        "h": 0.45
+      },
+      "name": {
+        "me": "Mangal",
+        "en": "Brazier (mangal)",
+        "sq": "Mangalli"
+      },
+      "subtitle": {
+        "me": "Grijalica na žar, od mesinga i bakra",
+        "en": "Charcoal brazier of brass and copper",
+        "sq": "Ngrohëse me prush, prej tunxhi e bakri"
+      },
+      "description": {
+        "me": "Mangal od mesinga i bakra sa širokim obodom i kubetastim poklopcem. U njega se stavljao žar s ognjišta: grijao je sobu, a na obodu se podgrijavala džezva s kafom.",
+        "en": "A brass and copper brazier with a wide rim and a domed lid. Embers from the hearth were placed inside: it warmed the room, and the coffee pot was kept warm on its rim.",
+        "sq": "Mangall prej tunxhi e bakri me buzë të gjerë dhe kapak në formë kube. Në të vihej prush nga vatra: ngrohte dhomën, ndërsa mbi buzë mbahej e ngrohtë xhezvja me kafe."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "grijanje",
+            "en": "heating",
+            "sq": "ngrohje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "mesing, bakar",
+            "en": "brass, copper",
+            "sq": "tunxh, bakër"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height",
+            "sq": "Lartësia"
+          },
+          "v": {
+            "me": "oko 45 cm (procjena)",
+            "en": "about 45 cm (estimate)",
+            "sq": "rreth 45 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fildzan",
+      "gallery": "dom",
+      "model": "models/fildzan.glb",
+      "thumb": "thumbs/fildzan.png",
+      "kind": "object",
+      "size": {
+        "long": 0.14,
+        "label": {
+          "me": "Promjer tacne",
+          "en": "Saucer diameter",
+          "sq": "Diametri i pjatës"
+        }
+      },
+      "name": {
+        "me": "Fildžan",
+        "en": "Coffee cup (fildžan)",
+        "sq": "Filxhani"
+      },
+      "subtitle": {
+        "me": "Šoljica za kafu s tacnom",
+        "en": "Small coffee cup with saucer",
+        "sq": "Filxhan kafeje me pjatë"
+      },
+      "description": {
+        "me": "Mali fildžan bez drške, u ukrasnom bakarnom držaču, na tacni. Iz ovakvih šoljica pila se kafa iz džezve, polako i uz razgovor.",
+        "en": "A small handleless cup in a decorative copper holder, on a saucer. Coffee from the džezva was drunk from cups like this, slowly and with conversation.",
+        "sq": "Filxhan i vogël pa dorezë, në mbajtëse zbukuruese bakri, mbi pjatë. Nga filxhanë të tillë pihej kafeja e xhezves, ngadalë dhe me bisedë."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "posuđe za kafu",
+            "en": "coffee set",
+            "sq": "takëm kafeje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "porculan, bakar",
+            "en": "porcelain, copper",
+            "sq": "porcelan, bakër"
+          }
+        },
+        {
+          "k": {
+            "me": "Promjer tacne",
+            "en": "Saucer diameter",
+            "sq": "Diametri i pjatës"
+          },
+          "v": {
+            "me": "oko 14 cm (procjena)",
+            "en": "about 14 cm (estimate)",
+            "sq": "rreth 14 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
       "id": "cijev",
       "gallery": "polje",
       "model": "models/cijev.glb",
@@ -1164,6 +1371,69 @@
             "me": "oko 1 m (procjena)",
             "en": "about 1 m (estimate)",
             "sq": "rreth 1 m (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "budak",
+      "gallery": "polje",
+      "model": "models/budak.glb",
+      "thumb": "thumbs/budak.png",
+      "kind": "object",
+      "size": {
+        "long": 0.8
+      },
+      "name": {
+        "me": "Budak",
+        "en": "Mattock",
+        "sq": "Kazma"
+      },
+      "subtitle": {
+        "me": "Alat za kopanje",
+        "en": "Digging tool",
+        "sq": "Vegël për gërmim"
+      },
+      "description": {
+        "me": "Budak s gvozdenim sječivom na drvenoj dršci, za kopanje tvrde i kamenite zemlje, krčenje korijenja i kopanje kanala za vodu. Na kamenitim planinskim njivama bio je neophodan.",
+        "en": "A mattock with an iron head on a wooden handle, for digging hard and stony ground, grubbing out roots and cutting water channels. On stony mountain fields it was indispensable.",
+        "sq": "Kazmë me kokë hekuri në bisht druri, për gërmimin e tokës së fortë e me gurë, shkuljen e rrënjëve dhe hapjen e kanaleve të ujit. Në arat malore me gurë ishte e domosdoshme."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "poljoprivredni alat",
+            "en": "farm tool",
+            "sq": "vegël bujqësore"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "gvožđe, drvo",
+            "en": "iron, wood",
+            "sq": "hekur, dru"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 80 cm (procjena)",
+            "en": "about 80 cm (estimate)",
+            "sq": "rreth 80 cm (vlerësim)"
           }
         }
       ]
@@ -1759,6 +2029,391 @@
             "me": "oko 55 cm (procjena)",
             "en": "about 55 cm (estimate)",
             "sq": "rreth 55 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fes",
+      "gallery": "nosnja",
+      "model": "models/fes.glb",
+      "thumb": "thumbs/fes.png",
+      "kind": "object",
+      "heavy": true,
+      "size": {
+        "h": 0.15
+      },
+      "name": {
+        "me": "Fes",
+        "en": "Fez",
+        "sq": "Festja"
+      },
+      "subtitle": {
+        "me": "Muška kapa od crvene čohe",
+        "en": "Men's red felt cap",
+        "sq": "Kapelë burrash prej shajaku të kuq"
+      },
+      "description": {
+        "me": "Crveni fes s crnom kitom, kapa koja se u ovom kraju i širom osmanskog svijeta nosila od 19. vijeka do sredine 20. vijeka. Bio je dio svakodnevne i svečane muške nošnje.",
+        "en": "A red fez with a black tassel, a cap worn in this region and across the Ottoman world from the 19th century until the mid-20th century. It was part of men's everyday and festive dress.",
+        "sq": "Feste e kuqe me xhufkë të zezë, kapelë që në këto anë dhe në gjithë botën osmane mbahej nga shekulli XIX deri në mesin e shekullit XX. Ishte pjesë e veshjes së përditshme dhe festive të burrave."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "muška nošnja",
+            "en": "men's dress",
+            "sq": "veshje burrash"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "valjana vuna",
+            "en": "felted wool",
+            "sq": "lesh i shtypur"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height",
+            "sq": "Lartësia"
+          },
+          "v": {
+            "me": "oko 15 cm (procjena)",
+            "en": "about 15 cm (estimate)",
+            "sq": "rreth 15 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "lutka",
+      "gallery": "nosnja",
+      "model": "models/lutka.glb",
+      "thumb": "thumbs/lutka.png",
+      "kind": "object",
+      "size": {
+        "h": 0.35
+      },
+      "name": {
+        "me": "Lutka u nošnji",
+        "en": "Doll in folk costume",
+        "sq": "Kukulla me veshje popullore"
+      },
+      "subtitle": {
+        "me": "Mlada u svečanoj nošnji",
+        "en": "A bride in festive dress",
+        "sq": "Nuse me veshje festive"
+      },
+      "description": {
+        "me": "Lutka obučena kao mlada: bijela haljina, prsluk sa zlatovezom, nakit i ukras za glavu. Ovakve lutke pravile su se kao uspomena i pokazuju svečanu nošnju u malom, s mnogo detalja.",
+        "en": "A doll dressed as a bride: a white dress, a gold-embroidered vest, jewellery and a headdress. Dolls like this were made as keepsakes and show festive dress in miniature, in fine detail.",
+        "sq": "Kukull e veshur si nuse: fustan i bardhë, jelek i qëndisur me ar, stoli dhe zbukurim koke. Kukulla të tilla bëheshin si kujtim dhe e tregojnë veshjen festive në miniaturë, me shumë hollësi."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "lutka, uspomena",
+            "en": "doll, keepsake",
+            "sq": "kukull, kujtim"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "tkanina, vez",
+            "en": "fabric, embroidery",
+            "sq": "pëlhurë, qëndisje"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height",
+            "sq": "Lartësia"
+          },
+          "v": {
+            "me": "oko 35 cm (procjena)",
+            "en": "about 35 cm (estimate)",
+            "sq": "rreth 35 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ukras-dukati",
+      "gallery": "nosnja",
+      "model": "models/ukras-dukati.glb",
+      "thumb": "thumbs/ukras-dukati.png",
+      "kind": "object",
+      "heavy": true,
+      "size": {
+        "long": 0.25,
+        "label": {
+          "me": "Širina",
+          "en": "Width",
+          "sq": "Gjerësia"
+        }
+      },
+      "name": {
+        "me": "Ukras s dukatima",
+        "en": "Coin ornament",
+        "sq": "Stoli me dukate"
+      },
+      "subtitle": {
+        "me": "Zlatni nakit na baršunastom jastučiću",
+        "en": "Gold jewellery on a velvet cushion",
+        "sq": "Stoli ari mbi jastëk kadifeje"
+      },
+      "description": {
+        "me": "Raskošan ukras od zlatnih pločica i dukata, s treperavim iglicama koje podsjećaju na paunov rep, prikazan na jastučiću od crvenog baršuna. Dukati na nakitu bili su i ukras i porodična ušteđevina, koju je mlada donosila u novi dom.",
+        "en": "A lavish ornament of gold plates and coins, with trembling pins that recall a peacock's tail, shown on a red velvet cushion. Coins on jewellery were both decoration and family savings, which a bride brought to her new home.",
+        "sq": "Stoli e pasur me pllaka ari dhe dukate, me gjilpëra që dridhen e të kujtojnë bishtin e palloit, e vendosur mbi një jastëk kadifeje të kuqe. Dukatet në stoli ishin njëkohësisht zbukurim dhe kursim i familjes, që nusja e sillte në shtëpinë e re."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "nakit",
+            "en": "jewellery",
+            "sq": "stoli"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "zlatne pločice, dukati, baršun",
+            "en": "gold plates, coins, velvet",
+            "sq": "pllaka ari, dukate, kadife"
+          }
+        },
+        {
+          "k": {
+            "me": "Širina",
+            "en": "Width",
+            "sq": "Gjerësia"
+          },
+          "v": {
+            "me": "oko 25 cm (procjena)",
+            "en": "about 25 cm (estimate)",
+            "sq": "rreth 25 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "kljuc",
+      "gallery": "brave",
+      "model": "models/kljuc.glb",
+      "thumb": "thumbs/kljuc.png",
+      "kind": "object",
+      "size": {
+        "long": 0.18
+      },
+      "name": {
+        "me": "Ključ",
+        "en": "Key",
+        "sq": "Çelësi"
+      },
+      "subtitle": {
+        "me": "Veliki kovani ključ",
+        "en": "Large forged key",
+        "sq": "Çelës i madh i farkëtuar"
+      },
+      "description": {
+        "me": "Veliki gvozdeni ključ s kovanim zupcima, za vrata kuće, ambara ili sanduka. Ovakvi ključevi rađeni su kod kovača zajedno s bravom, pa je svaki otvarao samo svoju.",
+        "en": "A large iron key with forged bits, for the door of a house, a granary or a chest. Keys like this were made by the blacksmith together with the lock, so each one opened only its own.",
+        "sq": "Çelës i madh hekuri me dhëmbë të farkëtuar, për derën e shtëpisë, hambarit ose sëndukut. Çelësa të tillë bëheshin nga farkëtari bashkë me bravën, ndaj secili hapte vetëm të vetën."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "brava i ključ",
+            "en": "lock and key",
+            "sq": "bravë e çelës"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "kovano gvožđe",
+            "en": "forged iron",
+            "sq": "hekur i farkëtuar"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 18 cm (procjena)",
+            "en": "about 18 cm (estimate)",
+            "sq": "rreth 18 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "katanac",
+      "gallery": "brave",
+      "model": "models/katanac.glb",
+      "thumb": "thumbs/katanac.png",
+      "kind": "object",
+      "size": {
+        "h": 0.12
+      },
+      "name": {
+        "me": "Katanac",
+        "en": "Padlock",
+        "sq": "Dryni"
+      },
+      "subtitle": {
+        "me": "Stari gvozdeni katanac",
+        "en": "Old iron padlock",
+        "sq": "Dry i vjetër hekuri"
+      },
+      "description": {
+        "me": "Masivni gvozdeni katanac s lukom i poklopcem preko otvora za ključ. Njime su se zaključavali štale, ambari, sanduci i kapije.",
+        "en": "A heavy iron padlock with a shackle and a cover over the keyhole. It secured stables, granaries, chests and gates.",
+        "sq": "Dry i rëndë hekuri me hark dhe kapak mbi vrimën e çelësit. Me të mbylleshin stallat, hambarët, sëndukët dhe portat."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "brava i ključ",
+            "en": "lock and key",
+            "sq": "bravë e çelës"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "gvožđe",
+            "en": "iron",
+            "sq": "hekur"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height",
+            "sq": "Lartësia"
+          },
+          "v": {
+            "me": "oko 12 cm (procjena)",
+            "en": "about 12 cm (estimate)",
+            "sq": "rreth 12 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "brava",
+      "gallery": "brave",
+      "model": "models/brava.glb",
+      "thumb": "thumbs/brava.png",
+      "kind": "object",
+      "size": {
+        "long": 0.2
+      },
+      "name": {
+        "me": "Brava",
+        "en": "Door lock",
+        "sq": "Brava e derës"
+      },
+      "subtitle": {
+        "me": "Gvozdena brava za vrata",
+        "en": "Iron box lock for a door",
+        "sq": "Bravë hekuri për derë"
+      },
+      "description": {
+        "me": "Gvozdena brava u kutiji, s rezom koji se pomjera ključem i kvakom. Pričvršćivala se na unutrašnju stranu drvenih vrata, a rđa pokazuje dugu upotrebu.",
+        "en": "An iron box lock with a bolt moved by the key and the handle. It was fixed to the inside of a wooden door, and the rust shows long use.",
+        "sq": "Bravë hekuri në kuti, me shul që lëviz me çelës dhe dorezë. Mbërthehej në anën e brendshme të derës prej druri, dhe ndryshku tregon përdorim të gjatë."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "brava i ključ",
+            "en": "lock and key",
+            "sq": "bravë e çelës"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "gvožđe",
+            "en": "iron",
+            "sq": "hekur"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 20 cm (procjena)",
+            "en": "about 20 cm (estimate)",
+            "sq": "rreth 20 cm (vlerësim)"
           }
         }
       ]
