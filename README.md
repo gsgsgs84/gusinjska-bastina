@@ -14,6 +14,17 @@ A 3D museum in your hand: buildings and objects of Gusinje and Prokletije that y
   - `?ids=a,b,c` is the showcase: the side of the cube that points up chooses the exhibit.
 - QR codes for physical labels point at `…/#/e/<exhibit>`.
 - `staze.html`: hiking trails around Gusinje in 3D, also in AR in front of you (see below).
+- `soba-test.html`: room test for the *Mladina sehara* escape room (see below).
+
+## Mladina sehara escape room: room test (`soba-test.html`)
+An AR escape room in the Gusinje ethno room is planned. It uses no room tracking: every station has its own printed card with an ArUco marker (MIP_36h12, the same detector as the AR cube), placed next to its object, plus a 3-digit code to type if the camera fails. Step 0 measures every card spot in the real room before any puzzle is built.
+- **Cards:** `print/soba/mladina_sehara_test_kartice.pdf` (A4, print at 100 % on matte paper). Page 1: instructions (ME | EN), 100 mm scale, QR code to the test page, station table. Then all six stations in three sizes: S (60 mm black square, pages 2–3), M (90 mm, 4–6), L (120 mm, 7–12).
+- **Stations and ids:** `data/soba.json` (names ME/SQ/EN, codes, marker ids per size, marker cells). Ids picked by `tools/soba/pick_station_ids.py`: at least 14 bits from each other and from the cube and table-card ids.
+- **Test page:** the card in view selects itself (station + size). *Testiraj mjesto / Test this spot* measures for about 4 s: time to a fresh recognition, share of frames recognised, longest dropout, distance, size in the picture, angle, light. Verdict: PASS (recognised within 1 s, ≥ 85 % of frames, no dropout over 0.5 s), WEAK (within 3 s, ≥ 50 %), FAIL. *Domet / Range* records how far the card stays recognised while stepping back. The ⌨ button checks the fallback codes. Light condition (morning, day, evening, lamps) and a device name go with every result. *Rezultati / Results* shows an overview per station and size and copies everything as text. Results stay in the browser (localStorage).
+- Distances assume a 66° camera angle across the long side (about ±15 % on real phones).
+- Rebuild: `python3 tools/soba/build_data.py`, `python3 tools/soba/make_cards.py`, check with `python3 tools/soba/check_pdf.py` (every marker found once, right page, right size).
+- Simulation (`tools/soba/synth.py`, `synth_detect.mjs`, `synth_report.py`): the printed cards projected into the room photos with blur, noise, video compression, evening light and shake. End-to-end: `node tools/tests/soba_test.cjs VIDEO.mjpeg OUT spot|range [WxH] [me|en]` with a fake camera.
+- Fonts in `tools/soba/fonts/` (Marcellus, Golos Text) are under the SIL Open Font License (licence files next to them).
 
 ## Hiking trails (`staze.html`)
 A 3D relief of the Gusinje area (19.74–19.95 E, 42.45–42.60 N, about 17 × 17 km) with 18 hiking and cycling routes.

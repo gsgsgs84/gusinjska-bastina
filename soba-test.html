@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="sr-ME">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14120f">
+<title>Test sobe – Mladina sehara</title>
+<meta name="description" content="Room test for the Mladina sehara escape room: how quickly and reliably the phone recognises each station card.">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/soba-test.css">
+<script type="module" src="js/soba-test.js"></script>
+</head>
+<body>
+<video id="cam" playsinline muted autoplay></video>
+<canvas id="ov"></canvas>
+
+<section id="start">
+  <div class="sheet-in">
+    <div class="kick" data-t="kicker"></div>
+    <h1 data-t="title"></h1>
+    <p class="lead" data-t="lead"></p>
+    <label class="fld"><span data-t="device"></span><input id="devName" autocomplete="off" maxlength="40"></label>
+    <div class="fld"><span data-t="light"></span><div class="seg" id="lightSeg"></div></div>
+    <button class="btn primary" id="go" data-t="start"></button>
+    <p id="err"></p>
+    <div class="links">
+      <a href="print/soba/mladina_sehara_test_kartice.pdf" data-t="pdf"></a>
+      <button class="lang" type="button" data-lang></button>
+    </div>
+    <p class="note" data-t="note"></p>
+  </div>
+</section>
+
+<header id="top" hidden>
+  <div class="chip"><b data-t="title"></b><small id="lightBtn" role="button" tabindex="0"></small></div>
+  <div class="tr">
+    <button class="pill" type="button" data-lang></button>
+    <button class="pill" type="button" id="resBtn"></button>
+  </div>
+</header>
+
+<div id="hint" hidden></div>
+
+<footer id="dock" hidden>
+  <div id="live"></div>
+  <div class="row pick">
+    <div id="stations" class="stations"></div>
+    <div class="seg small" id="sizeSeg"></div>
+  </div>
+  <div id="stName"></div>
+  <div class="row acts">
+    <button class="btn primary" id="spotBtn" data-t="testSpot"></button>
+    <button class="btn" id="rangeBtn" data-t="range"></button>
+    <button class="btn icon" id="codeBtn" aria-label="Šifra">⌨</button>
+  </div>
+  <div id="meter"></div>
+</footer>
+
+<section id="run" class="panel" hidden>
+  <div class="run-t" id="runTitle"></div>
+  <div class="run-big" id="runBig"></div>
+  <div class="bar"><i id="runBar"></i></div>
+  <div class="run-sub" id="runSub"></div>
+  <div class="row"><button class="btn" id="runCancel" data-t="cancel"></button><button class="btn primary" id="runDone" data-t="done" hidden></button></div>
+</section>
+
+<section id="verdict" class="panel" hidden>
+  <div class="v-badge" id="vBadge"></div>
+  <div class="v-st" id="vSt"></div>
+  <div class="kv" id="vKv"></div>
+  <ul class="tips" id="vTips"></ul>
+  <button class="btn primary" id="vOk" data-t="ok"></button>
+</section>
+
+<section id="codeSheet" class="panel" hidden>
+  <div class="run-t" data-t="codeTitle"></div>
+  <input id="codeIn" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off">
+  <div id="codeOut"></div>
+  <button class="btn" id="codeClose" data-t="close"></button>
+</section>
+
+<section id="resSheet" class="sheet" hidden>
+  <div class="sh-head"><h2 data-t="results"></h2><button class="pill" id="resClose" data-t="close"></button></div>
+  <div id="sumBox"></div>
+  <div id="resList"></div>
+  <div class="row"><button class="btn primary" id="copyBtn" data-t="copy"></button><button class="btn danger" id="clearBtn" data-t="clear"></button></div>
+  <textarea id="copyArea" readonly hidden></textarea>
+</section>
+
+<div id="toast"></div>
+</body>
+</html>
