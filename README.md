@@ -15,6 +15,7 @@ A 3D museum in your hand: buildings and objects of Gusinje and Prokletije that y
 - QR codes for physical labels point at `…/#/e/<exhibit>`.
 - `staze.html`: hiking trails around Gusinje in 3D, also in AR in front of you (see below).
 - `soba-test.html`: room test for the *Mladina sehara* escape room (see below).
+- `mace.html`: *Gdje su mace?*, a hide-and-seek game with kittens in your own room (see below). `?demo` opens the test room, `?debug` shows tracking details, points and occluders.
 
 ## Mladina sehara escape room: room test (`soba-test.html`)
 An AR escape room in the Gusinje ethno room is planned. It uses no room tracking: every station has its own printed card with an ArUco marker (MIP_36h12, the same detector as the AR cube), placed next to its object, plus a 3-digit code to type if the camera fails. Step 0 measures every card spot in the real room before any puzzle is built.
@@ -47,6 +48,16 @@ Which trails, names, colours and labelled places are used is set in `tools/trail
 
 Data rights: OpenStreetMap (ODbL) and Copernicus DEM (free with credit) are credited on the page. The "Tri vrha" loop still uses a track from peaksofthebalkans.info (all rights reserved) because only half of it is mapped in OpenStreetMap; ask them, record our own track, or map the missing paths before a public launch.
 
+## Kitten game (`mace.html`)
+*Gdje su mace? / Ku janë macet? / Where are the kittens?* Nine kittens hide around the player's real room: 5 white ones sit still, 3 grey ones keep walking, and 1 black one comes out after the white ones are found, dashes between hiding places and runs away from a fast-moving phone.
+- **Room tracking:** the 8th Wall XR Engine (`external/xr/`, the same engine as the trails page), so it works without Google's AR services and on iPhone Safari. `enableWorldPoints` gives the tracked feature points.
+- **Scan:** after tracking starts, the player sweeps the phone around the room. The game keeps every tracked point (by id) and the camera path, until about 650 points and 5 of 12 directions are covered (*Sakrij mace* is allowed earlier).
+- **Hiding spots** (`js/mace-room.js`, plain JS, no three.js): floor height from the lowest dense layer of points; 10 cm voxels; flat layers with free space above (*on* a table or seat, *high* on a shelf or cupboard); floor next to things (*beside*); floor under a flat surface where floor points were seen (*under*); spots mostly hidden from where the player stood (*behind*). Walls and corners are rejected as surfaces, cats are nudged off nearby points, and a spot nobody could see from the scan path is dropped. Grey cats get walking loops found by a grid search on free floor; the black cat gets four resting places far apart.
+- **Hiding behind real things:** every occupied voxel becomes an invisible depth-only box around its own points, stretched to the voxel side where the neighbour is occupied too (so a table top is a thin slab and a wall a thin sheet). The same boxes decide in code whether a cat can be seen. On a phone without depth sensing this is approximate: edges can be a few centimetres off.
+- **Catching:** the cat-head reticle in the middle fills in the cat's colour while it is on a visible part of a cat: white 1 s, grey 2 s in total (it drains slowly when the cat slips away), black 1.5 s and only while the phone moves slowly. A fast phone within 2.6 m of the black cat makes her bolt; the reticle's eyes look where she ran. *Riba* (fish) lands where the reticle points and she comes to eat for 7 s. *Mjau* plays a meow from the nearest cat you cannot see yet (3D sound).
+- **Test room:** on a computer (or `?demo`) the same game runs in a furnished room (`js/mace-demo.js`) that produces tracked-like points for the same hiding-spot code. Mouse drag to look, W A S D to walk, Q / E down and up; on touch, one finger looks and two fingers walk.
+- Cats are built from simple shapes in `js/mace-cat.js` (poses: sit, loaf, sleep, peek, walk, run, happy); sounds are synthesised in `js/mace-sound.js`. Best time is kept in `localStorage` (`gkb.mace.best`).
+
 ## QR codes
 `print/qr/staze_android.png` and `print/qr/staze_windows.png` (made by `tools/qr/make_qr.py`, Xplore Prokletije mark in the middle, error correction H, each decoded again as a check):
 - **Android** → `staze.html?ar=1`: opens with the AR prompt; if the phone opens it in another browser (Samsung Internet, an app's built-in browser…), it first offers to reopen it in Chrome.
@@ -73,5 +84,7 @@ Data rights: OpenStreetMap (ODbL) and Copernicus DEM (free with credit) are cred
 ## Tests (tools/tests)
 - `ui.cjs` screenshots every page.
 - `e2e_cube.cjs` runs the cube page in Chromium with a fake camera video.
+- `mace.cjs` plays the kitten game in the test room (each white cat, the grey ones, the black cat's bolt, the fish, the win card).
+- `mace_video.cjs` films the test room as a phone video (`mace_film.html`), feeds it to Chromium as the camera, with matching motion-sensor events, and runs the real room-tracking engine: tracking, scan, hiding spots and cats over the picture.
 
-Third-party code: three.js (MIT); the 8th Wall XR Engine in `external/xr/` (© 2026 Niantic Spatial, Inc., used unmodified under the XR Engine License Agreement in `external/xr/LICENSE`, provided without warranty; it is credited on the trails page and with a "powered by 8th Wall" mark in AR; update it by copying `dist/` of the npm package `@8thwall/engine-binary`); the marker contour code is adapted from js-aruco / js-aruco2 (MIT, `js/cv/LICENSE-js-aruco.txt`).
+Third-party code: three.js (MIT); the 8th Wall XR Engine in `external/xr/` (© 2026 Niantic Spatial, Inc., used unmodified under the XR Engine License Agreement in `external/xr/LICENSE`, provided without warranty; it is credited on the trails page and with a "powered by 8th Wall" mark in AR on the trails and kitten pages; update it by copying `dist/` of the npm package `@8thwall/engine-binary`); the marker contour code is adapted from js-aruco / js-aruco2 (MIT, `js/cv/LICENSE-js-aruco.txt`).

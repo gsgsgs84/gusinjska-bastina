@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="sr-ME">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Gdje su mace? – Gusinjska kulturna baština</title>
+<meta name="description" content="Igra u proširenoj stvarnosti: devet maca se sakrije po vašoj sobi, a vi ih tražite kamerom telefona.">
+<meta name="theme-color" content="#f3ede3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14120f" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/museum.css">
+<link rel="stylesheet" href="css/mace.css">
+<script type="importmap">{"imports":{"three":"./js/vendor/three/three.module.min.js","three/addons/":"./js/vendor/three/addons/"}}</script>
+<script type="module" src="js/mace.js"></script>
+</head>
+<body class="mace">
+<div id="stage" class="m-stage"></div>
+
+<section id="start" class="m-start">
+  <header class="m-top">
+    <a class="m-museum" href="index.html" id="toMuseum">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      <span id="museumTxt"></span>
+    </a>
+    <div class="lang" role="group" aria-label="Jezik / Language">
+      <button data-lang="me">ME</button><button data-lang="sq">SQ</button><button data-lang="en">EN</button>
+    </div>
+  </header>
+  <div class="m-hero">
+    <div class="m-logo" id="logo"></div>
+    <p class="m-kicker" id="kicker"></p>
+    <h1 id="title"></h1>
+    <div class="m-heads" id="introHeads" aria-hidden="true"></div>
+    <p class="m-lead" id="lead"></p>
+    <ul class="m-kinds" id="kinds"></ul>
+    <div class="m-how"><span class="m-how-ret" id="howRet" aria-hidden="true"></span><p id="how"></p></div>
+    <button class="m-btn primary" id="btnAR"></button>
+    <button class="m-btn ghost" id="btnDemo"></button>
+    <p class="m-note" id="note"></p>
+    <p class="m-best" id="best" hidden></p>
+  </div>
+  <footer class="m-foot"><span id="foot"></span></footer>
+</section>
+
+<section id="hud" class="m-hud" hidden>
+  <div class="m-bar">
+    <button class="m-round" id="btnClose" aria-label="Zatvori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="m-list" id="list"></div>
+    <button class="m-round" id="btnSound" aria-label="Zvuk" aria-pressed="true"></button>
+  </div>
+  <div class="m-timer" id="timer"></div>
+  <div class="m-ret" id="ret" aria-hidden="true"></div>
+  <div class="m-msg" id="msg" role="status"></div>
+  <div class="m-scan" id="scan" hidden>
+    <div class="m-ring"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="bg"/><circle cx="22" cy="22" r="19" class="fg" id="scanRing"/></svg><span id="scanPct"></span></div>
+    <button class="m-btn primary small" id="btnHide" disabled></button>
+  </div>
+  <div class="m-actions" id="actions" hidden>
+    <button class="m-act" id="btnMeow"><span class="ico" aria-hidden="true">♪</span><span class="lbl" id="meowTxt"></span></button>
+    <button class="m-act" id="btnFish" hidden><span class="ico" aria-hidden="true"><svg viewBox="0 0 32 20"><path d="M2 10 Q10 1 20 4 L27 0 L26 10 L27 20 L20 16 Q10 19 2 10Z" fill="currentColor"/><circle cx="8" cy="9" r="1.6" fill="#fff"/></svg></span><span class="lbl" id="fishTxt"></span></button>
+  </div>
+  <div class="m-demo-help" id="demoHelp" hidden></div>
+  <a class="m-powered" id="powered" href="external/xr/LICENSE" target="_blank" rel="noopener" hidden><img src="external/xr/resources/powered-by.svg" alt="Powered by 8th Wall"></a>
+  <pre class="m-debug" id="debug" hidden></pre>
+</section>
+
+<section id="win" class="m-win" hidden>
+  <div class="m-card">
+    <div class="m-stars" id="stars"></div>
+    <h2 id="winTitle"></h2>
+    <div class="m-heads big" id="winHeads" aria-hidden="true"></div>
+    <dl class="m-stats" id="stats"></dl>
+    <button class="m-btn primary" id="btnAgain"></button>
+    <button class="m-btn ghost" id="btnRescan"></button>
+    <a class="m-link" href="index.html" id="winMuseum"></a>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status"></div>
+</body>
+</html>
