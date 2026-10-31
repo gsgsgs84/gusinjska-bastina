@@ -1,0 +1,25 @@
+<!doctype html><meta charset="utf-8"><style>html,body{margin:0;background:#efe7da}</style>
+<script type="importmap">{"imports":{"three":"../../js/vendor/three/three.module.min.js","three/addons/":"../../js/vendor/three/addons/"}}</script>
+<canvas id="c" width="1200" height="600"></canvas>
+<script type="module">
+// Preview a GLB from two sides plus its bounding box (for identifying uploads). ?src=path
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+const src = new URLSearchParams(location.search).get('src');
+const r = new THREE.WebGLRenderer({ canvas: c, antialias: true, preserveDrawingBuffer: true }); r.setSize(1200, 600, false);
+r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.NeutralToneMapping; r.setScissorTest(true);
+const s = new THREE.Scene(); s.background = new THREE.Color(0xefe7da);
+s.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture;
+const d = new THREE.DirectionalLight(0xffffff, 1.5); d.position.set(-1, 2, 2); s.add(d);
+const g = (await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(src)).scene; s.add(g);
+const box = new THREE.Box3().setFromObject(g), ctr = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3()), R = sz.length() / 2;
+const cam = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+[[0.6, 0.35], [-2.2, 0.9]].forEach(([az, el], i) => {
+  const dist = R / Math.sin(15 * Math.PI / 180) * 1.05;
+  cam.position.set(ctr.x + Math.sin(az) * Math.cos(el) * dist, ctr.y + Math.sin(el) * dist, ctr.z + Math.cos(az) * Math.cos(el) * dist);
+  cam.lookAt(ctr); r.setViewport(i * 600, 0, 600, 600); r.setScissor(i * 600, 0, 600, 600); r.render(s, cam);
+});
+document.title = 'done:' + [sz.x, sz.y, sz.z].map(v => v.toFixed(2)).join('x');
+</script>

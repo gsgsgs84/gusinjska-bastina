@@ -21,9 +21,9 @@
         "sq": "Shtëpia dhe familja"
       },
       "description": {
-        "me": "Posuđe, kolijevka, kopanja i stap: predmeti koji su držali kuću na okupu.",
-        "en": "Vessels, a cradle, a trough and a churn: the objects that kept a household going.",
-        "sq": "Ena, djepi, magjja dhe tundësi: sendet që e mbanin gjallë shtëpinë."
+        "me": "Posuđe, kolijevka, kopanja, stap, mlin za kafu i mašice: predmeti koji su držali kuću na okupu.",
+        "en": "Vessels, a cradle, a trough, a churn, a coffee mill and hearth tongs: the objects that kept a household going.",
+        "sq": "Ena, djepi, magjja, tundësi, mulli i kafesë dhe mashat: sendet që e mbanin gjallë shtëpinë."
       }
     },
     {
@@ -47,9 +47,22 @@
         "sq": "Leshi dhe endja"
       },
       "description": {
-        "me": "Od runa do ćilima: preslica i razboj.",
-        "en": "From fleece to rug: the distaff and the loom.",
-        "sq": "Nga leshi te qilimi: furka dhe vegja."
+        "me": "Od runa do ćilima: preslica, vreteno i razboj.",
+        "en": "From fleece to rug: the distaff, the spindle and the loom.",
+        "sq": "Nga leshi te qilimi: furka, boshti dhe vegja."
+      }
+    },
+    {
+      "id": "nosnja",
+      "name": {
+        "me": "Nošnja i nakit",
+        "en": "Costume and jewellery",
+        "sq": "Veshja dhe stolitë"
+      },
+      "description": {
+        "me": "Svečana nošnja i nakit: zlatovez, biseri i ukrasi za praznike i svadbe.",
+        "en": "Festive costume and jewellery: gold embroidery, pearls and wedding finery.",
+        "sq": "Veshja festive dhe stolitë: qëndisje ari, margaritarë dhe stoli dasme."
       }
     },
     {
@@ -654,6 +667,195 @@
       ]
     },
     {
+      "id": "mlin",
+      "gallery": "dom",
+      "model": "models/mlin.glb",
+      "thumb": "thumbs/mlin.png",
+      "kind": "object",
+      "size": {
+        "h": 0.32
+      },
+      "name": {
+        "me": "Mlin za kafu",
+        "en": "Coffee grinder",
+        "sq": "Mulli i kafesë"
+      },
+      "subtitle": {
+        "me": "Ručni mlin od mesinga",
+        "en": "Hand-cranked brass mill",
+        "sq": "Mulli dore prej tunxhi"
+      },
+      "description": {
+        "me": "Cilindrični ručni mlin za kafu, od mesinga ili bakra, s ručicom na vrhu. Pržena zrna mljela su se tik prije kuvanja, a kafa je bila znak gostoprimstva: u svakoj kući gost se dočekivao kafom.",
+        "en": "A cylindrical hand mill for coffee, made of brass or copper, with a crank on top. Roasted beans were ground just before brewing, and coffee was a sign of hospitality: every house welcomed a guest with a cup.",
+        "sq": "Mulli cilindrik dore për kafe, prej tunxhi ose bakri, me dorezë në krye. Kokrrat e pjekura bluheshin pak para zierjes, dhe kafeja ishte shenjë mikpritjeje: në çdo shtëpi miku pritej me kafe."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "kuhinjski pribor",
+            "en": "kitchenware",
+            "sq": "vegël kuzhine"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "mesing",
+            "en": "brass",
+            "sq": "tunxh"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height",
+            "sq": "Lartësia"
+          },
+          "v": {
+            "me": "oko 32 cm (procjena)",
+            "en": "about 32 cm (estimate)",
+            "sq": "rreth 32 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "masice",
+      "gallery": "dom",
+      "model": "models/masice.glb",
+      "thumb": "thumbs/masice.png",
+      "kind": "object",
+      "size": {
+        "long": 0.6
+      },
+      "name": {
+        "me": "Mašice",
+        "en": "Fire tongs",
+        "sq": "Mashat"
+      },
+      "subtitle": {
+        "me": "Za žar na ognjištu",
+        "en": "For embers on the hearth",
+        "sq": "Për prushin në vatër"
+      },
+      "description": {
+        "me": "Kovane gvozdene mašice kojima se uzimao i premještao žar na ognjištu, slagala drva i primicalo posuđe vatri. Ognjište je bilo središte kuće: na njemu se kuvalo, uz njega se grijalo i sjedjelo uveče.",
+        "en": "Forged iron tongs used to pick up and move embers on the hearth, stack firewood and push pots closer to the fire. The hearth was the heart of the house: people cooked on it, warmed themselves and gathered around it in the evening.",
+        "sq": "Masha të farkëtuara hekuri, me të cilat merrej e zhvendosej prushi në vatër, rregulloheshin drutë dhe afroheshin enët pranë zjarrit. Vatra ishte zemra e shtëpisë: aty gatuhej, ngrohej dhe rrihej mbrëmjeve."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "kućni alat",
+            "en": "household tool",
+            "sq": "vegël shtëpiake"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "kovano gvožđe",
+            "en": "forged iron",
+            "sq": "hekur i farkëtuar"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 60 cm (procjena)",
+            "en": "about 60 cm (estimate)",
+            "sq": "rreth 60 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tikva",
+      "gallery": "dom",
+      "model": "models/tikva.glb",
+      "thumb": "thumbs/tikva.png",
+      "kind": "object",
+      "size": {
+        "h": 0.5
+      },
+      "name": {
+        "me": "Tikva",
+        "en": "Bottle gourd",
+        "sq": "Kungulli"
+      },
+      "subtitle": {
+        "me": "Osušena tikva dugog vrata",
+        "en": "Dried long-necked gourd",
+        "sq": "Kungull i tharë me qafë të gjatë"
+      },
+      "description": {
+        "me": "Osušena tikva dugog vrata koja je u domaćinstvu služila kao posuda za vodu, rakiju ili sjeme. Ovakve tikve korišćene su i kao natega: kroz dugi vrat iz bureta se izvlačilo vino ili rakija.",
+        "en": "A dried long-necked gourd, used in the household as a container for water, rakija or seeds. Gourds like this also served as a siphon (natega) for drawing wine or rakija out of a barrel through the long neck.",
+        "sq": "Kungull i tharë me qafë të gjatë, që në shtëpi përdorej si enë për ujë, raki ose fara. Kunguj të tillë përdoreshin edhe për të nxjerrë verë ose raki nga fuçia nëpërmjet qafës së gjatë."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "posuda",
+            "en": "vessel",
+            "sq": "enë"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "osušena tikva",
+            "en": "dried gourd",
+            "sq": "kungull i tharë"
+          }
+        },
+        {
+          "k": {
+            "me": "Visina",
+            "en": "Height",
+            "sq": "Lartësia"
+          },
+          "v": {
+            "me": "oko 50 cm (procjena)",
+            "en": "about 50 cm (estimate)",
+            "sq": "rreth 50 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
       "id": "cijev",
       "gallery": "polje",
       "model": "models/cijev.glb",
@@ -827,6 +1029,206 @@
             "me": "oko 1,6 m (procjena)",
             "en": "about 1.6 m (estimate)",
             "sq": "rreth 1,6 m (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "preslica-vreteno",
+      "gallery": "vuna",
+      "model": "models/preslica-vreteno.glb",
+      "thumb": "thumbs/preslica-vreteno.png",
+      "kind": "object",
+      "size": {
+        "long": 0.9
+      },
+      "name": {
+        "me": "Preslica i vreteno",
+        "en": "Distaff and spindle",
+        "sq": "Furka dhe boshti"
+      },
+      "subtitle": {
+        "me": "Ručna preslica s povjesmom vune",
+        "en": "Hand distaff with a tuft of wool",
+        "sq": "Furkë dore me shtëllungë leshi"
+      },
+      "description": {
+        "me": "Ručna preslica s ukrašenom glavom, na koju se vezivalo povjesmo očešljane vune, i vreteno na koje se namotavala ispredena nit. Žene su prele uz ognjište, ali i hodajući ili čuvajući stoku, s preslicom zadjenutom za pojas.",
+        "en": "A hand distaff with a decorated head, to which a tuft of combed wool was tied, and a spindle on which the spun thread was wound. Women spun by the hearth, but also while walking or herding, with the distaff tucked into the belt.",
+        "sq": "Furkë dore me kokë të zbukuruar, ku lidhej shtëllunga e leshit të krehur, dhe boshti ku mblidhej peri i tjerrë. Gratë tjernin pranë vatrës, por edhe duke ecur ose duke ruajtur bagëtinë, me furkën të ngulur në brez."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "predenje",
+            "en": "spinning",
+            "sq": "tjerrje"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "drvo, vuna",
+            "en": "wood, wool",
+            "sq": "dru, lesh"
+          }
+        },
+        {
+          "k": {
+            "me": "Dužina",
+            "en": "Length",
+            "sq": "Gjatësia"
+          },
+          "v": {
+            "me": "oko 90 cm (procjena)",
+            "en": "about 90 cm (estimate)",
+            "sq": "rreth 90 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "jelek",
+      "gallery": "nosnja",
+      "model": "models/jelek.glb",
+      "thumb": "thumbs/jelek.png",
+      "kind": "object",
+      "heavy": true,
+      "size": {
+        "long": 0.55,
+        "label": {
+          "me": "Širina",
+          "en": "Width",
+          "sq": "Gjerësia"
+        }
+      },
+      "name": {
+        "me": "Jelek",
+        "en": "Embroidered vest",
+        "sq": "Jeleku"
+      },
+      "subtitle": {
+        "me": "Prsluk vezen zlatnim nitima",
+        "en": "Vest embroidered with gold thread",
+        "sq": "Jelek i qëndisur me fije ari"
+      },
+      "description": {
+        "me": "Kratki prsluk (jelek) bogato izvezen zlatnim nitima, dio svečane ženske nošnje. Vez se radio ručno, sedmicama, a motivi grana i listova prenosili su se s koljena na koljeno. Jelek se nosio preko bijele košulje, za praznike i svadbe.",
+        "en": "A short vest (jelek) richly embroidered with gold thread, part of a woman's festive costume. The embroidery was done by hand over many weeks, and its branch and leaf motifs were passed down through generations. The jelek was worn over a white shirt on holidays and at weddings.",
+        "sq": "Jelek i shkurtër, i qëndisur pasur me fije ari, pjesë e veshjes festive të grave. Qëndisja bëhej me dorë për javë të tëra, dhe motivet e degëve e gjetheve trashëgoheshin brez pas brezi. Jeleku vishej mbi këmishën e bardhë, në festa dhe dasma."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "ženska nošnja",
+            "en": "women's costume",
+            "sq": "veshje grash"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "čoha, zlatni vez",
+            "en": "wool broadcloth, gold embroidery",
+            "sq": "shajak, qëndisje ari"
+          }
+        },
+        {
+          "k": {
+            "me": "Širina",
+            "en": "Width",
+            "sq": "Gjerësia"
+          },
+          "v": {
+            "me": "oko 55 cm (procjena)",
+            "en": "about 55 cm (estimate)",
+            "sq": "rreth 55 cm (vlerësim)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "kruna",
+      "gallery": "nosnja",
+      "model": "models/kruna.glb",
+      "thumb": "thumbs/kruna.png",
+      "kind": "object",
+      "size": {
+        "long": 0.28,
+        "label": {
+          "me": "Širina",
+          "en": "Width",
+          "sq": "Gjerësia"
+        }
+      },
+      "name": {
+        "me": "Svadbena kruna",
+        "en": "Bridal crown",
+        "sq": "Kurora e nusës"
+      },
+      "subtitle": {
+        "me": "Ukras za glavu mlade",
+        "en": "The bride's headdress",
+        "sq": "Stoli koke për nusen"
+      },
+      "description": {
+        "me": "Svadbena kruna ukrašena biserima i cvjetovima, koju je mlada nosila na dan vjenčanja. Ovakvi ukrasi za glavu bili su najdragocjeniji dio nevjestinske opreme i često su se čuvali i prenosili u porodici.",
+        "en": "A bridal crown decorated with pearls and flowers, worn by the bride on her wedding day. Headdresses like this were the most precious part of a bride's outfit and were often kept and handed down within the family.",
+        "sq": "Kurorë nusërie e zbukuruar me margaritarë dhe lule, që nusja e mbante ditën e dasmës. Stolitë e tilla të kokës ishin pjesa më e çmuar e pajës së nuses dhe shpesh ruheshin e trashëgoheshin në familje."
+      },
+      "facts": [
+        {
+          "k": {
+            "me": "Vrsta",
+            "en": "Type",
+            "sq": "Lloji"
+          },
+          "v": {
+            "me": "nakit, svadbeni običaji",
+            "en": "jewellery, wedding customs",
+            "sq": "stoli, zakone dasme"
+          }
+        },
+        {
+          "k": {
+            "me": "Materijal",
+            "en": "Material",
+            "sq": "Materiali"
+          },
+          "v": {
+            "me": "biseri, tkanina",
+            "en": "pearls, fabric",
+            "sq": "margaritarë, pëlhurë"
+          }
+        },
+        {
+          "k": {
+            "me": "Širina",
+            "en": "Width",
+            "sq": "Gjerësia"
+          },
+          "v": {
+            "me": "oko 28 cm (procjena)",
+            "en": "about 28 cm (estimate)",
+            "sq": "rreth 28 cm (vlerësim)"
           }
         }
       ]
