@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Planinarske staze – Gusinjska kulturna baština</title>
-<meta name="description" content="Gusinje i Prokletije u 3D: teren sa planinarskim stazama koji možete postaviti na sto.">
+<meta name="description" content="Gusinje i Prokletije u 3D: teren sa planinarskim stazama. U AR-u izraste iz odštampane mape na vašem stolu, na iPhoneu i Androidu.">
 <meta name="theme-color" content="#f3ede3" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14120f" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
@@ -34,7 +34,7 @@
       <div class="ar-cta-box">
         <button class="btn primary" id="ctaStart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3"/><path d="M12 7.5l4 2.3v4.4L12 16.5l-4-2.3V9.8z"/></svg><span id="ctaTxt"></span></button>
         <p id="ctaSub"></p>
-        <button class="linkbtn" id="ctaSkip"></button>
+        <div class="cta-links"><a class="linkbtn" id="ctaPdf" href="print/staze/AR_mapa_staze_A4.pdf" target="_blank" rel="noopener"></a><button class="linkbtn" id="ctaSkip"></button></div>
       </div>
     </div>
   </div>
@@ -44,6 +44,12 @@
     <button class="btn" id="btnLabels" aria-pressed="true"></button>
     <button class="btn" id="btnReset"></button>
   </div>
+  <section class="mapcard">
+    <a href="print/staze/AR_mapa_staze_A4.pdf" target="_blank" rel="noopener" class="thumb"><img src="print/staze/AR_mapa_staze_thumb.jpg" width="104" height="147" alt="" loading="lazy"></a>
+    <div><h2 id="mapH"></h2><p id="mapP"></p>
+      <div class="row"><a class="btn" id="mapA4" href="print/staze/AR_mapa_staze_A4.pdf" target="_blank" rel="noopener"></a><a class="btn" id="mapA3" href="print/staze/AR_mapa_staze_A3.pdf" target="_blank" rel="noopener"></a></div>
+    </div>
+  </section>
   <section class="trail-card" id="card" hidden></section>
   <header class="page-h"><h1 id="title"></h1><p id="lead"></p></header>
   <div id="groups"></div>
@@ -51,18 +57,41 @@
   <p class="note" id="note"></p>
   <details class="credits"><summary id="creditsH"></summary><ul id="credits"></ul></details>
 </main>
-<div id="xrOverlay" class="xr-overlay staze-xr" hidden>
-  <div class="xr-top"><span id="xrMsg"></span><button id="xrClose" class="xr-btn"></button></div>
-  <div class="xr-panel">
-    <div class="xr-trail"><button class="xr-btn round" id="xrPrev" aria-label="◀">◀</button><span id="xrTrail"></span><button class="xr-btn round" id="xrNext" aria-label="▶">▶</button></div>
-    <div class="xr-row">
-      <button class="xr-btn" id="xrSmaller" aria-label="−">−</button><span id="xrSize"></span><button class="xr-btn" id="xrBigger" aria-label="+">+</button>
-      <button class="xr-btn" id="xrRotL" aria-label="⟲">⟲</button><button class="xr-btn" id="xrRotR" aria-label="⟳">⟳</button>
+<div id="arRoot" class="ar-root" hidden></div>
+<div id="xrOverlay" class="xr-overlay staze-xr" hidden data-mode="search">
+  <div class="ar-top">
+    <button class="ar-icon" id="xrClose" aria-label="Zatvori"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="ar-status" role="status"><i class="ar-dot"></i><span id="xrMsg"></span></div>
+    <button class="ar-icon" id="xrMoreBtn" aria-label="Još"><svg viewBox="0 0 24 24" class="fill"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>
+  </div>
+  <p class="ar-hint" id="xrHint"></p>
+  <div class="ar-scan" id="xrScan" aria-hidden="true">
+    <svg class="ar-scan-ill" viewBox="0 0 200 150">
+      <path class="paper" d="M40 92 L160 92 L188 136 L12 136 Z"/>
+      <g class="mk"><rect x="30" y="95.5" width="11" height="7" rx="1"/><rect x="66" y="95.5" width="11" height="7" rx="1"/><rect x="123" y="95.5" width="11" height="7" rx="1"/><rect x="159" y="95.5" width="11" height="7" rx="1"/>
+        <rect x="16" y="124" width="14" height="9" rx="1"/><rect x="62" y="124" width="14" height="9" rx="1"/><rect x="124" y="124" width="14" height="9" rx="1"/><rect x="170" y="124" width="14" height="9" rx="1"/></g>
+      <g class="mt"><path d="M46 118 L76 72 L92 92 L112 52 L140 96 L152 84 L164 118 Z"/><path class="snow" d="M104 66 L112 52 L120 65 L114 62 L109 68 Z"/><path class="trail" d="M60 116 C80 104 86 98 98 96 C108 94 106 80 112 60"/></g>
+    </svg>
+    <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+  </div>
+  <div class="ar-arrow" id="xrArrow" hidden><svg viewBox="0 0 24 24"><path d="M5 12h13M12.5 6l6 6-6 6"/></svg></div>
+  <div class="ar-dock">
+    <section class="ar-coach" id="xrCoach" hidden>
+      <h2 id="coachH"></h2><p id="coachP"></p>
+      <div class="ar-coach-row"><button class="ar-btn primary" id="coachFree"></button><button class="ar-btn" id="coachRoom" hidden></button><a class="ar-btn" id="coachPdf" href="print/staze/AR_mapa_staze_A4.pdf" target="_blank" rel="noopener"></a></div>
+    </section>
+    <section class="ar-card" id="xrCard" hidden></section>
+    <div class="ar-trailbar">
+      <button class="ar-icon sm" id="xrPrev" aria-label="◀"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="ar-chip" id="xrTrail"></button>
+      <button class="ar-icon sm" id="xrNext" aria-label="▶"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
     </div>
-    <div class="xr-row">
-      <button class="xr-btn" id="xrFront"></button><button class="xr-btn" id="xrTable"></button><button class="xr-btn" id="xrQuick" hidden></button>
+    <div class="ar-tools">
+      <button class="ar-tool" id="xrHeight"><svg viewBox="0 0 24 24"><path d="M3 19l6-9 4 5 3-4 5 8z"/><path d="M12 3v4M10 5l2-2 2 2"/></svg><span></span></button>
+      <button class="ar-tool" id="xrLabels"><svg viewBox="0 0 24 24"><path d="M4 7h11l5 5-5 5H4z"/><circle cx="8.5" cy="12" r="1.3"/></svg><span></span></button>
+      <button class="ar-tool" id="xrPlace"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 7.5l2-1.5 2 1.5M12 6v6"/><path d="M9 16h6"/></svg><span></span></button>
+      <button class="ar-tool" id="xrTableBtn" hidden><svg viewBox="0 0 24 24"><path d="M3 14l9-5 9 5-9 5z"/><path d="M12 9V4"/></svg><span id="xrTableTxt"></span></button>
     </div>
-    <a class="xr-powered" id="xrPowered" href="external/xr/LICENSE" target="_blank" rel="noopener" hidden><img src="external/xr/resources/powered-by.svg" alt="Powered by 8th Wall"></a>
   </div>
 </div>
 <div class="ar-help" id="arHelp" hidden role="dialog" aria-modal="true" aria-labelledby="arHelpH">

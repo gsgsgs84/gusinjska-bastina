@@ -1,10 +1,13 @@
-// Planinarske staze – 3D relief of the Gusinje area with hiking trails: touch viewer and AR in front of you (WebXR, camera + motion sensors, Quick Look).
+// Planinarske staze – 3D relief of the Gusinje area with hiking trails: touch viewer and AR.
+// AR (js/staze-ar.js): own three.js camera AR on the printed AR map or in front of you, in Safari and Chrome alike;
+// WebXR (Chrome with Google's AR services) and Quick Look (iPhone) stay available as extras.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STR, detectLang, L, HTML_LANG, NUM_LOCALE } from './i18n.js';
+import { TrailsAR, arText } from './staze-ar.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -12,17 +15,37 @@ const store = { get(k, d) { try { const v = JSON.parse(localStorage.getItem(k));
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } } };
 let lang = store.get('gkb.lang', null) || detectLang();
 if (!STR[lang]) lang = 'me';
-const t = k => STR[lang][k] ?? STR.me[k] ?? k;
+const t = k => (PAGE[lang] && PAGE[lang][k]) ?? (STR[lang] && STR[lang][k]) ?? PAGE.me[k] ?? STR.me[k] ?? k;
 const tx = o => L(o, lang);
 const num = (v, d = 0, group = true) => Number(v).toLocaleString(NUM_LOCALE[lang] || 'en', { maximumFractionDigits: d, minimumFractionDigits: d, useGrouping: group });
 const m0 = v => num(Math.round(v), 0, false);     // heights: 2534, not 2.534
 
-const EXAGS = [1, 1.5, 2];
+const EXAGS = [1, 1.5, 2, 3];
 const SIZES = [0.3, 0.45, 0.6, 0.8, 1.0, 1.5];       // table model width in metres
 const R_TRAIL = 0.0021, R_SEL = 0.0036, R_PICK = 0.011;
 
 const S = { data: null, exag: store.get('gkb.staze.exag', 1.5), labels: store.get('gkb.staze.labels', true), sel: null,
-  walk: null, trails: new Map(), places: [], sizeIdx: 2, xr: null };
+  walk: null, trails: new Map(), places: [], sizeIdx: 2, xr: null, arK: 1 };
+if (!EXAGS.includes(S.exag)) S.exag = 1.5;
+
+// texts of this page that are new or changed since the shared dictionary in i18n.js
+const PAGE = {
+  me: { s_ar: 'Pokreni AR', s_ctaSub: 'Usmjerite kameru na odštampanu AR mapu: teren izraste iz papira i možete ga obići. Bez mape se pojavi ispred vas.',
+    s_mapH: 'AR mapa za štampu', s_mapP: 'Odštampajte je, stavite na sto i usmjerite kameru: Prokletije izrastu iz papira. Radi na iPhoneu i Androidu, u bilo kojoj veličini štampe.',
+    s_mapA4: 'PDF A4', s_mapA3: 'PDF A3 (izložba)', s_room: 'Prostorni AR', s_roomSub: 'Teren u prostoru bez mape (Chrome sa Googleovim AR uslugama). Obiđite ga i dodirnite stazu.',
+    s_camFail: 'Kamera se nije pokrenula.', s_inApp: 'Ovaj link je otvoren unutar druge aplikacije, koja ne daje kameru. Otvorite ga u Safariju (iPhone) ili Chromeu (Android).',
+    s_helpTitle: 'AR ne može početi ovdje', s_optSafari: 'Otvori u Safariju', s_optSafariSub: 'Na iPhoneu: dodirnite ••• ili ikonu za dijeljenje, pa „Otvori u Safariju“.' },
+  en: { s_ar: 'Start AR', s_ctaSub: 'Point the camera at the printed AR map: the terrain rises out of the paper and you can walk around it. Without the map it appears in front of you.',
+    s_mapH: 'Printable AR map', s_mapP: 'Print it, put it on a table and point the camera at it: Prokletije rise out of the paper. Works on iPhone and Android, at any print size.',
+    s_mapA4: 'PDF A4', s_mapA3: 'PDF A3 (exhibition)', s_room: 'Room AR', s_roomSub: 'The terrain in your room without the map (Chrome with Google’s AR services). Walk around it and tap a trail.',
+    s_camFail: 'The camera did not start.', s_inApp: 'This link opened inside another app, which does not give the camera to pages. Open it in Safari (iPhone) or Chrome (Android).',
+    s_helpTitle: 'AR cannot start here', s_optSafari: 'Open in Safari', s_optSafariSub: 'On iPhone: tap ••• or the share icon, then “Open in Safari”.' },
+  sq: { s_ar: 'Nis AR', s_ctaSub: 'Drejtojeni kamerën nga harta AR e printuar: terreni ngrihet nga letra dhe mund të ecni rreth tij. Pa hartë shfaqet para jush.',
+    s_mapH: 'Harta AR për printim', s_mapP: 'Printojeni, vendoseni në tavolinë dhe drejtoni kamerën: Bjeshkët e Nemuna ngrihen nga letra. Punon në iPhone dhe Android, në çdo madhësi printimi.',
+    s_mapA4: 'PDF A4', s_mapA3: 'PDF A3 (ekspozitë)', s_room: 'AR në hapësirë', s_roomSub: 'Terreni në dhomën tuaj pa hartë (Chrome me shërbimet AR të Google). Ecni rreth tij dhe prekni një shteg.',
+    s_camFail: 'Kamera nuk u nis.', s_inApp: 'Kjo lidhje u hap brenda një aplikacioni tjetër, që nuk ua jep kamerën faqeve. Hapeni në Safari (iPhone) ose Chrome (Android).',
+    s_helpTitle: 'AR nuk mund të niset këtu', s_optSafari: 'Hape në Safari', s_optSafariSub: 'Në iPhone: prekni ••• ose ikonën e ndarjes, pastaj „Hape në Safari“.' },
+};
 
 // ---------------- three.js scene ----------------
 const stage = $('#stage');
@@ -39,20 +62,22 @@ const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.35;
 const sun = new THREE.DirectionalLight(0xfff4e6, 1.7); sun.position.set(-1, 1.6, -0.9);      // from the north-west, like the painted shading
-scene.add(sun, new THREE.HemisphereLight(0xffffff, 0x6b5a45, 0.75));
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6b5a45, 0.75));
 const camera = new THREE.PerspectiveCamera(35, 1, 0.005, 20);
 const controls = new OrbitControls(camera, renderer.domElement);
 Object.assign(controls, { enableDamping: true, dampingFactor: 0.08, maxPolarAngle: Math.PI * 0.47, minDistance: 0.12, maxDistance: 2.6,
   screenSpacePanning: false, rotateSpeed: 0.75, panSpeed: 0.9 });
 controls.addEventListener('start', () => { $('#hint').style.opacity = '0'; });
 
-const holder = new THREE.Group();          // whole model; scaled to table size in AR
+const holder = new THREE.Group();          // whole model; placed and scaled in AR
+const rise = new THREE.Group();            // grows out of the paper when AR finds the map
 const terrainWrap = new THREE.Group();      // vertical exaggeration
 const trailGroup = new THREE.Group(), pickGroup = new THREE.Group(), pinGroup = new THREE.Group();
-holder.add(terrainWrap, trailGroup, pickGroup, pinGroup);
+rise.add(terrainWrap, trailGroup, pickGroup, pinGroup);
+holder.add(rise, sun, sun.target);          // the sun turns with the model, so its light always matches the painted shading
 scene.add(holder);
 const hiker = new THREE.Mesh(new THREE.SphereGeometry(0.0055, 20, 12), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xff7a00, emissiveIntensity: 0.9, roughness: 0.4 }));
-hiker.visible = false; holder.add(hiker);
+hiker.visible = false; rise.add(hiker);
 const reticle = new THREE.Mesh(new THREE.RingGeometry(0.07, 0.085, 48).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffffff }));
 reticle.matrixAutoUpdate = false; reticle.visible = false; scene.add(reticle);
 
@@ -68,7 +93,7 @@ reticle.matrixAutoUpdate = false; reticle.visible = false; scene.add(reticle);
 }
 
 function resize() {
-  if (renderer.xr.isPresenting || (S.xr && S.xr.kind !== 'webxr')) return;
+  if (renderer.xr.isPresenting || S.xr) return;
   const w = stage.clientWidth, h = stage.clientHeight;
   if (!w || !h) return;
   renderer.setSize(w, h, false);
@@ -99,7 +124,7 @@ async function init() {
   const pre = decodeURIComponent(location.hash.slice(1));
   if (S.trails.has(pre)) select(pre, false);
   const qs = new URLSearchParams(location.search);
-  if (qs.has('ar') && IS_ANDROID && !IS_CHROME) showChromeSheet();          // Android QR code opened outside Chrome
+  if (qs.has('ar') && IN_APP) showChromeSheet();          // QR code opened inside another app (no camera there)
   else if (pre !== 'ar-pomoc' && !qs.has('pc') && (pre === 'ar' || qs.has('ar') || matchMedia('(pointer: coarse)').matches)) showCTA();
   renderer.setAnimationLoop(frame);
   wireUI();
@@ -129,14 +154,16 @@ function paintText() {
   $('#note').textContent = t('s_note');
   $('#creditsH').textContent = t('s_credits');
   $('#northTxt').textContent = t('s_north');
-  $('#xrClose').textContent = t('close');
-  $('#xrFront').textContent = t('s_front'); $('#xrTable').textContent = t('s_toTable'); $('#xrQuick').textContent = t('s_moreAR');
+  $('#mapH').textContent = t('s_mapH'); $('#mapP').textContent = t('s_mapP'); $('#ctaPdf').textContent = arText(lang, 'pdf');
+  $('#xrTableTxt').textContent = t('s_toTable');
+  paintXRTools();
+  $('#mapA4').textContent = t('s_mapA4'); $('#mapA3').textContent = t('s_mapA3');
+  if (S.ar) S.ar.paint();
   if (!S.data) return;
   const styles = S.data.styles, colors = S.data.colors;
   $('#legend').innerHTML = Object.keys(styles).map(k => `<li><span class="line" style="background:${colors[k]}"></span>${esc(tx(styles[k]))}</li>`).join('') +
     `<li><span class="line border-line"></span>${esc(lang === 'en' ? 'State border' : lang === 'sq' ? 'Kufiri shtetëror' : 'Državna granica')}</li>`;
-  $('#credits').innerHTML = S.data.credits.map(c => `<li>${esc(c)}</li>`).join('') +
-    `<li>${esc(t('s_engine'))} <a href="external/xr/LICENSE" target="_blank" rel="noopener">XR Engine License Agreement</a></li>`;
+  $('#credits').innerHTML = S.data.credits.map(c => `<li>${esc(c)}</li>`).join('');
 }
 
 // ---------------- geometry ----------------
@@ -178,12 +205,12 @@ function buildTrails() {
   trailGroup.clear(); pickGroup.clear();
   for (const tr of S.data.trails) {
     const isSel = S.sel === tr.id;
-    const r = isSel ? R_SEL : R_TRAIL;
-    const mat = new THREE.MeshStandardMaterial({ color: tr.color, roughness: 0.55, emissive: tr.color, emissiveIntensity: isSel ? 0.35 : 0.12,
-      transparent: true, opacity: S.sel && !isSel ? 0.45 : 1 });
+    const r = (isSel ? R_SEL : R_TRAIL) * S.arK;
+    const mat = new THREE.MeshStandardMaterial({ color: tr.color, roughness: 0.55, emissive: tr.color, emissiveIntensity: (isSel ? 0.35 : 0.12) + (S.arK > 1 ? 0.18 : 0),
+      transparent: true, opacity: S.sel && !isSel ? (S.arK > 1 ? 0.6 : 0.45) : 1 });
     const mesh = new THREE.Mesh(tube(tr.segs, r, isSel ? 8 : 6, r * 0.55), mat);
     mesh.renderOrder = isSel ? 3 : 1;
-    const pick = new THREE.Mesh(tube(tr.segs, R_PICK, 5, 0.002), new THREE.MeshBasicMaterial({ visible: false }));
+    const pick = new THREE.Mesh(tube(tr.segs, R_PICK * (S.arK > 1 ? 1.6 : 1), 5, 0.002), new THREE.MeshBasicMaterial({ visible: false }));
     pick.userData.id = mesh.userData.id = tr.id;
     trailGroup.add(mesh); pickGroup.add(pick);
     S.trails.set(tr.id, { tr, mesh, pick });
@@ -236,11 +263,14 @@ function buildPlaces() {
 const v3 = new THREE.Vector3();
 function layoutLabels(cam, viewH, viewW) {
   if (!S.labels) return;
-  const k = 2 / (viewH * cam.projectionMatrix.elements[5]);
+  const rising = rise.scale.y < 0.9;           // AR: names appear once the relief has risen
+  pinGroup.visible = !rising;
+  if (rising) return;
+  const k = 2 / (viewH * cam.projectionMatrix.elements[5]) / (holder.scale.x || 1);     // constant size on screen, whatever the model's scale
   const placed = [];
   const order = [...S.places].sort((a, b) => a.userData.rank - b.userData.rank);
   for (const s of order) {
-    const hPx = s.userData.px * (S.xr ? 1.15 : 1);
+    const hPx = s.userData.px * (S.xr ? 1.1 : 1);
     s.scale.set(hPx * s.userData.aspect * k, hPx * k, 1);
     s.getWorldPosition(v3).project(cam);
     let ok = v3.z < 1 && v3.z > -1;
@@ -263,7 +293,7 @@ function select(id, focus = true) {
   for (const b of document.querySelectorAll('.trails button')) b.setAttribute('aria-pressed', String(b.dataset.id === id));
   history.replaceState(null, '', id ? '#' + encodeURIComponent(id) : location.pathname + location.search);
   renderCard();
-  updateXRTrail();
+  paintXRTrail();
   if (id && focus && !S.xr) focusTrail(id);
 }
 function trailPoints(tr) {       // all points; `gap` marks the first point of each further segment
@@ -305,14 +335,14 @@ function renderCard() {
   $('#btnWalk')?.addEventListener('click', () => S.walk ? stopWalk() : startWalk());
   drawProfile();
 }
-function drawProfile(cursorKm = null) {
-  const c = $('#prof'); if (!c || !S.sel) return;
+function drawProfile(cursorKm = null, c = $('#prof')) {
+  if (!c || !S.sel) return;
   const tr = S.trails.get(S.sel).tr, pr = profile(tr);
   const dpr = Math.min(devicePixelRatio || 1, 2), w = c.clientWidth, h = c.clientHeight;
   c.width = w * dpr; c.height = h * dpr;
   const g = c.getContext('2d'); g.scale(dpr, dpr);
   const css = getComputedStyle(document.documentElement);
-  const ink = css.getPropertyValue('--muted') || '#6e655a';
+  const ink = c.dataset.ink || css.getPropertyValue('--muted') || '#6e655a';
   const maxD = pr[pr.length - 1][0] || 1, eles = pr.map(p => p[1]);
   let lo = Math.min(...eles), hi = Math.max(...eles); const pad = Math.max(40, (hi - lo) * 0.12); lo -= pad; hi += pad;
   const X = d => 46 + (d / maxD) * (w - 50), Y = e => 6 + (1 - (e - lo) / (hi - lo)) * (h - 22);
@@ -337,11 +367,12 @@ function startWalk() {
   S.walk = { pts, pr, t0: performance.now(), dur: Math.min(30, Math.max(8, pr[pr.length - 1][0] * 2.2)) * 1000 };
   hiker.visible = true;
   const b = $('#btnWalk'); if (b) b.textContent = t('s_stop');
+  paintWalkBtn();
 }
 function stopWalk() {
   S.walk = null; hiker.visible = false;
   const b = $('#btnWalk'); if (b) b.textContent = t('s_walk');
-  drawProfile();
+  drawProfile(); paintWalkBtn(); drawProfile(null, $('#xrProf'));
 }
 function stepWalk(now) {
   const w = S.walk; if (!w) return;
@@ -350,7 +381,7 @@ function stepWalk(now) {
   const a = w.pr[k - 1], b = w.pr[k], u = b[0] > a[0] ? (km - a[0]) / (b[0] - a[0]) : 0;
   const pa = w.pts[k - 1], pb = w.pts[k];
   hiker.position.set(pa[0] + (pb[0] - pa[0]) * u, (pa[1] + (pb[1] - pa[1]) * u) * S.exag + 0.007, pa[2] + (pb[2] - pa[2]) * u);
-  if (!S.xr && (now | 0) % 3 === 0) drawProfile(km);
+  if ((now | 0) % 3 === 0) { if (!S.xr) drawProfile(km); else drawProfile(km, $('#xrProf')); }
 }
 
 // ---------------- camera ----------------
@@ -391,25 +422,32 @@ function pickTrail(origin, dir) {
 }
 let down = null;
 renderer.domElement.addEventListener('pointerdown', e => {
-  down = { x: e.clientX, y: e.clientY, t: performance.now(), rot0: holder.rotation.y, moved: false };
-});
-renderer.domElement.addEventListener('pointermove', e => {
-  if (!down || !S.xr || S.xr.kind === 'webxr') return;     // camera AR: drag sideways to turn the terrain
-  const dx = e.clientX - down.x;
-  if (Math.abs(dx) > 8) down.moved = true;
-  if (down.moved) holder.rotation.y = down.rot0 + dx / innerWidth * Math.PI * 1.5;
+  down = S.xr ? null : { x: e.clientX, y: e.clientY, t: performance.now() };
 });
 renderer.domElement.addEventListener('pointerup', e => {
-  if (!down || (S.xr && S.xr.kind === 'webxr')) { down = null; return; }
-  const moved = down.moved || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8, dt = performance.now() - down.t; down = null;
+  if (!down || S.xr) { down = null; return; }
+  const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8, dt = performance.now() - down.t; down = null;
   if (moved || dt > 500) return;
-  if (S.xr && S.xr.kind === 'slam' && S.xr.mode === 'table') return slamPlace(e.clientX, e.clientY);
   const r = renderer.domElement.getBoundingClientRect();
-  ray.setFromCamera(new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), S.xr ? arCam : camera);
+  ray.setFromCamera(new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
   const hits = ray.intersectObjects(pickGroup.children, false);
   if (hits.length) select(hits[0].object.userData.id);
-  else if (S.sel && !S.xr) select(S.sel);   // tap on empty terrain clears the selection
+  else if (S.sel) select(S.sel);   // tap on empty terrain clears the selection
 });
+const pv = new THREE.Vector3();
+function pickAt(ndc, cam) {
+  ray.setFromCamera(ndc, cam);
+  const ids = [...new Set(ray.intersectObjects(pickGroup.children, false).map(h => h.object.userData.id))];
+  if (ids.length < 2) return ids[0] || null;
+  // several trails under the finger (the touch area is wide in AR): the one whose line passes closest wins
+  let best = null, bd = Infinity;
+  rise.updateMatrixWorld(true);
+  for (const id of ids) for (const sg of S.trails.get(id).tr.segs) for (let k = 0; k < sg.length; k += 3) {
+    const d = ray.ray.distanceSqToPoint(pv.set(sg[k], sg[k + 1] * S.exag, sg[k + 2]).applyMatrix4(rise.matrixWorld));
+    if (d < bd) { bd = d; best = id; }
+  }
+  return best;
+}
 
 // ---------------- lists ----------------
 function renderLists() {
@@ -428,6 +466,14 @@ function renderLists() {
 
 function showCTA() { const c = $('#arCta'); if (c) c.hidden = false; }
 function hideCTA() { const c = $('#arCta'); if (c) c.hidden = true; }
+function cycleHeight() {
+  S.exag = EXAGS[(EXAGS.indexOf(S.exag) + 1) % EXAGS.length] || 1.5; store.set('gkb.staze.exag', S.exag);
+  terrainWrap.scale.y = S.exag; buildTrails(); buildPlaces(); paintText();
+  if (S.walk) startWalk();
+}
+function toggleLabels() {
+  S.labels = !S.labels; store.set('gkb.staze.labels', S.labels); pinGroup.visible = S.labels; paintText();
+}
 function wireUI() {
   $('#ctaStart').addEventListener('click', startAR);
   $('#arOpts').addEventListener('click', e => { const b = e.target.closest('[data-opt]'); if (b) helpChoice(b.dataset.opt); });
@@ -435,181 +481,217 @@ function wireUI() {
   $('#arHelp').addEventListener('click', e => { if (e.target.id === 'arHelp') hideHelp(); });
   if (location.hash === '#ar-pomoc') showHelp();
   $('#ctaSkip').addEventListener('click', hideCTA);
-  $('#btnHeight').addEventListener('click', () => {
-    S.exag = EXAGS[(EXAGS.indexOf(S.exag) + 1) % EXAGS.length] || 1.5; store.set('gkb.staze.exag', S.exag);
-    terrainWrap.scale.y = S.exag; buildTrails(); buildPlaces(); paintText();
-  });
-  $('#btnLabels').addEventListener('click', () => {
-    S.labels = !S.labels; store.set('gkb.staze.labels', S.labels); pinGroup.visible = S.labels; paintText();
-  });
+  $('#btnHeight').addEventListener('click', cycleHeight);
+  $('#btnLabels').addEventListener('click', toggleLabels);
   $('#btnReset').addEventListener('click', () => resetView());
   $('#btnTable').addEventListener('click', startAR);
+  // AR screen
+  $('#xrClose').addEventListener('click', stopAR);
+  const ids = () => S.data.trails.map(x => x.id);
+  const step = d => { const l = ids(), i = S.sel ? l.indexOf(S.sel) : (d > 0 ? -1 : 0); select(l[(i + d + l.length) % l.length]); };
+  $('#xrPrev').addEventListener('click', () => step(-1));
+  $('#xrNext').addEventListener('click', () => step(1));
+  $('#xrTrail').addEventListener('click', () => { if (!S.sel) step(1); else $('#xrOverlay').classList.toggle('card-min'); });
+  $('#xrHeight').addEventListener('click', cycleHeight);
+  $('#xrLabels').addEventListener('click', toggleLabels);
+  $('#xrPlace').addEventListener('click', () => {
+    if (S.xr && S.xr.kind === 'webxr') { S.xr.mode = 'front'; S.xr.needFront = true; xrMsg('s_arFront'); }
+    else if (S.ar) S.ar.togglePlace();
+  });
+  $('#xrTableBtn').addEventListener('click', () => {
+    if (!S.xr || S.xr.kind !== 'webxr') return;
+    if (!S.xr.hit) { toast(t('s_noTable')); return; }
+    S.xr.mode = 'table'; S.xr.placed = false; holder.visible = false; xrMsg('s_arTable');
+  });
+  $('#xrMoreBtn').addEventListener('click', showMore);
+  $('#coachFree').addEventListener('click', () => S.ar && S.ar.goFree(true));
+  $('#coachRoom').addEventListener('click', e => helpChoice(e.currentTarget.dataset.opt));
+  $('#xrCard').addEventListener('click', e => { if (e.target.closest('#xrWalk')) S.walk ? stopWalk() : startWalk(); });
   terrainWrap.scale.y = S.exag;
 }
 
 // ---------------- frame loop ----------------
 function frame(now, xrFrame) {
   const kind = S.xr && S.xr.kind;
-  if (kind === 'webxr' && xrFrame) xrStep(xrFrame);
-  else if (kind === 'cam') camStep();
-  else if (kind === 'slam') slamStep();
-  else if (!kind) { stepCamera(now); controls.update(); }
+  let cam = camera, vw = stage.clientWidth, vh = stage.clientHeight;
+  if (kind === 'webxr') {
+    if (xrFrame) xrStep(xrFrame);
+    cam = renderer.xr.isPresenting ? (renderer.xr.getCamera().cameras[0] || renderer.xr.getCamera()) : camera; vw = innerWidth; vh = innerHeight;
+  } else if (kind === 'cam') {
+    cam = S.ar.frame(now); vw = S.ar.w; vh = S.ar.h;
+  } else { stepCamera(now); controls.update(); }
   stepWalk(now);
-  const camLike = kind === 'cam' || kind === 'slam';
-  const cam = renderer.xr.isPresenting ? (renderer.xr.getCamera().cameras[0] || renderer.xr.getCamera()) : camLike ? arCam : camera;
-  layoutLabels(cam, kind ? innerHeight : stage.clientHeight, kind ? innerWidth : stage.clientWidth);
+  layoutLabels(cam, vh, vw);
   if (!kind) $('#north').style.transform = `rotate(${THREE.MathUtils.radToDeg(controls.getAzimuthalAngle())}deg)`;
-  renderer.render(scene, camLike ? arCam : camera);
+  renderer.render(scene, kind === 'cam' ? cam : camera);
 }
 
-// ---------------- AR: the terrain appears in front of you ----------------
-// 1. WebXR (Chrome on Android with Google Play Services for AR): world-tracked. The terrain floats in front of you at once;
-//    "On a table" puts it down on a real surface. Drag across the screen to turn it, tap a trail to select it.
-// 2. Camera + motion sensors (any phone, also iPhone): the camera picture is shown behind the 3D and the terrain stays
-//    in front of you while you turn the phone (rotation only). iPhone also offers Quick Look (world-tracked, no names).
 let toastT;
 function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 3600); }
-const FRONT_SIZE = 1;                       // index into SIZES: 45 cm wide when floating in front of you
-const arCam = new THREE.PerspectiveCamera(60, 1, 0.01, 50);
-let shadowMesh = null;
-holder.traverse(o => { if (o.isMesh && o.material?.map && o.renderOrder === -1) shadowMesh = o; });
-const quickLookOK = (() => { const a = document.createElement('a'); return !!(a.relList && a.relList.supports && a.relList.supports('ar')); })();
 
+// ---------------- AR ----------------
+// Camera AR (js/staze-ar.js) is the default on every phone: on the printed AR map, or in front of you without it.
+// Extras: WebXR "room AR" where Chrome has Google's AR services, Quick Look on iPhone.
 const UA = navigator.userAgent;
 const IS_ANDROID = /Android/i.test(UA);
 const IS_IOS = /iP(hone|ad|od)/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-const IN_APP = IS_ANDROID && /; wv\)|FBAN|FBAV|Instagram|Line\/|MicroMessenger|Telegram|Snapchat|Twitter|GSA\//i.test(UA);
-const IS_CHROME = /Chrome\/\d/.test(UA) && !/SamsungBrowser|EdgA|OPR\/|Firefox|YaBrowser|MiuiBrowser|UCBrowser|HuaweiBrowser|; wv\)|Version\/[\d.]+ Chrome/i.test(UA);
-// Real AR (you can walk around it) in this order: WebXR in Chrome -> Google's AR viewer (Android) -> Quick Look (iPhone).
-// Only if none works: a help sheet with the other ways (open in Chrome, install AR services, the printed cube/card, camera only).
+const IN_APP = /; wv\)|FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|Telegram|Snapchat|Twitter|LinkedInApp|GSA\//i.test(UA);
+const quickLookOK = (() => { const a = document.createElement('a'); return !!(a.relList && a.relList.supports && a.relList.supports('ar')); })();
+const FRONT_SIZE = 1;                       // WebXR: 45 cm wide when floating in front of you
+let webxrOK = false;
+(async () => { try { webxrOK = !!(navigator.xr && await navigator.xr.isSessionSupported('immersive-ar')); } catch { webxrOK = false; } })();
+
+const arCtx = {
+  renderer, scene, holder, rise, t, toast, select,
+  lang: () => lang,
+  exagLabel: () => num(S.exag, S.exag % 1 ? 1 : 0),
+  labels: () => S.labels,
+  paintTrail: () => paintXRTrail(),
+  pick: (ndc, cam) => pickAt(ndc, cam),
+  onExit: () => leaveAR(),
+  onCoach: () => { if (IS_IOS && quickLookOK) prepareUSDZ().catch(() => {}); },
+};
+
+function motionPermission() {      // iPhone asks for the motion sensors; the request must start inside the tap
+  const E = typeof DeviceOrientationEvent !== 'undefined' ? DeviceOrientationEvent : null;
+  return E && typeof E.requestPermission === 'function' ? E.requestPermission().catch(() => 'denied') : null;
+}
+function enterAR(kind) {
+  hideCTA(); hideHelp();
+  S.xr = { kind, S0: { pos: holder.position.clone(), quat: holder.quaternion.clone(), scale: holder.scale.x } };
+  controls.enabled = false;
+  S.arK = 1.9; buildTrails(); hiker.scale.setScalar(2.2);
+  const ov = $('#xrOverlay');
+  ov.dataset.kind = kind; ov.dataset.mode = kind === 'webxr' ? 'webxr' : 'search'; ov.hidden = false; ov.classList.remove('card-min');
+  $('#xrTableBtn').hidden = kind !== 'webxr';
+  // without the print, room AR that you can walk around: Quick Look on iPhone, WebXR where Chrome has Google's AR services
+  const room = $('#coachRoom'), roomKind = IS_IOS && quickLookOK ? 'quick' : webxrOK ? 'room' : '';
+  room.hidden = !roomKind; room.dataset.opt = roomKind;
+  room.textContent = roomKind === 'quick' ? arText(lang, 'quick') : t('s_room');
+  document.body.classList.add('in-ar');
+  paintXRTrail();
+}
+function leaveAR() {
+  if (!S.xr) return;
+  const s0 = S.xr.S0;
+  S.xr = null; S.ar = null;
+  holder.position.copy(s0.pos); holder.quaternion.copy(s0.quat); holder.scale.setScalar(s0.scale);
+  holder.visible = true; rise.scale.y = 1; reticle.visible = false; if (shadowMesh) shadowMesh.visible = true;
+  S.arK = 1; buildTrails(); hiker.scale.setScalar(1);
+  renderer.toneMappingExposure = 1;
+  $('#xrOverlay').hidden = true; $('#arRoot').hidden = true; document.body.classList.remove('in-ar');
+  if (renderer.domElement.parentElement !== stage) stage.prepend(renderer.domElement);
+  renderer.domElement.style.width = ''; renderer.domElement.style.height = '';
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  controls.enabled = true; resize();
+}
+
 function startAR() {
-  hideCTA();
-  const perms = motionPermissions();      // iPhone: must be asked inside the tap, before anything is awaited
-  (async () => {
-    let ok = false;
-    try { ok = !!(navigator.xr && await navigator.xr.isSessionSupported('immersive-ar')); } catch { ok = false; }
-    if (ok && await startWebXR()) return;
-    await perms;
-    if (await startSlamAR()) return;     // world tracking from the camera image: works without Google's AR services
-    showHelp();
-  })();
-}
-function motionPermissions() {
-  const ask = [];
-  for (const E of [typeof DeviceMotionEvent !== 'undefined' && DeviceMotionEvent, typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent]) {
-    if (E && typeof E.requestPermission === 'function') ask.push(E.requestPermission().catch(() => 'denied'));
+  const perm = motionPermission();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (webxrOK) { startWebXR(); return; }
+    showHelp('noapi'); return;
   }
-  return Promise.all(ask);
+  enterAR('cam');
+  S.ar = new TrailsAR(arCtx);
+  S.ar.start(perm).catch(e => {
+    console.warn('camera AR', e);
+    const why = e && e.name === 'NotAllowedError' ? 'c_errBlocked' : e && e.name === 'NotFoundError' ? 'c_errNoCam' : IN_APP ? 's_inApp' : 's_camFail';
+    leaveAR(); showHelp(why);
+  });
 }
-function arModelURL() { return new URL(S.data.arModel, location.href).href; }
-function pageURL(hash = '') { return location.href.split('#')[0] + hash; }
-function sceneViewer() {
-  const q = `file=${encodeURIComponent(arModelURL())}&mode=ar_preferred&resizable=true` +
-    `&title=${encodeURIComponent(t('s_title') + ' – Gusinje')}&link=${encodeURIComponent(pageURL())}`;
-  const url = `intent://arvr.google.com/scene-viewer/1.0?${q}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;` +
-    `action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(pageURL('#ar-pomoc'))};end;`;
-  toast(t('s_opening'));
-  location.href = url;
-  // if nothing opened (blocked, or no Google app), offer the other ways
-  setTimeout(() => { if (document.visibilityState === 'visible' && !S.xr) showHelp(); }, 2500);
+function stopAR() {
+  if (!S.xr) return;
+  if (S.xr.kind === 'webxr') S.xr.session?.end();
+  else if (S.ar) S.ar.stop();
 }
-// QR code for Android (staze.html?ar=1): AR is best in Chrome, so other browsers first offer to reopen it there
-function showChromeSheet() {
-  $('#arHelpH').textContent = t('s_chromeTitle');
-  $('#arHelpWhy').textContent = t('s_chromeWhy');
-  $('#arOpts').innerHTML = `<button class="opt first" data-opt="chrome"><b>${esc(t('s_optChrome'))}</b><small>${esc(t('s_chromeSub'))}</small></button>` +
-    `<button class="opt" data-opt="here"><b>${esc(t('s_stayHere'))}</b><small>${esc(t('s_stayHereSub'))}</small></button>`;
+
+// trail chip and card on the AR screen
+function paintXRTrail() {
+  const chip = $('#xrTrail'), card = $('#xrCard'); if (!chip) return;
+  const tr = S.sel && S.trails.get(S.sel) && S.trails.get(S.sel).tr;
+  chip.innerHTML = tr ? `<span class="dot" style="background:${tr.color}"></span><span class="nm">${esc(tx(tr.name))}</span>`
+    : `<span class="nm muted">${esc(t('s_noTrail'))}</span>`;
+  if (!tr) { card.hidden = true; card.innerHTML = ''; return; }
+  card.hidden = false;
+  const time = lang === 'me' ? tr.time : tr.time.replace('dana', lang === 'sq' ? 'ditë' : 'days');
+  card.innerHTML = `<div class="stats"><span>${num(tr.km, tr.km < 20 ? 1 : 0)} km</span><span>↑ ${m0(tr.up)} m</span><span>${esc(time)}</span>
+      <span class="chip" style="background:${tr.color}">${esc(tx(S.data.styles[tr.style]))}</span></div>
+    ${tr.style !== 'long' ? `<canvas id="xrProf" data-ink="rgba(246,241,231,.75)" aria-label="${esc(t('s_profile'))}"></canvas>
+    <button class="ar-walk" id="xrWalk" aria-pressed="${!!S.walk}"></button>` : ''}`;
+  paintWalkBtn();
+  requestAnimationFrame(() => drawProfile(null, $('#xrProf')));
+}
+function paintWalkBtn() {
+  const b = $('#xrWalk'); if (!b) return;
+  b.setAttribute('aria-pressed', String(!!S.walk));
+  b.innerHTML = S.walk ? `<svg viewBox="0 0 24 24"><rect x="7" y="6" width="3.5" height="12" rx="1"/><rect x="13.5" y="6" width="3.5" height="12" rx="1"/></svg>${esc(t('s_stop'))}`
+    : `<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>${esc(t('s_walk'))}`;
+}
+function paintXRTools() {
+  $('#xrHeight span').textContent = `${arText(lang, 'height')} ×${num(S.exag, S.exag % 1 ? 1 : 0)}`;
+  $('#xrLabels span').textContent = arText(lang, 'labels'); $('#xrLabels').setAttribute('aria-pressed', String(S.labels));
+  if (!S.ar) $('#xrPlace span').textContent = arText(lang, 'place');
+}
+function xrMsg(k) { $('#xrMsg').textContent = t(k); $('#xrHint').textContent = ''; }
+
+// "More" on the AR screen and the help sheet when AR cannot start
+function sheet(title, why, opts) {
+  $('#arHelpH').textContent = title;
+  $('#arHelpWhy').textContent = why || '';
+  $('#arHelpWhy').hidden = !why;
+  $('#arOpts').innerHTML = opts.map(([id, h, sub, href], i) => href
+    ? `<a class="opt${i ? '' : ' first'}" href="${esc(href)}" target="_blank" rel="noopener"><b>${esc(h)}</b><small>${esc(sub)}</small></a>`
+    : `<button class="opt${i ? '' : ' first'}" data-opt="${id}"><b>${esc(h)}</b><small>${esc(sub)}</small></button>`).join('');
   $('#arHelpClose').textContent = t('close');
   $('#arHelp').hidden = false;
 }
-function showHelp() {
+const ART = k => arText(lang, k);
+function pdfOpts() {
+  const T = ART;
+  return [['pdf', `${t('s_mapH')} · A4`, T('pdfSub'), 'print/staze/AR_mapa_staze_A4.pdf'], ['pdf3', `${t('s_mapH')} · A3`, T('pdfA3'), 'print/staze/AR_mapa_staze_A3.pdf']];
+}
+function showMore() {
+  arCtx.onCoach();
   const opts = [];
-  if (!slamFailed) opts.push(['slam', 's_optSlam', 's_optSlamSub']);
-  if (IS_ANDROID && !IN_APP) opts.push(['scene', 's_optScene', 's_optSceneSub']);
-  if (IS_ANDROID) opts.push(['chrome', 's_optChrome', 's_optChromeSub'], ['arcore', 's_optArcore', 's_optArcoreSub']);
-  if (IS_IOS && quickLookOK) opts.push(['quick', 's_optQuick', 's_optQuickSub']);
-  opts.push(['cube', 's_optCube', 's_optCubeSub'], ['cam', 's_optCam', 's_optCamSub'], ['test', 's_optTest', 's_optTestSub']);
-  $('#arHelpH').textContent = t('s_helpTitle');
-  $('#arHelpWhy').textContent = t(IN_APP ? 's_helpInApp' : 's_helpWhy') + (arError ? `\n(${arError})` : '');
-  $('#arOpts').innerHTML = opts.map(([id, h, sub], i) => `<button class="opt${i ? '' : ' first'}" data-opt="${id}"><b>${esc(t(h))}</b><small>${esc(t(sub))}</small></button>`).join('');
-  $('#arHelpClose').textContent = t('close');
-  $('#arHelp').hidden = false;
+  if (S.xr && S.xr.kind === 'cam') opts.push(['camera', ART('camera'), ART('cameraSub')]);
+  if (webxrOK) opts.push(['room', t('s_room'), t('s_roomSub')]);
+  if (IS_IOS && quickLookOK) opts.push(['quick', ART('quick'), ART('quickSub')]);
+  opts.push(...pdfOpts());
+  if (S.xr && S.xr.kind === 'cam') opts.push(['debug', ART('debug'), ART('debugSub')]);
+  sheet(ART('moreH'), '', opts);
+}
+function showHelp(why) {
+  const opts = [];
+  if (IN_APP && IS_ANDROID) opts.push(['chrome', t('s_optChrome'), t('s_optChromeSub')]);
+  if (IN_APP && IS_IOS) opts.push(['safari', t('s_optSafari'), t('s_optSafariSub')]);
+  opts.push(['retry', t('s_ar'), t('s_ctaSub')]);
+  if (webxrOK) opts.push(['room', t('s_room'), t('s_roomSub')]);
+  if (IS_IOS && quickLookOK) opts.push(['quick', t('s_optQuick'), t('s_optQuickSub')]);
+  opts.push(['cube', t('s_optCube'), t('s_optCubeSub')], ...pdfOpts());
+  sheet(t('s_helpTitle'), why ? t(why) : (IN_APP ? t('s_inApp') : ''), opts);
+}
+function showChromeSheet() {
+  sheet(t('s_chromeTitle'), t('s_inApp'), [IS_IOS ? ['safari', t('s_optSafari'), t('s_optSafariSub')] : ['chrome', t('s_optChrome'), t('s_chromeSub')],
+    ['here', t('s_stayHere'), t('s_stayHereSub')]]);
 }
 function hideHelp() { $('#arHelp').hidden = true; if (location.hash === '#ar-pomoc') history.replaceState(null, '', pageURL()); }
 function helpChoice(id) {
   hideHelp();
   if (id === 'here') { showCTA(); return; }
-  if (id === 'slam') { motionPermissions(); startSlamAR().then(ok => { if (!ok) { toast(t('s_slamFail')); } }); return; }
-  if (id === 'scene') return sceneViewer();
-  if (id === 'quick') return quickLook();
+  if (id === 'retry') { startAR(); return; }
+  if (id === 'safari') { toast(t('s_optSafariSub')); return; }
+  if (id === 'camera') { S.ar && S.ar.engine.nextCamera().then(ok => { if (!ok) toast('1 camera'); }); return; }
+  if (id === 'debug') { if (S.ar) { S.ar.debug = !S.ar.debug; if (!S.ar.debug && S.ar.debugCanvas) { S.ar.debugCanvas.remove(); S.ar.debugCanvas = null; } } return; }
+  if (id === 'room') { if (S.xr) { const go = () => startWebXR(); if (S.ar) { S.ar.stop(); setTimeout(go, 50); } else go(); } else startWebXR(); return; }
+  if (id === 'quick') { if (S.ar) S.ar.stop(); quickLook(); return; }
   if (id === 'chrome') { location.href = `intent://${location.host}${location.pathname}?ar=1#Intent;scheme=https;package=com.android.chrome;end`; return; }
-  if (id === 'arcore') { location.href = 'https://play.google.com/store/apps/details?id=com.google.ar.core'; return; }
-  if (id === 'test') { location.href = 'ar-test.html'; return; }
   if (id === 'cube') { location.href = 'kocka.html?id=staze-teren'; return; }
-  if (id === 'cam') {
-    // iPhone asks for motion-sensor permission; the request must start inside the tap
-    const perm = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'
-      ? DeviceOrientationEvent.requestPermission().catch(() => 'denied') : null;
-    startCamAR(perm);
-  }
 }
-function sizeLabel() {
-  const m = SIZES[S.sizeIdx], scale = Math.round(S.data.widthM / m / 100) * 100;
-  return `${num(m * 100)} cm · 1:${num(scale)}`;
-}
-function applySize() { holder.scale.setScalar(SIZES[S.sizeIdx]); $('#xrSize').textContent = sizeLabel(); }
-function updateXRTrail() {
-  const el = $('#xrTrail'); if (!el) return;
-  const tr = S.sel && S.trails.get(S.sel).tr;
-  el.innerHTML = tr ? `<span class="dot" style="background:${tr.color}"></span>${esc(tx(tr.name))}` : esc(t('s_noTrail'));
-}
-function msg(k) { $('#xrMsg').textContent = t(k); }
+function pageURL(hash = '') { return location.href.split('#')[0] + hash; }
 
-// shared overlay (buttons work the same in both kinds of AR)
-function openOverlay(kind) {
-  const ov = $('#xrOverlay');
-  S.xr = { kind, S0: { pos: holder.position.clone(), rot: holder.rotation.y, scale: holder.scale.x, size: S.sizeIdx }, mode: 'front', placed: false,
-    needFront: true, drag: null };
-  controls.enabled = false;
-  S.sizeIdx = FRONT_SIZE; applySize(); updateXRTrail();
-  holder.visible = false;
-  ov.hidden = false; msg('s_starting');
-  $('#xrClose').onclick = () => stopAR();
-  $('#xrSmaller').onclick = () => { S.sizeIdx = Math.max(0, S.sizeIdx - 1); applySize(); };
-  $('#xrBigger').onclick = () => { S.sizeIdx = Math.min(SIZES.length - 1, S.sizeIdx + 1); applySize(); };
-  $('#xrRotL').onclick = () => { holder.rotation.y += Math.PI / 6; };
-  $('#xrRotR').onclick = () => { holder.rotation.y -= Math.PI / 6; };
-  $('#xrFront').onclick = () => { S.xr.mode = 'front'; S.xr.needFront = true; msg(kind === 'cam' ? 's_arCam' : kind === 'slam' ? 's_slamPlaced' : 's_arFront'); };
-  $('#xrTable').onclick = () => {
-    if (kind === 'slam') { S.xr.mode = 'table'; msg('s_slamTable'); return; }
-    if (!S.xr.hit) { toast(t('s_noTable')); return; }
-    S.xr.mode = 'table'; S.xr.placed = false; holder.visible = false; msg('s_arTable');
-  };
-  $('#xrQuick').onclick = () => { stopAR(); showHelp(); };
-  $('#xrTable').hidden = kind === 'cam';
-  $('#xrPowered').hidden = kind !== 'slam';
-  $('#xrQuick').hidden = kind !== 'cam';
-  const ids = S.data.trails.map(x => x.id);
-  const step = d => { const i = S.sel ? ids.indexOf(S.sel) : (d > 0 ? -1 : 0); select(ids[(i + d + ids.length) % ids.length]); };
-  $('#xrPrev').onclick = () => step(-1); $('#xrNext').onclick = () => step(1);
-  document.body.classList.add('in-ar');
-  return ov;
-}
-function closeOverlay() {
-  const s0 = S.xr && S.xr.S0;
-  S.xr = null; $('#xrOverlay').hidden = true; reticle.visible = false; document.body.classList.remove('in-ar');
-  if (s0) { holder.position.copy(s0.pos); holder.rotation.y = s0.rot; holder.scale.setScalar(s0.scale); S.sizeIdx = s0.size; }
-  holder.visible = true; if (shadowMesh) shadowMesh.visible = true;
-  controls.enabled = true; resize();
-}
-function stopAR() {
-  if (!S.xr) return;
-  if (S.xr.kind === 'webxr') S.xr.session?.end();
-  else if (S.xr.kind === 'slam') stopSlamAR();
-  else stopCamAR();
-}
-
-// put the terrain in front of the viewer, a little below the eyes, south edge towards them, at a distance where it fits the view
+// ---- WebXR (Chrome with Google's AR services): the terrain floats in front of you; "On a table" puts it on a surface ----
+const SIZES_XR = [0.3, 0.45, 0.6, 0.8];
 const fwd = new THREE.Vector3(), eye = new THREE.Vector3();
 function placeInFront(camMatrix, proj) {
   eye.setFromMatrixPosition(camMatrix);
@@ -617,24 +699,29 @@ function placeInFront(camMatrix, proj) {
   if (fwd.lengthSq() < 1e-4) fwd.set(0, 0, -1);
   fwd.normalize();
   const e = proj ? proj.elements : null;
-  const half = e ? Math.atan(1 / Math.max(e[0], e[5])) : THREE.MathUtils.degToRad(15);   // narrower half-angle of the view
-  const size = SIZES[S.sizeIdx], radius = size * 0.5 * Math.hypot(1, S.data.depth) * 0.8;
+  const half = e ? Math.atan(1 / Math.max(e[0], e[5])) : THREE.MathUtils.degToRad(15);
+  const size = SIZES_XR[FRONT_SIZE], radius = size * 0.5 * Math.hypot(1, S.data.depth) * 0.8;
   const dist = Math.min(2.5, Math.max(0.45, radius / Math.tan(half)));
+  holder.scale.setScalar(size);
   holder.position.copy(eye).addScaledVector(fwd, dist); holder.position.y -= dist * 0.42;    // about 23° below eye level
   holder.rotation.set(0, Math.atan2(eye.x - holder.position.x, eye.z - holder.position.z), 0);
   holder.visible = true; if (shadowMesh) shadowMesh.visible = false;
   S.xr.placed = true; S.xr.needFront = false;
 }
-
-// ---- 1. WebXR ----
+let shadowMesh = null;
+holder.traverse(o => { if (o.isMesh && o.material?.map && o.renderOrder === -1) shadowMesh = o; });
 async function startWebXR() {
-  const ov = openOverlay('webxr');
-  for (const el of ov.querySelectorAll('.xr-top, .xr-panel')) el.addEventListener('beforexrselect', ev => ev.preventDefault());
+  enterAR('webxr');
+  const ov = $('#xrOverlay');
+  Object.assign(S.xr, { mode: 'front', placed: false, needFront: true, drag: null });
+  holder.visible = false;
+  for (const el of ov.querySelectorAll('.ar-top, .ar-dock')) el.addEventListener('beforexrselect', ev => ev.preventDefault());
+  xrMsg('s_starting');
   let session;
   try {
     session = await navigator.xr.requestSession('immersive-ar', { optionalFeatures: ['hit-test', 'dom-overlay'], domOverlay: { root: ov } });
   } catch (e) {
-    console.warn('WebXR session failed', e); closeOverlay(); return false;
+    console.warn('WebXR session failed', e); leaveAR(); showHelp('s_camFail'); return false;
   }
   S.xr.session = session;
   renderer.xr.setReferenceSpaceType('local');
@@ -643,8 +730,8 @@ async function startWebXR() {
   session.addEventListener('selectstart', e => { if (S.xr) S.xr.drag = { source: e.inputSource, yaw0: null, rot0: holder.rotation.y, moved: false }; });
   session.addEventListener('select', xrSelect);
   session.addEventListener('selectend', () => { if (S.xr) S.xr.drag = null; });
-  session.addEventListener('end', () => closeOverlay());
-  msg('s_arFront');
+  session.addEventListener('end', () => leaveAR());
+  xrMsg('s_arFront');
   return true;
 }
 const rayM = new THREE.Matrix4(), rayO = new THREE.Vector3(), rayD = new THREE.Vector3();
@@ -652,7 +739,7 @@ function xrStep(xrFrame) {
   const ref = renderer.xr.getReferenceSpace();
   if (S.xr.needFront) {
     const vp = xrFrame.getViewerPose(ref);
-    if (vp) placeInFront(rayM.fromArray(vp.transform.matrix), (renderer.xr.getCamera().cameras[0] || arCam).projectionMatrix);
+    if (vp) placeInFront(rayM.fromArray(vp.transform.matrix), (renderer.xr.getCamera().cameras[0] || camera).projectionMatrix);
   }
   if (S.xr.mode === 'table' && !S.xr.placed && S.xr.hit) {
     const hits = xrFrame.getHitTestResults(S.xr.hit);
@@ -682,229 +769,43 @@ function xrSelect(e) {
     renderer.xr.getCamera().getWorldPosition(camP);
     holder.rotation.set(0, Math.atan2(camP.x - tmpP.x, camP.z - tmpP.z), 0);     // south edge towards the visitor, north away
     holder.visible = true; if (shadowMesh) shadowMesh.visible = true; S.xr.placed = true;
-    msg('s_xrPlaced');
+    xrMsg('s_xrPlaced');
     return;
   }
   const pose = e.frame.getPose(e.inputSource.targetRaySpace, renderer.xr.getReferenceSpace());
   if (!pose) return;
   rayM.fromArray(pose.transform.matrix);
-  const id = pickTrail(rayO.setFromMatrixPosition(rayM), rayD.set(0, 0, -1).transformDirection(rayM));
-  if (id) select(id);
+  ray.set(rayO.setFromMatrixPosition(rayM), rayD.set(0, 0, -1).transformDirection(rayM));
+  const hits = ray.intersectObjects(pickGroup.children, false);
+  if (hits.length) select(hits[0].object.userData.id);
 }
 
-// ---- 2. camera picture + motion sensors ----
-const camEl = document.createElement('div'); camEl.className = 'cam-ar'; camEl.hidden = true;
-const video = document.createElement('video'); video.playsInline = true; video.muted = true; video.setAttribute('playsinline', '');
-camEl.appendChild(video); document.body.appendChild(camEl);
-const orient = { q: new THREE.Quaternion(), have: false, alpha0: null };
-const EUL = new THREE.Euler(), Q90 = new THREE.Quaternion(-Math.SQRT1_2, 0, 0, Math.SQRT1_2), QZ = new THREE.Quaternion(), ZAX = new THREE.Vector3(0, 0, 1);
-function onOrient(e) {
-  if (e.alpha == null && e.beta == null) return;
-  const d2r = Math.PI / 180, so = ((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) * d2r;
-  EUL.set((e.beta || 0) * d2r, (e.alpha || 0) * d2r, -(e.gamma || 0) * d2r, 'YXZ');
-  orient.q.setFromEuler(EUL).multiply(Q90).multiply(QZ.setFromAxisAngle(ZAX, -so));
-  if (!orient.have && S.xr && S.xr.kind === 'cam') { S.xr.needFront = true; msg('s_arCam'); }   // sensor came late: place again
-  orient.have = true;
-}
-async function startCamAR(orientPerm) {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    toast(quickLookOK ? t('preparing') : t('s_noAR')); if (quickLookOK) quickLook(); return;
-  }
-  openOverlay('cam');
-  let stream;
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
-  } catch (e) {
-    closeOverlay();
-    toast(e && e.name === 'NotAllowedError' ? t('c_errBlocked') : e && e.name === 'NotFoundError' ? t('c_errNoCam') : t('c_errStart'));
-    return;
-  }
-  video.srcObject = stream; camEl.hidden = false;
-  try { await video.play(); } catch { /* starts on the next tap */ }
-  camEl.appendChild(renderer.domElement);
-  S.xr.stream = stream;
-  orient.have = false;
-  if (orientPerm) await orientPerm;          // iPhone: wait for the motion-sensor answer (no events if refused)
-  window.addEventListener('deviceorientation', onOrient);
-  sizeCam();
-  window.addEventListener('resize', sizeCam);
-  arCam.position.set(0, 0, 0); arCam.quaternion.identity();
-  setTimeout(() => { if (S.xr && S.xr.kind === 'cam') msg(orient.have ? 's_arCam' : 's_arCamDrag'); }, 1200);
-  msg('s_arCam');
-}
-function sizeCam() {
-  if (!S.xr || S.xr.kind === 'webxr') return;
-  renderer.setSize(innerWidth, innerHeight, false);
-  renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%';
-  if (S.xr.kind === 'slam') {                  // the engine's camera picture; the projection comes from the engine
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    feed.width = Math.round(innerWidth * dpr); feed.height = Math.round(innerHeight * dpr);
-    return;
-  }
-  arCam.aspect = innerWidth / innerHeight;
-  arCam.fov = arCam.aspect < 1 ? 62 : 42;      // roughly a phone's main camera, after the picture is cropped to fill the screen
-  arCam.updateProjectionMatrix();
-}
-function camStep() {
-  if (orient.have) arCam.quaternion.copy(orient.q);
-  else arCam.quaternion.setFromEuler(EUL.set(-0.45, 0, 0, 'YXZ'));     // no sensor: look a little downwards
-  arCam.updateMatrixWorld();
-  if (S.xr.needFront && (orient.have || performance.now() - (S.xr.t0 ||= performance.now()) > 900)) placeInFront(arCam.matrixWorld, arCam.projectionMatrix);
-}
-function stopCamAR() {
-  window.removeEventListener('deviceorientation', onOrient);
-  window.removeEventListener('resize', sizeCam);
-  S.xr.stream?.getTracks().forEach(tr => tr.stop());
-  video.srcObject = null; camEl.hidden = true;
-  stage.prepend(renderer.domElement); renderer.domElement.style.width = ''; renderer.domElement.style.height = '';
-  closeOverlay();
-}
-
-// ---- 3. world tracking from the camera image (8th Wall engine): any phone, no Google AR services needed ----
-// The XR Engine (© Niantic Spatial, Inc., used unmodified under its licence, external/xr/LICENSE) runs SLAM on the
-// camera picture and gives the phone's position and turn in the room; our own three.js canvas is drawn on top.
-const feed = document.createElement('canvas'); feed.className = 'xr8-feed';
-let xr8Loading = null, slamFailed = false, arError = '', gumPatched = false;
-// The engine asks for an exact 960x720 back camera; some phones refuse that. Retry with the same size as a wish.
-function softenCamera() {
-  if (gumPatched || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
-  gumPatched = true;
-  const orig = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
-  navigator.mediaDevices.getUserMedia = c => orig(c).catch(e => {
-    if (!(e && /Overconstrained|NotReadable|NotFound/.test(e.name)) || !c || typeof c.video !== 'object') throw e;
-    const v = { facingMode: { ideal: 'environment' } };
-    for (const k of ['width', 'height']) if (c.video[k] != null) { const x = c.video[k]; v[k] = { ideal: typeof x === 'object' ? (x.exact ?? x.ideal ?? x.min) : x }; }
-    arError = `camera ${e.name}${e.constraint ? ' (' + e.constraint + ')' : ''}, retried`;
-    return orig({ ...c, video: v });
-  });
-}
-function loadXR8() {
-  if (window.XR8) return Promise.resolve(window.XR8);
-  if (!xr8Loading) xr8Loading = new Promise((resolve, reject) => {
-    const sc = document.createElement('script');
-    sc.src = 'external/xr/xr.js'; sc.async = true; sc.crossOrigin = 'anonymous';
-    sc.setAttribute('data-preload-chunks', 'slam');
-    const to = setTimeout(() => reject(new Error('XR engine timeout')), 60000);
-    window.addEventListener('xrloaded', () => { clearTimeout(to); resolve(window.XR8); }, { once: true });
-    sc.onerror = () => { clearTimeout(to); xr8Loading = null; reject(new Error('XR engine did not load')); };
-    document.head.appendChild(sc);
-  });
-  return xr8Loading;
-}
-async function startSlamAR() {
-  openOverlay('slam');
-  msg('s_slamLoading');
-  let XR8;
-  try {
-    XR8 = await loadXR8();
-    if (typeof XR8.loadChunk === 'function') await XR8.loadChunk('slam');
-  } catch (e) {
-    console.warn(e); slamFailed = true; arError = 'XR engine load: ' + (e && e.message || e); closeOverlay(); return false;
-  }
-  if (!S.xr || S.xr.kind !== 'slam') return true;          // closed while loading
-  video.hidden = true; camEl.prepend(feed); camEl.hidden = false; camEl.appendChild(renderer.domElement);
-  S.xr.slam = { status: 'LIMITED', reason: 'INITIALIZING', pose: false, wasNormal: false, t0: performance.now(), failed: false };
-  sizeCam(); window.addEventListener('resize', sizeCam);
-  const fail = why => {
-    if (!S.xr || S.xr.kind !== 'slam' || S.xr.slam.failed) return;
-    console.warn('XR engine:', why); S.xr.slam.failed = true; slamFailed = true;
-    arError = 'XR engine: ' + (typeof why === 'string' ? why : (why && (why.message || JSON.stringify(why))) || 'unknown');
-    stopSlamAR(); toast(t('s_slamFail')); showHelp();
-  };
-  try {
-    XR8.clearCameraPipelineModules();
-    XR8.XrController.configure({ disableWorldTracking: false, scale: 'responsive' });
-    XR8.addCameraPipelineModules([
-      XR8.GlTextureRenderer.pipelineModule(),          // draws the camera picture
-      XR8.XrController.pipelineModule(),               // world tracking (SLAM)
-      {
-        name: 'gkb-staze',
-        onStart: () => {
-          // the floor is y = 0 and the phone starts 1.4 units above it, so one unit is about a metre
-          XR8.XrController.updateCameraProjectionMatrix({ origin: { x: 0, y: 1.4, z: 0 }, facing: { w: 1, x: 0, y: 0, z: 0 } });
-        },
-        onUpdate: ({ processCpuResult }) => {
-          const r = processCpuResult && processCpuResult.reality;
-          if (!r || !S.xr || S.xr.kind !== 'slam') return;
-          if (r.position) arCam.position.set(r.position.x, r.position.y, r.position.z);
-          if (r.rotation) arCam.quaternion.set(r.rotation.x, r.rotation.y, r.rotation.z, r.rotation.w);
-          if (r.intrinsics) { arCam.projectionMatrix.fromArray(r.intrinsics); arCam.projectionMatrixInverse.copy(arCam.projectionMatrix).invert(); }
-          if (r.trackingStatus) S.xr.slam.status = r.trackingStatus;
-          if (r.trackingReason) S.xr.slam.reason = r.trackingReason;
-          S.xr.slam.pose = true;
-        },
-        onCameraStatusChange: st => { if (st && st.status === 'failed') fail(st); },
-        onException: e => fail(e),
-        listeners: [{ event: 'reality.trackingstatus', process: ({ detail }) => {
-          if (S.xr && S.xr.slam && detail) { S.xr.slam.status = detail.status; S.xr.slam.reason = detail.reason; }
-        } }],
-      },
-    ]);
-    softenCamera();
-    XR8.run({ canvas: feed, allowedDevices: XR8.XrConfig.device().ANY });
-  } catch (e) { fail(e); return true; }
-  return true;
-}
-let slamMsg = '';
-function slamStep() {
-  const sl = S.xr.slam;
-  arCam.updateMatrixWorld();
-  if (!sl || !sl.pose) return;
-  const normal = sl.status === 'NORMAL';
-  if (normal) sl.wasNormal = true;
-  if (S.xr.needFront && (normal || performance.now() - sl.t0 > 6000)) placeInFront(arCam.matrixWorld, arCam.projectionMatrix);
-  const k = !S.xr.placed ? 's_slamInit' : S.xr.mode === 'table' ? 's_slamTable' : (!normal && sl.wasNormal) ? 's_slamLost' : 's_slamPlaced';
-  if (k !== slamMsg) { slamMsg = k; msg(k); }
-}
-const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hitV = new THREE.Vector3();
-function slamPlace(cx, cy) {
-  // put the terrain where the user tapped: a tracked point on the table or floor, else the floor (y = 0)
-  let p = null;
-  try {
-    const hits = window.XR8.XrController.hitTest(cx / innerWidth, cy / innerHeight, ['FEATURE_POINT']) || [];
-    if (hits.length) p = new THREE.Vector3(hits[0].position.x, hits[0].position.y, hits[0].position.z);
-  } catch { p = null; }
-  if (!p) {
-    ray.setFromCamera(new THREE.Vector2(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1), arCam);
-    if (ray.ray.intersectPlane(groundPlane, hitV)) p = hitV.clone();
-  }
-  if (!p) return;
-  holder.position.copy(p);
-  arCam.getWorldPosition(camP);
-  holder.rotation.set(0, Math.atan2(camP.x - p.x, camP.z - p.z), 0);
-  holder.visible = true; if (shadowMesh) shadowMesh.visible = true;
-  S.xr.placed = true; S.xr.needFront = false; S.xr.mode = 'placed';
-}
-function stopSlamAR() {
-  try { window.XR8 && window.XR8.stop(); } catch (e) { console.warn(e); }
-  try { window.XR8 && window.XR8.clearCameraPipelineModules(); } catch (e) { console.warn(e); }
-  window.removeEventListener('resize', sizeCam);
-  feed.remove(); video.hidden = false; camEl.hidden = true; slamMsg = '';
-  stage.prepend(renderer.domElement); renderer.domElement.style.width = ''; renderer.domElement.style.height = '';
-  closeOverlay();
-}
-
-let usdzURL = null;
-async function quickLook() {
-  // Apple's AR viewer: the same real-size model as Google's (terrain, trails and name signs), converted on the phone
+// ---- Quick Look (iPhone): Apple's AR viewer with the real-size model (terrain, trails and name signs) ----
+let usdzURL = null, usdzBusy = null;
+function prepareUSDZ() { return usdzBusy ||= makeUSDZ().catch(e => { usdzBusy = null; throw e; }); }
+// Safari opens Quick Look only straight from a tap, so the model is prepared in advance (when AR starts on iPhone)
+function quickLook() {
+  if (usdzURL) { openQuickLook(); return; }
   toast(t('preparing'));
-  try {
-    if (!usdzURL) {
-      const { USDZExporter } = await import('three/addons/exporters/USDZExporter.js');
-      const gltf = await new GLTFLoader().loadAsync(S.data.arModel);
-      gltf.scene.traverse(o => {
-        if (o.isMesh && o.material.isMeshBasicMaterial) {     // the unlit name signs -> a material Quick Look accepts
-          const m = o.material;
-          o.material = new THREE.MeshStandardMaterial({ map: m.map, emissiveMap: m.map, emissive: 0xffffff, transparent: true, roughness: 1, metalness: 0 });
-        }
-      });
-      const s = new THREE.Scene(); s.add(gltf.scene); s.updateMatrixWorld(true);
-      const buf = await new USDZExporter().parseAsync(s, { quickLookCompatible: true, maxTextureSize: 2048 });
-      usdzURL = URL.createObjectURL(new Blob([buf], { type: 'model/vnd.usdz+zip' }));
+  prepareUSDZ().then(openQuickLook).catch(e => { console.warn(e); showHelp(); });
+}
+function openQuickLook() {
+  const a = document.createElement('a'); a.rel = 'ar'; a.href = usdzURL; a.appendChild(document.createElement('img'));
+  document.body.appendChild(a); a.click(); a.remove();
+}
+async function makeUSDZ() {
+  if (usdzURL) return;
+  const { USDZExporter } = await import('three/addons/exporters/USDZExporter.js');
+  const gltf = await new GLTFLoader().loadAsync(S.data.arModel);
+  gltf.scene.traverse(o => {
+    if (o.isMesh && o.material.isMeshBasicMaterial) {     // the unlit name signs -> a material Quick Look accepts
+      const m = o.material;
+      o.material = new THREE.MeshStandardMaterial({ map: m.map, emissiveMap: m.map, emissive: 0xffffff, transparent: true, roughness: 1, metalness: 0 });
     }
-    const a = document.createElement('a'); a.rel = 'ar'; a.href = usdzURL; a.appendChild(document.createElement('img'));
-    document.body.appendChild(a); a.click(); a.remove();
-  } catch (e) { console.warn(e); showHelp(); }
+  });
+  const sc = new THREE.Scene(); sc.add(gltf.scene); sc.updateMatrixWorld(true);
+  const buf = await new USDZExporter().parseAsync(sc, { quickLookCompatible: true, maxTextureSize: 2048 });
+  usdzURL = URL.createObjectURL(new Blob([buf], { type: 'model/vnd.usdz+zip' }));
 }
 
-window.__staze = { S, scene, camera, controls, renderer, holder, select, arCam, startAR, stopAR, orient };   // for tests
+window.__staze = { S, scene, camera, controls, renderer, holder, rise, select, startAR, stopAR };   // for tests

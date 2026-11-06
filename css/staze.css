@@ -42,18 +42,6 @@
 .credits summary { cursor: pointer; font-weight: 650; }
 .credits ul { padding-left: 18px; margin: 6px 0; }
 
-/* AR overlay */
-.staze-xr .xr-panel { display: grid; gap: 10px; justify-items: center; }
-.staze-xr .xr-trail { display: flex; gap: 8px; align-items: center; pointer-events: auto; max-width: 100%; }
-.staze-xr #xrTrail { background: rgba(20,18,15,.72); color: #fff; padding: 9px 12px; border-radius: 12px; font-size: 14px; max-width: 62vw; text-align: center;
-  display: flex; gap: 8px; align-items: center; }
-.staze-xr .xr-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; pointer-events: auto; }
-.staze-xr #xrSize { background: rgba(20,18,15,.72); color: #fff; padding: 9px 10px; border-radius: 12px; font-size: 13px; min-width: 84px; text-align: center; }
-.staze-xr .xr-btn { padding: 10px 14px; min-width: 44px; }
-.staze-xr .xr-btn.round { border-radius: 50%; width: 44px; height: 44px; padding: 0; }
-@media (min-width: 700px) { .tools { grid-template-columns: 1.6fr 1fr 1fr 1fr; } }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-
 /* "AR in front of me" call-to-action over the viewer */
 .ar-cta { position: absolute; inset: 0; display: grid; place-items: end center; padding: 16px; background: linear-gradient(transparent 35%, rgba(20,18,15,.35)); z-index: 2; }
 .ar-cta[hidden] { display: none; }
@@ -62,13 +50,6 @@
 .ar-cta-box p { margin: 0; color: var(--muted); font-size: 14px; }
 .linkbtn { border: 0; background: none; color: var(--muted); text-decoration: underline; font-size: 14px; cursor: pointer; padding: 4px; }
 
-/* camera AR (phones without WebXR): camera picture behind the 3D canvas */
-.cam-ar { position: fixed; inset: 0; z-index: 40; background: #000; }
-.cam-ar[hidden] { display: none; }
-.cam-ar video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cam-ar canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
-body.in-ar { overflow: hidden; }
-
 /* "real AR" help sheet */
 .ar-help { position: fixed; inset: 0; z-index: 70; background: rgba(20,18,15,.45); display: flex; align-items: flex-end; justify-content: center; }
 .ar-help[hidden] { display: none; }
@@ -76,15 +57,118 @@ body.in-ar { overflow: hidden; }
 .ar-help h2 { font-size: 21px; }
 .ar-help p { margin: 0; color: var(--muted); font-size: 14.5px; white-space: pre-line; }
 .ar-help .opts { display: grid; gap: 8px; }
-.ar-help .opt { text-align: left; border: 1px solid var(--line); background: var(--paper); border-radius: 14px; padding: 11px 14px; cursor: pointer; display: grid; gap: 2px; }
+.ar-help .opt { text-align: left; border: 1px solid var(--line); background: var(--paper); border-radius: 14px; padding: 11px 14px; cursor: pointer; display: grid; gap: 2px; color: inherit; text-decoration: none; }
+.ar-help p[hidden] { display: none; }
 .ar-help .opt b { font-size: 15.5px; }
 .ar-help .opt small { color: var(--muted); font-size: 13px; }
 .ar-help .opt.first { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
 .ar-help .opt.first small { color: inherit; opacity: .85; }
 
-/* world tracking (8th Wall engine): its camera canvas under our 3D canvas */
-.cam-ar .xr8-feed { position: absolute; inset: 0; width: 100%; height: 100%; }
-.cam-ar video[hidden] { display: none; }
-.staze-xr .xr-powered { pointer-events: auto; display: block; opacity: .85; }
-.staze-xr .xr-powered[hidden] { display: none; }
-.staze-xr .xr-powered img { height: 14px; width: auto; display: block; }
+
+.cta-links { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+/* printable AR map */
+.mapcard { display: grid; grid-template-columns: 104px 1fr; gap: 14px; align-items: center; margin: 12px 0 4px; padding: 12px 14px 12px 12px;
+  background: var(--paper); border-radius: var(--radius); box-shadow: var(--shadow); }
+.mapcard .thumb img { width: 104px; height: auto; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 6px 16px rgba(40,30,15,.16); transform: rotate(-2.5deg); }
+.mapcard h2 { font-size: 18px; }
+.mapcard p { margin: 4px 0 9px; font-size: 13.5px; line-height: 1.45; color: var(--muted); }
+.mapcard .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.mapcard .btn { min-height: 38px; padding: 7px 12px; font-size: 13.5px; border-radius: 11px; }
+
+/* ---------- AR: camera picture behind the 3D, glass controls on top ---------- */
+.ar-root { position: fixed; inset: 0; z-index: 40; background: #0b0a09; overflow: hidden; touch-action: none; }
+.ar-root[hidden] { display: none; }
+.ar-root video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ar-root canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; -webkit-user-select: none; user-select: none; }
+.ar-root .ar-debug { pointer-events: none; }
+body.in-ar { overflow: hidden; }
+
+.staze-xr { --glass: rgba(24, 21, 17, .58); --glass-line: rgba(255, 255, 255, .13); --ink-ar: #f6f1e7; --muted-ar: rgba(246, 241, 231, .76);
+  --acc-ar: #e3a659; --blur: blur(18px) saturate(1.5); color: var(--ink-ar); justify-content: flex-start; gap: 8px; }
+.staze-xr .glassy, .ar-icon, .ar-status, .ar-chip, .ar-coach, .ar-card, .ar-tools {
+  background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .22); }
+.ar-top { display: flex; align-items: center; gap: 10px; }
+.ar-icon { pointer-events: auto; width: 44px; height: 44px; border-radius: 50%; color: var(--ink-ar); display: grid; place-items: center; cursor: pointer; flex: none; padding: 0; }
+.ar-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+.ar-icon svg.fill { fill: currentColor; stroke: none; }
+.ar-icon.sm { width: 42px; height: 42px; }
+.ar-status { flex: 1; min-width: 0; height: 44px; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 0 16px;
+  border-radius: 999px; font-weight: 650; font-size: 15px; letter-spacing: .005em; }
+.ar-status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ar-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; background: #e3a33b; animation: arPulse 1.6s infinite; }
+[data-mode="map"] .ar-dot { background: #5ccb8f; box-shadow: 0 0 10px rgba(92, 203, 143, .9); animation: none; }
+[data-mode="free"] .ar-dot { background: #74b6ec; box-shadow: 0 0 10px rgba(116, 182, 236, .8); animation: none; }
+[data-mode="held"] .ar-dot { background: #cfc7ba; animation: none; }
+[data-mode="lost"] .ar-dot { background: #ef6b55; }
+[data-kind="webxr"] .ar-dot { background: #74b6ec; animation: none; }
+@keyframes arPulse { 0% { box-shadow: 0 0 0 0 rgba(227, 163, 59, .6); } 70% { box-shadow: 0 0 0 11px rgba(227, 163, 59, 0); } 100% { box-shadow: 0 0 0 0 rgba(227, 163, 59, 0); } }
+.ar-hint { margin: 0 auto; max-width: min(92vw, 440px); text-align: center; font-size: 13.5px; line-height: 1.42; color: var(--ink-ar);
+  background: rgba(24, 21, 17, .45); padding: 7px 12px; border-radius: 12px; transition: opacity .7s; text-shadow: 0 1px 2px rgba(0, 0, 0, .35); }
+.ar-hint.gone, .ar-hint:empty { opacity: 0; }
+
+.ar-scan { position: absolute; left: 50%; top: 44%; width: min(70vw, 340px); aspect-ratio: 1 / 1; transform: translate(-50%, -50%); pointer-events: none; }
+.ar-scan[hidden] { display: none; }
+.ar-scan .c { position: absolute; width: 36px; height: 36px; border: 3px solid rgba(246, 241, 231, .92); filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .45));
+  animation: arBreath 2.4s ease-in-out infinite; }
+.ar-scan .tl { left: 0; top: 0; border-right: 0; border-bottom: 0; border-radius: 12px 0 0 0; transform-origin: 100% 100%; }
+.ar-scan .tr { right: 0; top: 0; border-left: 0; border-bottom: 0; border-radius: 0 12px 0 0; transform-origin: 0 100%; }
+.ar-scan .bl { left: 0; bottom: 0; border-right: 0; border-top: 0; border-radius: 0 0 0 12px; transform-origin: 100% 0; }
+.ar-scan .br { right: 0; bottom: 0; border-left: 0; border-top: 0; border-radius: 0 0 12px 0; transform-origin: 0 0; }
+@keyframes arBreath { 50% { transform: scale(.86); opacity: .7; } }
+.ar-scan-ill { position: absolute; left: 14%; top: 22%; width: 72%; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .35)); }
+.ar-scan-ill .paper { fill: rgba(246, 241, 231, .2); stroke: rgba(246, 241, 231, .95); stroke-width: 2; stroke-linejoin: round; }
+.ar-scan-ill .mk rect { fill: rgba(246, 241, 231, .95); }
+.ar-scan-ill .mt { transform-box: fill-box; transform-origin: 50% 100%; animation: arRise 2.4s cubic-bezier(.3, .7, .2, 1) infinite; }
+.ar-scan-ill .mt path { fill: rgba(227, 166, 89, .9); stroke: #f6f1e7; stroke-width: 1.6; stroke-linejoin: round; }
+.ar-scan-ill .mt .snow { fill: #fff; stroke: none; }
+.ar-scan-ill .mt .trail { fill: none; stroke: #ef6b55; stroke-width: 2.4; stroke-dasharray: 4 3; }
+@keyframes arRise { 0%, 12% { transform: scaleY(.04); opacity: .2; } 55%, 85% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+[data-mode="lost"] .ar-scan-ill { display: none; }
+
+.ar-arrow { position: absolute; left: 0; top: 0; width: 48px; height: 48px; margin: -24px 0 0 -24px; border-radius: 50%; background: var(--acc-ar); color: #2a1d0c;
+  display: grid; place-items: center; box-shadow: 0 4px 16px rgba(0, 0, 0, .4); pointer-events: none; }
+.ar-arrow[hidden] { display: none; }
+.ar-arrow svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+.ar-dock { margin-top: auto; display: grid; gap: 8px; width: 100%; max-width: 500px; align-self: center; }
+.ar-coach { pointer-events: auto; border-radius: 22px; padding: 18px 16px 14px; display: grid; gap: 8px; animation: arUp .5s cubic-bezier(.2, .8, .2, 1); }
+.ar-coach[hidden] { display: none; }
+.ar-coach h2 { font-family: var(--serif); font-size: 23px; color: var(--ink-ar); }
+.ar-coach p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--muted-ar); }
+.ar-coach-row { display: grid; gap: 8px; margin-top: 6px; }
+.ar-btn { pointer-events: auto; display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 16px; border-radius: 15px;
+  border: 1px solid var(--glass-line); background: rgba(255, 255, 255, .09); color: var(--ink-ar); font-weight: 650; font-size: 15px; text-decoration: none; cursor: pointer; }
+.ar-btn.primary { background: var(--acc-ar); color: #24180a; border-color: transparent; }
+@keyframes arUp { from { transform: translateY(24px); opacity: 0; } }
+
+.ar-card { pointer-events: auto; border-radius: 18px; padding: 10px 12px 10px; display: grid; gap: 6px; animation: arUp .35s cubic-bezier(.2, .8, .2, 1); }
+.ar-card[hidden], .card-min .ar-card { display: none; }
+.ar-card .stats { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-size: 14px; font-weight: 650; }
+.ar-card .chip { font-size: 11.5px; }
+.ar-card canvas { width: 100%; height: 66px; display: block; }
+.ar-walk { justify-self: start; display: inline-flex; gap: 6px; align-items: center; border: 0; border-radius: 999px; padding: 7px 14px 7px 10px;
+  background: rgba(255, 255, 255, .13); color: var(--ink-ar); font-weight: 650; font-size: 13.5px; cursor: pointer; }
+.ar-walk svg { width: 16px; height: 16px; fill: currentColor; }
+.ar-walk[aria-pressed="true"] { background: var(--acc-ar); color: #24180a; }
+
+.ar-trailbar { pointer-events: auto; display: flex; align-items: center; gap: 8px; width: 100%; }
+.ar-chip { flex: 1; min-width: 0; height: 46px; display: flex; align-items: center; justify-content: center; gap: 9px; border-radius: 999px;
+  color: var(--ink-ar); font: 600 16px/1.2 var(--serif); padding: 0 16px; cursor: pointer; }
+.ar-chip .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ar-chip .muted { font: 600 14px/1.2 var(--sans); color: var(--muted-ar); }
+.ar-chip .dot { box-shadow: 0 0 0 2px rgba(255, 255, 255, .85); }
+
+.ar-tools { pointer-events: auto; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; width: 100%; padding: 5px; border-radius: 22px; }
+.ar-tool { display: grid; justify-items: center; gap: 3px; padding: 8px 4px 7px; border: 0; border-radius: 17px; background: transparent; color: var(--ink-ar);
+  font-size: 12px; font-weight: 600; cursor: pointer; line-height: 1.15; }
+.ar-tool:active { background: rgba(255, 255, 255, .1); }
+.ar-tool svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ar-tool[aria-pressed="true"] { color: var(--acc-ar); }
+.ar-tool[hidden] { display: none; }
+[data-mode="search"] .ar-trailbar, [data-mode="search"] .ar-tools, [data-mode="search"] .ar-card, [data-mode="lost"] .ar-card { display: none; }
+[data-kind="webxr"] .ar-scan, [data-kind="webxr"] #xrMoreBtn, [data-kind="webxr"] .ar-coach, [data-kind="webxr"] .ar-arrow, [data-kind="webxr"] .ar-hint { display: none !important; }
+[data-kind="webxr"] .ar-trailbar, [data-kind="webxr"] .ar-tools { display: flex; }
+[data-kind="webxr"] .ar-tools { display: grid; }
+@media (prefers-reduced-motion: reduce) { .ar-scan .c, .ar-scan-ill .mt, .ar-dot { animation: none; } }
