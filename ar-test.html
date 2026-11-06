@@ -78,8 +78,9 @@ document.getElementById('b1').onclick = async () => {
     if (E && typeof E.requestPermission === 'function') asks.push(E.requestPermission().then(r => log(`${E.name}.requestPermission: ${r}`)).catch(e => log(`${E.name}.requestPermission error: ${e}`, 'bad')));
   }
   await Promise.all(asks);
-  let nO = 0, nM = 0, lastO = null;
-  const o = e => { nO++; lastO = e; }, m = () => { nM++; };
+  let nO = 0, nM = 0, lastO = null, nAbs = 0, nRate = 0;
+  const o = e => { nO++; lastO = e; if (e.absolute === true) nAbs++; };
+  const m = e => { nM++; const r = e.rotationRate; if (r && (Number.isFinite(r.alpha) || Number.isFinite(r.beta) || Number.isFinite(r.gamma))) nRate++; };
   addEventListener('deviceorientation', o); addEventListener('devicemotion', m);
   const tryCam = async (label, c) => {
     try {
@@ -99,6 +100,10 @@ document.getElementById('b1').onclick = async () => {
   removeEventListener('deviceorientation', o); removeEventListener('devicemotion', m);
   yes(nO > 0, `deviceorientation events: ${nO}${lastO ? ` (alpha ${Math.round(lastO.alpha)}, beta ${Math.round(lastO.beta)}, gamma ${Math.round(lastO.gamma)})` : ''}`);
   yes(nM > 0, `devicemotion events: ${nM}`);
+  // no gyroscope: Chrome's orientation then comes from the accelerometer + compass (absolute) and there is no rotation rate
+  const gyro = nRate > 0 || (nO > 0 && nAbs === 0 && nM === 0);
+  yes(gyro, gyro ? 'gyroscope: yes (rotation rate reported)'
+    : `gyroscope: NO (${nAbs > 0 ? 'orientation from accelerometer + compass, marked absolute' : 'no rotation rate'}) – the trails AR takes the turning from the camera picture`);
 };
 
 // 2. 8th Wall engine

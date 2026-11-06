@@ -2,6 +2,8 @@
 // (tools/tests/staze_ar_synth.py room DIR). The motion sensors are simulated with noise, a drifting heading and lag,
 // and the surface is assumed at the wrong distance (as on a phone), so the room is rebuilt at another scale.
 // usage: node tools/tests/staze_room_track.mjs DIR [scale=1.4] [fovGuess=66]
+//   VISION=1: a phone without a gyroscope: the tracker gets only which way is down (late and noisy, like an
+//   accelerometer; GRAV=0: not even that) and takes the rotation from the picture
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
@@ -36,6 +38,16 @@ const gyro = (i) => {
   const n = rotAx([gauss(), gauss(), gauss()].map((v, _, a) => v / Math.hypot(...a)), 0.05 * Math.PI / 180 * Math.abs(gauss()));
   return mul(n, mul(wob, mul(F.R, drift)));
 };
+// accelerometer of a phone without a gyroscope: only which way is up (the room's y axis in camera axes), 3 frames late,
+// with 0.4° of noise and a slow 1° wobble from the hand's own acceleration
+const VISION = !!+(process.env.VISION || 0), GRAV = process.env.GRAV !== '0';
+const gravAt = i => {
+  const F = cfg.frames[Math.max(0, i - 3)], t = i / cfg.fps;
+  const wob = rotAx([Math.sin(t * 1.9), Math.cos(t * 1.3), 0.3].map((v, _, a) => v / Math.hypot(...a)), 1.0 * Math.PI / 180 * Math.sin(t * 2.3));
+  const n = rotAx([gauss(), gauss(), gauss()].map((v, _, a) => v / Math.hypot(...a)), 0.4 * Math.PI / 180 * Math.abs(gauss()));
+  const R = mul(n, mul(wob, F.R));
+  return [R[1], R[4], R[7]];
+};
 const proj = (R, C, Kk, X) => {
   const a = X[0] - C[0], b = X[1] - C[1], c = X[2] - C[2];
   const x = R[0] * a + R[1] * b + R[2] * c, y = R[3] * a + R[4] * b + R[5] * c, z = R[6] * a + R[7] * b + R[8] * c;
@@ -45,26 +57,34 @@ const proj = (R, C, Kk, X) => {
 const tr = new RoomTracker(w, h, OPTS);
 const F0 = cfg.frames[0], C0 = F0.C;
 // the app's room: the drifting sensor frame, surface assumed SCALE times farther than it is
-const D0 = rotY(0);
+// without a gyroscope the room's heading is arbitrary: the tracker's room is turned by YAW about the start camera
+const YAW = VISION ? 0.6 : 0;
+const D0 = rotY(YAW);
 const T3 = A => [A[0], A[3], A[6], A[1], A[4], A[7], A[2], A[5], A[8]];
 let D = D0;
 const planeY = C0[1] - SCALE * C0[1];
 const rows = [];
 // anchors: the terrain's centre on the desk and a peak 4 cm above it, in the true room and in the tracker's room
 const anchors = [[0, 0, 0], [0.03, 0.04, 0.02], [-0.15, 0, 0.12]];
-const toEst = X => [C0[0] + SCALE * (X[0] - C0[0]), C0[1] + SCALE * (X[1] - C0[1]), C0[2] + SCALE * (X[2] - C0[2])];
+const toEst = X => { const d = [X[0] - C0[0], X[1] - C0[1], X[2] - C0[2]], c = Math.cos(YAW), s = Math.sin(YAW);
+  // D0^T d (D0 = rotY(YAW)), scaled
+  return [C0[0] + SCALE * (c * d[0] - s * d[2]), C0[1] + SCALE * d[1], C0[2] + SCALE * (s * d[0] + c * d[2])]; };
 // STEP=n: only every n-th frame reaches the tracker (a slow phone); DROP=p: frames lost at random
 const STEP = +(process.env.STEP || 1), DROP = +(process.env.DROP || 0);
+const BLANK = (process.env.BLANK || '').split('-').filter(Boolean).map(Number);
 for (let i = 0; i < cfg.frames.length; i++) {
   if (i > 0 && (i % STEP || rnd() < DROP)) continue;
   const F = cfg.frames[i];
   const { data } = await sharp(path.join(dir, `r${String(i).padStart(4, '0')}.jpg`)).resize(w, h).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const rgba = new Uint8ClampedArray(data.buffer, data.byteOffset, data.length);
+  // BLANK=a-b: the camera is covered from a to b seconds (a hand, a pocket): tracking is lost and has to find its way back
+  if (BLANK.length === 2 && F.t >= BLANK[0] && F.t < BLANK[1]) for (let k = 0; k < rgba.length; k += 4) { const v = 70 + ((k * 2654435761) >>> 28); rgba[k] = rgba[k + 1] = rgba[k + 2] = v; }
   let r;
   if (i === 0) { tr.start(rgba, K, mul(F.R, D0), C0, planeY, F.t); r = { ok: true, R: mul(F.R, D0), C: C0, inl: tr.pts.length, n: tr.pts.length, ms: 0 }; }
   else {
     // like the app: the sensor rotation corrected by what the camera saw (the sensor's heading drifts)
-    r = tr.track(rgba, K, gyro(i), F.t);       // raw sensor rotation: the tracker uses only its change since the key frame
+    r = VISION ? tr.track(rgba, K, null, F.t, { vision: true, grav: GRAV ? gravAt(i) : null })
+      : tr.track(rgba, K, gyro(i), F.t);       // raw sensor rotation: the tracker uses only its change since the key frame
   }
   // the tracker's room is the true room turned by the sensor drift about the start camera... compare on screen instead:
   const errs = anchors.map(A => {
@@ -72,6 +92,7 @@ for (let i = 0; i < cfg.frames.length; i++) {
     return t && e && t[0] > -50 && t[0] < w + 50 && t[1] > -50 && t[1] < h + 50 ? Math.hypot(t[0] - e[0], t[1] - e[1]) / RS : null;
   });
   rows.push({ i, t: F.t, ok: r.ok, inl: r.inl, n: r.n, ms: r.ms, e: errs });
+  if (r.back) console.log(`   ${F.t.toFixed(2)} s: found the way back (remembered view, ${r.inl} matches), centre err ${rows.length > 1 && rows[rows.length - 2].e[0] != null ? rows[rows.length - 2].e[0].toFixed(1) : '-'} -> ${errs[0] != null ? errs[0].toFixed(1) : '-'} px`);
   if (process.env.DBG && tr.dbg && F.t > +process.env.DBG && F.t < +process.env.DBG + 2.5) {
     // how many tracked points are where the true camera sees them (LK right?) and how good is the prior pose
     const fromEst = X => [C0[0] + (X[0] - C0[0]) / SCALE, C0[1] + (X[1] - C0[1]) / SCALE, C0[2] + (X[2] - C0[2]) / SCALE];
@@ -99,11 +120,11 @@ for (let i = 0; i < cfg.frames.length; i++) {
 const med = a => { const s = a.filter(x => x != null).sort((x, y) => x - y); return s.length ? s[s.length >> 1] : NaN; };
 const p90 = a => { const s = a.filter(x => x != null).sort((x, y) => x - y); return s.length ? s[Math.floor(s.length * 0.9)] : NaN; };
 const seg = cfg.walk;
-console.log(`room tracker, every ${STEP}. frame, drop ${DROP}: ${rows.length} frames ${w}x${h}, surface assumed ${SCALE}x as far, focal guess ${FOV}° (true ${cfg.fov}°)`);
+console.log(`${VISION ? 'NO GYROSCOPE (rotation from the picture' + (GRAV ? ', accelerometer for level' : ', no accelerometer') + '); ' : ''}room tracker, every ${STEP}. frame, drop ${DROP}: ${rows.length} frames ${w}x${h}, surface assumed ${SCALE}x as far, focal guess ${FOV}° (true ${cfg.fov}°)`);
 for (let k = 0; k < seg.length - 1; k++) {
   const g = rows.filter(r => r.t >= seg[k][0] && r.t < seg[k + 1][0]);
   if (!g.length) continue;
   console.log(`  ${seg[k][0].toFixed(1)}-${seg[k + 1][0].toFixed(1)} s  ok ${(100 * g.filter(r => r.ok).length / g.length).toFixed(0)}%  points ${med(g.map(r => r.n))} inliers ${med(g.map(r => r.inl))}  centre err px med ${med(g.map(r => r.e[0])).toFixed(1)} p90 ${p90(g.map(r => r.e[0])).toFixed(1)} | peak ${med(g.map(r => r.e[1])).toFixed(1)} | edge ${med(g.map(r => r.e[2])).toFixed(1)}`);
 }
 console.log(`all: centre err med ${med(rows.map(r => r.e[0])).toFixed(1)} px, p90 ${p90(rows.map(r => r.e[0])).toFixed(1)}, end ${rows[rows.length - 1].e[0]?.toFixed(1)} px; ${med(rows.map(r => r.ms)).toFixed(1)} ms/frame`);
-fs.writeFileSync(path.join(dir, `room_result_${SCALE}_${FOV}.json`), JSON.stringify(rows));
+fs.writeFileSync(path.join(dir, `room_result_${SCALE}_${FOV}${VISION ? '_vision' : ''}.json`), JSON.stringify(rows));

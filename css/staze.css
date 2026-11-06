@@ -82,6 +82,8 @@
 .ar-root video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .ar-root canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; -webkit-user-select: none; user-select: none; }
 .ar-root .ar-debug { pointer-events: none; }
+/* phones without a gyroscope: the tracked camera picture, placed exactly like the video (js/staze-ar.js placeViews) */
+.ar-root canvas.ar-frame { inset: auto; pointer-events: none; }
 body.in-ar { overflow: hidden; }
 
 .staze-xr { --glass: rgba(24, 21, 17, .58); --glass-line: rgba(255, 255, 255, .13); --ink-ar: #f6f1e7; --muted-ar: rgba(246, 241, 231, .76);

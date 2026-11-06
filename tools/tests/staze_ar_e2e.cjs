@@ -1,9 +1,11 @@
 // End-to-end test of the trails AR in headless Chrome with a simulated phone: the camera plays the synthetic walk
 // (tools/tests/staze_ar_synth.py path DIR) and matching motion-sensor events are sent, so the AR overlay can be compared
 // with the true position of the printed map on screen. Serve the repo on port 8130 first.
-// usage: node tools/tests/staze_ar_e2e.cjs SYNTH_DIR OUT [gyro|nogyro|free|room] [me|sq|en]
+// usage: node tools/tests/staze_ar_e2e.cjs SYNTH_DIR OUT [gyro|nogyro|free|room|roomlevel] [me|sq|en]
 //   room: SYNTH_DIR from `staze_ar_synth.py room`; taps "No map" and walks round the desk, checking that the relief
 //   stays on the same spot of the desk.
+//   roomlevel: the same walk on a phone without a gyroscope (Chrome's accelerometer + compass orientation, marked
+//   absolute, with a wandering heading; motion events without a rotation rate).
 // Software WebGL here draws only ~2 frames per second, so the page runs in slow motion: its clock (performance.now and
 // requestAnimationFrame) runs at TIME_K of real time, which gives the app ~12 frames per second of its own time.
 const fs = require('fs');
@@ -11,12 +13,15 @@ const path = require('path');
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const [dir, out, mode = 'gyro', lang = 'me'] = process.argv.slice(2);
 const TIME_K = +(process.env.TIME_K || 0.15);
-const cfg = JSON.parse(fs.readFileSync(path.join(dir, mode === 'room' ? 'room.json' : 'path.json')));
-if (mode === 'room') for (const f of cfg.frames) f.t_ = f.t_ || f.t;
+const ROOM = mode === 'room' || mode === 'roomlevel';
+const cfg = JSON.parse(fs.readFileSync(path.join(dir, ROOM ? 'room.json' : 'path.json')));
+if (ROOM) for (const f of cfg.frames) f.t_ = f.t_ || f.t;
 fs.mkdirSync(out, { recursive: true });
 
 // runs in the page before its own scripts
 function fakePhone({ cfg, mode, timeK }) {
+  const level = mode === 'roomlevel';
+  if (level) mode = 'room';
   if (timeK && timeK !== 1) {
     const realNow = performance.now.bind(performance), base = realNow();
     performance.now = () => base + (realNow() - base) * timeK;
@@ -84,7 +89,14 @@ function fakePhone({ cfg, mode, timeK }) {
       let t = (performance.now() - S.t0) / 1000 + 0.05 - 0.5 / cfg.fps;      // the app expects the picture 50 ms behind the sensor
       if (mode === 'room') t = Math.max(0, t - Math.min(t, S.walkT0));
       const o = S.orientation(S.qAt(Math.max(0, t)));
-      window.dispatchEvent(new DeviceOrientationEvent('deviceorientation', { alpha: o.alpha, beta: o.beta, gamma: o.gamma, absolute: false }));
+      if (level) {
+        // no gyroscope: level from the accelerometer (a little late and noisy), heading from a compass that wanders
+        const tt = (performance.now() - S.t0) / 1000, o2 = S.orientation(S.qAt(Math.max(0, t - 0.08)));
+        const nz = () => (Math.random() - 0.5) * 0.6;
+        window.dispatchEvent(new DeviceOrientationEvent('deviceorientation', { alpha: (o.alpha + 30 * Math.sin(tt * 0.7) + 360) % 360, beta: o2.beta + nz(), gamma: o2.gamma + nz(), absolute: true }));
+        const m = new Event('devicemotion'); m.rotationRate = null; m.accelerationIncludingGravity = { x: 0, y: 9.8, z: 0 }; m.interval = 16;
+        window.dispatchEvent(m);
+      } else window.dispatchEvent(new DeviceOrientationEvent('deviceorientation', { alpha: o.alpha, beta: o.beta, gamma: o.gamma, absolute: false }));
     }, 16);
     return c.captureStream(Math.max(4, 30 * timeK));
   };
@@ -92,7 +104,8 @@ function fakePhone({ cfg, mode, timeK }) {
 
 // room test helpers: the true camera of the frame on screen
 function roomHelpers() {
-  const cam = () => { const S = window.__synth, f = window.__cfg.frames[S.idx], e = window.__staze.S.ar.engine; return { f, K: window.__cfg.K, cov: e.cover }; };
+  // the picture on screen: the live camera, or (no gyroscope) the tracked picture shown with its pose
+  const cam = () => { const S = window.__synth, e = window.__staze.S.ar.engine, v = e.room.active && e.room.vision && e.room.view, f = window.__cfg.frames[v ? v.tag : S.idx]; return { f, K: window.__cfg.K, cov: e.cover }; };
   window.__deskPoint = ([x, y]) => {          // screen point -> point on the true desk (y = 0)
     const { f, K, cov } = cam();
     const u = (x + cov.offx) / cov.s, v = (y + cov.offy) / cov.s;
@@ -146,7 +159,7 @@ function sample() {
   await ctx.addInitScript(fakePhone, { cfg, mode, timeK: TIME_K });
   await ctx.addInitScript(c => { window.__cfg = c; }, cfg);
   await ctx.addInitScript(roomHelpers);
-  if (mode === 'room') await ctx.addInitScript(() => { window.__roomLog = []; });
+  if (ROOM) await ctx.addInitScript(() => { window.__roomLog = []; });
   await ctx.route('**/__synth/**', r => r.fulfill({ path: path.join(dir, path.basename(new URL(r.request().url()).pathname)), contentType: 'image/jpeg' }));
   const p = await ctx.newPage();
   const logs = []; p.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') logs.push(m.type() + ': ' + m.text()); }); p.on('pageerror', e => logs.push('ERR ' + e.message));
@@ -157,14 +170,14 @@ function sample() {
   await p.tap('#ctaStart');
   const shots = new Set(), samples = [];
   const keys = cfg.keys;
-  const total = mode === 'free' ? 16 : mode === 'room' ? cfg.frames.length / cfg.fps + 2.5 : keys[keys.length - 1].t2;
+  const total = mode === 'free' ? 16 : ROOM ? cfg.frames.length / cfg.fps + 2.5 : keys[keys.length - 1].t2;
   let anchor = null;
   let tapped = false, freeClicked = false;
   for (;;) {
     const s = await p.evaluate(sample);
     if (s) {
       samples.push(s);
-      if (mode === 'room') {
+      if (ROOM) {
         if (!freeClicked && s.coach) {
           await p.screenshot({ path: `${out}/1_coach.png` }); await p.tap('#coachFree'); freeClicked = true;
           await p.evaluate(() => { window.__synth.walkT0 = (performance.now() - window.__synth.t0) / 1000 + 0.6; });
@@ -180,7 +193,7 @@ function sample() {
           const tr = await p.evaluate(a => window.__projectTrue(a), anchor);
           s.roomErr = tr ? Math.hypot(tr[0] - s.center[0], tr[1] - s.center[1]) : null;
         }
-        s.room = await p.evaluate(() => { const e = window.__staze.S.ar.engine, r = e.room, c = e.camera; return { on: r.tracking, n: r.n, inl: r.inl, st: document.querySelector('#xrOverlay').dataset.room,
+        s.room = await p.evaluate(() => { const e = window.__staze.S.ar.engine, r = e.room, c = e.camera; return { on: r.tracking, n: r.n, inl: r.inl, st: document.querySelector('#xrOverlay').dataset.room, vision: r.vision, gyro: e.gyroOn, shown: r.view && r.view.tag,
           pos: r.pos.toArray(), q: c.quaternion.toArray(), corr: e.corr.toArray(), idx: window.__synth.idx, planeY: r.planeY }; });
         for (const [at, name] of [[0.4, '2_room_start'], [4.5, '3_room_side'], [7.2, '4_room_close'], [12, '5_room_back'], [15.6, '6_room_end']]) if (walk > at && !shots.has(name)) { shots.add(name); await p.screenshot({ path: `${out}/${name}.png` }); }
       } else if (mode === 'free') {
@@ -211,12 +224,13 @@ function sample() {
   }
   const sel = await p.evaluate(() => window.__staze.S.sel);
   fs.writeFileSync(`${out}/samples.json`, JSON.stringify(samples));
-  if (mode === 'room') fs.writeFileSync(`${out}/roomlog.json`, JSON.stringify(await p.evaluate(() => window.__roomLog)));
+  if (ROOM) fs.writeFileSync(`${out}/roomlog.json`, JSON.stringify(await p.evaluate(() => window.__roomLog)));
   // summary per stop of the walk
   const med = a => { const q = a.slice().sort((x, y) => x - y); return q.length ? q[q.length >> 1] : NaN; };
   const mx = a => a.length ? Math.max(...a) : NaN;
   console.log(`mode ${mode}; ${samples.length} samples; trail tapped at ${tapped ? tapped.map(Math.round) : '-'} -> selected ${sel}`);
-  if (mode === 'room') {
+  if (ROOM) {
+    console.log(`gyroscope ${samples[samples.length - 1].room.gyro ? 'yes' : 'no'}, rotation from the picture ${samples[samples.length - 1].room.vision ? 'yes' : 'no'}`);
     const g = samples.filter(s => s.walk > 0 && s.roomErr != null);
     const segs = [[0, 1.5], [1.5, 5.5], [5.5, 7.5], [7.5, 9], [9, 10.5], [10.5, 14.5], [14.5, 16.5]];
     for (const [a, b] of segs) {

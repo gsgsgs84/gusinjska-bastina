@@ -11,7 +11,8 @@ self.onmessage = e => {
       self.postMessage({ type: 'room', id: m.id, start: true, ok: r.ok, n: r.n, R: m.R, C: m.C, inl: r.n, ms: 0 });
     } else if (m.type === 'frame') {
       if (!tracker || !tracker.started || tracker.w !== m.w || tracker.h !== m.h) { self.postMessage({ type: 'room', id: m.id, ok: false, idle: true }); return; }
-      const r = tracker.track(new Uint8ClampedArray(m.buf), m.K, m.R, m.time);
+      // no gyroscope: the rotation comes from the picture, m.grav (accelerometer) keeps it level
+      const r = tracker.track(new Uint8ClampedArray(m.buf), m.K, m.R, m.time, m.vision ? { vision: true, grav: m.grav } : undefined);
       r.type = 'room'; r.id = m.id;
       self.postMessage(r);
     } else if (m.type === 'stop') { if (tracker) tracker.started = false; }

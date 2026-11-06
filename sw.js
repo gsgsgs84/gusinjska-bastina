@@ -1,6 +1,6 @@
 // Offline support: the app shell is cached on install; models and thumbnails are cached the first time they are opened.
 // Pages, code and data are fetched from the network first (the cache is the offline fallback), so phones never keep running an old version.
-const VERSION = 'gkb-v1.7.1';
+const VERSION = 'gkb-v1.7.2';
 const SHELL = [
   './', 'index.html', 'kocka.html', 'staze.html', 'soba-test.html', 'css/soba-test.css', 'js/soba-test.js', 'data/soba.json', 'css/staze.css', 'js/staze.js', 'js/staze-ar.js', 'js/staze-ar-track.js', 'js/staze-ar-worker.js', 'js/staze-room-track.js', 'js/staze-room-worker.js', 'js/vendor/jsfeat/jsfeat-min.js', 'data/staze-mapa.json', 'print/staze/AR_mapa_staze_thumb.jpg',
   'mace.html', 'css/mace.css', 'js/mace.js', 'js/mace-cat.js', 'js/mace-room.js', 'js/mace-sound.js', 'js/mace-demo.js', 'manifest.webmanifest', 'css/museum.css', 'css/kocka.css',

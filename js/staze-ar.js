@@ -26,31 +26,61 @@ export function screenAngle() {
   return Number(a) || 0;
 }
 class Motion {
-  constructor() { this.hist = []; this.count = 0; this.on = e => this._on(e); this.t0 = 0; }
-  start() { this.t0 = performance.now(); window.addEventListener('deviceorientation', this.on); }
-  stop() { window.removeEventListener('deviceorientation', this.on); this.hist.length = 0; this.count = 0; }
+  constructor() {
+    this.hist = []; this.count = 0; this.on = e => this._on(e); this.onMotion = e => this._motion(e); this.t0 = 0;
+    this.abs = 0; this.rel = 0; this.noAlpha = 0; this.dm = 0; this.rate = 0;
+    this.forceLevel = /[?&]gyro=0\b/.test(location.search);       // test a phone without a gyroscope on any phone
+  }
+  start() { this.t0 = performance.now(); window.addEventListener('deviceorientation', this.on); window.addEventListener('devicemotion', this.onMotion); }
+  stop() { window.removeEventListener('deviceorientation', this.on); window.removeEventListener('devicemotion', this.onMotion); this.hist.length = 0; this.count = 0; }
   get ok() { return this.count > 3 && performance.now() - this.hist[this.hist.length - 1].t < 2000; }
+  // Many low-cost Android phones have no gyroscope. Chrome then makes the orientation from the accelerometer and the
+  // compass (and marks it absolute), and its motion events have no rotation rate: which way is down is right, but the
+  // heading lags, wanders indoors or stays put, so the terrain would turn with the phone. Room tracking then takes the
+  // turning from the camera picture.
+  get noGyro() {
+    if (this.forceLevel) return true;
+    if (this.latched != null) return this.latched;
+    let v;
+    if (this.rate) v = false;                            // a gyroscope reports how fast the phone turns
+    else if (this.abs > 3 && this.abs > this.rel) v = true;
+    else if (this.noAlpha > 3) v = true;
+    else v = this.dm > 10;                               // motion events, but never a rotation rate
+    if (this.count > 40 && this.dm > 40) this.latched = v;          // decided for good: no switching while in use
+    return v;
+  }
+  _motion(e) {
+    this.dm++;
+    const r = e.rotationRate;
+    if (r && (Number.isFinite(r.alpha) || Number.isFinite(r.beta) || Number.isFinite(r.gamma))) this.rate++;
+  }
   _on(e) {
     if (e.beta == null || e.gamma == null) return;
+    if (e.absolute === true) this.abs++; else this.rel++;
+    if (e.alpha == null) this.noAlpha++;
     const so = screenAngle() * D2R;
+    QZ.setFromAxisAngle(ZAX, -so);
     EUL.set(e.beta * D2R, (e.alpha || 0) * D2R, -e.gamma * D2R, 'YXZ');
-    const q = new THREE.Quaternion().setFromEuler(EUL).multiply(Q90).multiply(QZ.setFromAxisAngle(ZAX, -so));
+    const q = new THREE.Quaternion().setFromEuler(EUL).multiply(Q90).multiply(QZ);
+    EUL.set(e.beta * D2R, 0, -e.gamma * D2R, 'YXZ');
+    const ql = new THREE.Quaternion().setFromEuler(EUL).multiply(Q90).multiply(QZ);       // level only, no heading
     const last = this.hist[this.hist.length - 1];
     if (last && last.q.dot(q) < 0) { q.x = -q.x; q.y = -q.y; q.z = -q.z; q.w = -q.w; }
+    if (last && last.ql.dot(ql) < 0) { ql.x = -ql.x; ql.y = -ql.y; ql.z = -ql.z; ql.w = -ql.w; }
     const t = performance.now();
-    this.hist.push({ t, q });
+    this.hist.push({ t, q, ql });
     while (this.hist.length > 2 && t - this.hist[0].t > 1500) this.hist.shift();
     this.count++;
   }
-  at(t, out) {             // orientation at time t (ms), interpolated
-    const h = this.hist;
+  at(t, out, level) {      // orientation at time t (ms), interpolated; level: only which way is down (heading 0)
+    const h = this.hist, k = level ? 'ql' : 'q';
     if (!h.length) return out.identity();
-    if (t >= h[h.length - 1].t) return out.copy(h[h.length - 1].q);
-    if (t <= h[0].t) return out.copy(h[0].q);
+    if (t >= h[h.length - 1].t) return out.copy(h[h.length - 1][k]);
+    if (t <= h[0].t) return out.copy(h[0][k]);
     let i = h.length - 1;
     while (i > 0 && h[i - 1].t > t) i--;
     const a = h[i - 1], b = h[i];
-    return out.copy(a.q).slerp(b.q, (t - a.t) / Math.max(1, b.t - a.t));
+    return out.copy(a[k]).slerp(b[k], (t - a.t) / Math.max(1, b.t - a.t));
   }
 }
 
@@ -74,13 +104,19 @@ export class CameraAR {
     this.seq = 0; this.mapSeq = -1;
     this.corr = new THREE.Quaternion();     // correction of the motion sensors' slow heading drift, measured by room tracking
     this.room = { active: false, ready: false, busy: false, failed: false, tracking: false, pos: new THREE.Vector3(), okRun: 0, badRun: 0,
-      canvas: document.createElement('canvas'), seq: -1, planeY: 0, n: 0, inl: 0 };
+      canvas: document.createElement('canvas'), seq: -1, planeY: 0, n: 0, inl: 0, view: null };
     this.room.g2d = this.room.canvas.getContext('2d', { willReadFrequently: true });
+    this.level = false;            // free mode on a phone without a gyroscope: the view at least stays level
+    this.views = [];               // camera pictures shown with their tracked pose (no gyroscope), see showView()
   }
   camQ(t, out) {                // camera orientation in the room at time t (ms): sensors, corrected
     if (!this.gyroOn) return out.identity();
     return this.motion.at(t, out).premultiply(this.corr);
   }
+  get tiltOn() { return this.useGyro && this.motion.ok; }
+  // no gyroscope, but the accelerometer says which way is down: room tracking takes the turning from the picture
+  get vision() { return !this.gyroOn && this.tiltOn && !this.badGyro; }
+  levelQ(t, out) { return this.motion.at(t, out, true); }
 
   // container: element the video goes into (behind the 3D canvas). motionAnswer: promise from requestPermission()
   async start(container, motionAnswer) {
@@ -105,29 +141,31 @@ export class CameraAR {
     this.stream = null; this.video.srcObject = null; this.video.remove();
     if (this.worker) { this.worker.terminate(); this.worker = null; }
     if (this.room.worker) { this.room.worker.terminate(); this.room.worker = null; }
-    Object.assign(this.room, { active: false, ready: false, busy: false, tracking: false });
+    Object.assign(this.room, { active: false, ready: false, busy: false, tracking: false, view: null });
+    for (const v of this.views) v.c.remove();
+    this.views = []; this.shownView = null; this.video.style.opacity = '';
     this.map = null; this.busy = false;
   }
 
   // ---- room tracking (no map): the floor or table at height planeY (room metres, y up) ----
   roomStart(planeY) {
     const R = this.room;
-    if (R.failed || !this.gyroOn) return false;
+    if (R.failed || !(this.gyroOn || this.vision)) return false;
     if (!R.worker) {
       try { R.worker = new Worker(new URL('./staze-room-worker.js', import.meta.url)); }
       catch { R.failed = true; return false; }
       R.worker.onmessage = e => { const m = e.data; if (m.type === 'ready') R.ready = true; else if (m.type === 'room') this.roomResult(m); };
       R.worker.onerror = () => { R.failed = true; R.active = false; R.tracking = false; };
     }
-    Object.assign(R, { active: true, pending: true, planeY, tracking: false, okRun: 0, badRun: 0, busy: false, corrInit: false });
+    Object.assign(R, { active: true, pending: true, planeY, tracking: false, okRun: 0, badRun: 0, busy: false, corrInit: false, view: null, vision: !this.gyroOn });
     R.pos.set(0, 0, 0);
-    R.fp = new OneEuro(3, 1.4, 12, 1.5);
+    R.fp = R.vision ? new OneEuro(3, 2.0, 20, 1.5) : new OneEuro(3, 1.4, 12, 1.5);
     return true;
   }
   roomStop() {
     const R = this.room;
     if (R.worker) R.worker.postMessage({ type: 'stop' });
-    Object.assign(R, { active: false, tracking: false, busy: false, pending: false });
+    Object.assign(R, { active: false, tracking: false, busy: false, pending: false, view: null });
     R.pos.set(0, 0, 0);
   }
   sendRoom(now) {
@@ -135,17 +173,34 @@ export class CameraAR {
     const sc = Math.min(1, 640 / Math.max(this.vw, this.vh));
     const w = Math.round(this.vw * sc), h = Math.round(this.vh * sc);
     if (R.canvas.width !== w || R.canvas.height !== h) { R.canvas.width = w; R.canvas.height = h; }
+    // without a gyroscope the pose comes from the picture a moment later, so that very picture is what is shown
+    // behind the terrain (showView): the terrain sits exactly on the floor in it instead of trailing behind
+    const view = R.vision ? this.freeView() : null;
     let img;
-    try { R.g2d.drawImage(v, 0, 0, w, h); img = R.g2d.getImageData(0, 0, w, h); } catch { return; }
+    try {
+      if (view) { view.g.drawImage(v, 0, 0, view.c.width, view.c.height); R.g2d.drawImage(view.c, 0, 0, w, h); }
+      else R.g2d.drawImage(v, 0, 0, w, h);
+      img = R.g2d.getImageData(0, 0, w, h);
+    } catch { return; }
     const f = this.fRel * Math.max(w, h);
     const K = { fx: f, fy: f, cx: w / 2, cy: h / 2 };
     const t = now - LATENCY;
-    const qg = this.motion.at(t, new THREE.Quaternion());
-    const q = qg.clone().premultiply(this.corr);
-    const job = R.job = { id: (R.jobId = (R.jobId || 0) + 1), time: now, w, h, sc, qg, tag: window.__synth && window.__synth.idx };
+    const job = R.job = { id: (R.jobId = (R.jobId || 0) + 1), time: now, w, h, sc, tag: window.__synth && window.__synth.idx, view };
+    if (view) view.job = job.id;
     R.busy = true; R.seq = this.seq;
-    // the tracker takes the raw sensor rotation (it uses only how it changes); the first frame gets the corrected one
-    const msg = { type: R.pending ? 'start' : 'frame', id: job.id, buf: img.data.buffer, w, h, K, R: quatToCv(R.pending ? q : qg), Rs: quatToCv(qg), time: t / 1000 };
+    let msg;
+    if (R.vision) {
+      // which way is down (accelerometer); the heading is the picture's business
+      const ql = this.levelQ(t, new THREE.Quaternion()), Rl = quatToCv(ql);
+      job.q0 = ql;
+      msg = { type: R.pending ? 'start' : 'frame', id: job.id, buf: img.data.buffer, w, h, K, R: Rl, Rs: Rl, time: t / 1000, vision: true, grav: [Rl[1], Rl[4], Rl[7]] };
+    } else {
+      const qg = this.motion.at(t, new THREE.Quaternion());
+      const q = qg.clone().premultiply(this.corr);
+      job.qg = qg;
+      // the tracker takes the raw sensor rotation (it uses only how it changes); the first frame gets the corrected one
+      msg = { type: R.pending ? 'start' : 'frame', id: job.id, buf: img.data.buffer, w, h, K, R: quatToCv(R.pending ? q : qg), Rs: quatToCv(qg), time: t / 1000 };
+    }
     if (R.pending) { msg.C = [R.pos.x, R.pos.y, R.pos.z]; msg.planeY = R.planeY; R.pending = false; }
     R.worker.postMessage(msg, [img.data.buffer]);
   }
@@ -155,19 +210,59 @@ export class CameraAR {
     if (!R.active || !job || r.id !== job.id) return;
     if (r.error && this.debug) console.warn('room', r.error);
     R.n = r.n || 0; R.inl = r.inl || 0; R.pts = r.pts; R.ptsSc = job.sc; R.ptsAt = performance.now(); R.ms = r.ms;
+    const dtr = R.ptsAt - (R.lastAt || R.ptsAt); R.lastAt = R.ptsAt; if (dtr > 0) R.fps = 0.9 * (R.fps || 0) + 0.1 * 1000 / dtr;
     if (window.__roomLog) window.__roomLog.push({ tag: job.tag, t: job.time, ok: r.ok, inl: r.inl, n: r.n, C: r.C, start: r.start });   // tests
-    if (r.start || r.idle) return;
+    if (r.idle) return;
+    if (R.vision) {
+      // the picture of this frame, with the camera pose measured in it (or the last one, if this frame failed)
+      const q = r.R ? cvToQuat(r.R, new THREE.Quaternion()) : job.q0;
+      if (r.ok && !r.start) { const p = R.fp.filter(r.C, job.time / 1000); R.pos.set(p[0], p[1], p[2]); }
+      if (job.view && q) R.view = { c: job.view.c, q, pos: R.pos.clone(), tag: job.tag, time: job.time };
+    }
+    if (r.start) return;
     if (r.ok) {
       R.okRun++; R.badRun = 0;
-      // the camera's rotation as seen in the picture vs the sensors: the slow difference is the sensors' drift
-      const qv = cvToQuat(r.R, new THREE.Quaternion());
-      const meas = qv.multiply(job.qg.clone().invert());
-      if (!R.corrInit) { this.corr.copy(meas); R.corrInit = true; } else this.corr.slerp(meas, 0.12);
-      const p = R.fp.filter(r.C, job.time / 1000);
-      R.pos.set(p[0], p[1], p[2]);
+      if (!R.vision) {
+        // the camera's rotation as seen in the picture vs the sensors: the slow difference is the sensors' drift
+        const qv = cvToQuat(r.R, new THREE.Quaternion());
+        const meas = qv.multiply(job.qg.clone().invert());
+        if (!R.corrInit) { this.corr.copy(meas); R.corrInit = true; } else this.corr.slerp(meas, 0.12);
+        const p = R.fp.filter(r.C, job.time / 1000);
+        R.pos.set(p[0], p[1], p[2]);
+      }
     } else { R.badRun++; R.okRun = 0; }
     if (R.okRun >= 4) R.tracking = true;
     else if (R.badRun >= 12) R.tracking = false;
+  }
+  // a canvas for the next camera picture: neither the one on screen nor the one being tracked
+  freeView() {
+    const R = this.room, busy = new Set([R.view && R.view.c, R.job && R.busy && R.job.view && R.job.view.c]);
+    let v = this.views.find(x => !busy.has(x.c));
+    if (!v) {
+      const c = document.createElement('canvas');
+      c.className = 'ar-frame'; c.style.visibility = 'hidden';
+      this.video.after(c);
+      v = { c, g: c.getContext('2d') };
+      this.views.push(v);
+      this.placeViews();
+    }
+    const s = Math.min(1, 1280 / Math.max(this.vw, this.vh)), w = Math.round(this.vw * s), h = Math.round(this.vh * s);
+    if (v.c.width !== w || v.c.height !== h) { v.c.width = w; v.c.height = h; }
+    return v;
+  }
+  placeViews() {            // the pictures cover the screen exactly like the video does
+    const c = this.cover;
+    if (!c) return;
+    for (const v of this.views) Object.assign(v.c.style, { left: `${-c.offx}px`, top: `${-c.offy}px`, width: `${this.vw * c.s}px`, height: `${this.vh * c.s}px` });
+  }
+  // which camera picture is behind the terrain: the live video, or (no gyroscope, room tracking on) the tracked one
+  showView() {
+    const R = this.room, want = R.active && R.vision && R.view ? R.view.c : null;
+    if (want === this.shownView) return;
+    if (this.shownView) this.shownView.style.visibility = 'hidden';
+    if (want) want.style.visibility = 'visible';
+    this.video.style.opacity = want ? '0' : '';
+    this.shownView = want;
   }
 
   async openCamera(deviceId) {
@@ -277,8 +372,14 @@ export class CameraAR {
     const v = this.video;
     if (v.videoWidth && (v.videoWidth !== this.vw || v.videoHeight !== this.vh)) { this.vw = v.videoWidth; this.vh = v.videoHeight; this.loadFocal(); }
     if (this.projDirty && this.vw) this.projection();
-    this.camQ(now - LATENCY, this.camera.quaternion);
-    if (this.room.active) this.camera.position.copy(this.room.pos); else this.camera.position.set(0, 0, 0);
+    const RV = this.room.active && this.room.vision ? this.room.view : null;
+    if (RV) { this.camera.quaternion.copy(RV.q); this.camera.position.copy(RV.pos); }        // the tracked picture's own pose
+    else {
+      if (!this.gyroOn && this.level && this.tiltOn) this.levelQ(now - LATENCY, this.camera.quaternion);
+      else this.camQ(now - LATENCY, this.camera.quaternion);
+      if (this.room.active) this.camera.position.copy(this.room.pos); else this.camera.position.set(0, 0, 0);
+    }
+    this.showView();
     this.camera.updateMatrixWorld(true);
     if (this.busy && this.job && now - this.job.time > 1500) this.busy = false;        // a reply got lost: carry on
     if (this.room.busy && this.room.job && now - this.room.job.time > 1500) this.room.busy = false;
@@ -293,7 +394,7 @@ export class CameraAR {
     }
     if (this.map) this.map.fresh = now - this.map.seen < 260;
   }
-  get gyroOn() { return this.useGyro && !this.badGyro && this.motion.ok; }
+  get gyroOn() { return this.useGyro && !this.badGyro && this.motion.ok && !this.motion.noGyro; }
 
   projection() {
     const vw = this.vw, vh = this.vh, W = this.viewW, H = this.viewH;
@@ -308,6 +409,7 @@ export class CameraAR {
     this.camera.projectionMatrixInverse.copy(P).invert();
     this.projDirty = false;
     this.cover = { s, offx: (vw * s - W) / 2, offy: (vh * s - H) / 2 };
+    this.placeViews();
   }
 
   send(now) {
@@ -613,9 +715,16 @@ export class TrailsAR {
     const c = this.ctx, H = c.holder, first = this.mode === 'search' || this.mode === 'lost';
     clearTimeout(this.freeTimer);
     this.hideCoach();
-    if (this.engine.room.active) {          // the map takes over: back to the camera-centred room the map pose uses
-      H.position.sub(this.engine.room.pos);
-      this.engine.roomStop();
+    const e = this.engine;
+    if (!e.gyroOn) {
+      // no gyroscope: the map pose is relative to the camera, so the relief is taken there too, from wherever it is now
+      const cam = e.camera; cam.updateMatrixWorld(true); H.updateMatrix();
+      TMP.m3.copy(cam.matrixWorld).invert().multiply(H.matrix).decompose(H.position, H.quaternion, H.scale);
+      if (e.room.active) e.roomStop();
+      e.level = false;
+    } else if (e.room.active) {          // the map takes over: back to the camera-centred room the map pose uses
+      H.position.sub(e.room.pos);
+      e.roomStop();
     }
     this.engine.map.matrix.decompose(this.target.p, this.target.q, TMP.s); this.target.s = MAP_WIDTH;
     if (first) {
@@ -642,12 +751,20 @@ export class TrailsAR {
     const c = this.ctx, H = c.holder, now = performance.now(), wasHidden = this.mode === 'search' || this.mode === 'lost' || !H.visible;
     clearTimeout(this.freeTimer);
     this.hideCoach();
-    const room = this.engine.room;
+    const e = this.engine, room = e.room;
+    if (!e.gyroOn && e.tiltOn && !e.level) {
+      // no gyroscope: from now on the view is kept level (accelerometer), the relief taken along from where it is
+      const ql = e.levelQ(now - LATENCY, TMP.q3);
+      H.updateMatrix();
+      TMP.m3.makeRotationFromQuaternion(ql).multiply(H.matrix).decompose(H.position, H.quaternion, H.scale);
+      e.camera.quaternion.copy(ql); e.camera.position.set(0, 0, 0); e.camera.updateMatrixWorld(true);
+      e.level = true;
+    }
     if (recenter) {
       if (room.active) this.placeOnPlane();
       else {
         this.placeFree();
-        if (this.engine.gyroOn && this.engine.roomStart(this.free.pos.y)) this.roomState = null;
+        if ((e.gyroOn || e.vision) && e.roomStart(this.free.pos.y)) this.roomState = null;
       }
     }
     this.freeTarget();
@@ -662,7 +779,7 @@ export class TrailsAR {
   placeFree() {
     const cam = this.engine.camera, f = this.free;
     const d = new THREE.Vector3(0, 0, -1).applyQuaternion(cam.quaternion);
-    if (this.engine.gyroOn) {
+    if (this.engine.gyroOn || this.engine.level) {
       const pitch = Math.asin(THREE.MathUtils.clamp(d.y, -1, 1));
       const fh = new THREE.Vector3(d.x, 0, d.z); if (fh.lengthSq() < 1e-4) fh.set(0, 0, -1); fh.normalize();
       const phi = Math.min(pitch, -24 * D2R), dist = this.fitDist(f.scale);
@@ -703,6 +820,7 @@ export class TrailsAR {
   // ---------------- screen ----------------
   setMode(mode) {
     this.mode = mode;
+    if (mode === 'search') this.engine.level = false;
     const ov = this.ov;
     ov.dataset.mode = mode;
     const key = { search: ['scan', 'scanSub'], map: ['map', 'mapSub'], free: ['front', this.engine.gyroOn ? 'frontSub' : 'frontNoGyro'], held: ['held', 'heldSub'], lost: ['lost', 'lostSub'] }[mode];
@@ -720,7 +838,7 @@ export class TrailsAR {
   }
   roomStatus() {             // free mode: is the floor or table being followed?
     const e = this.engine, R = e.room;
-    const st = !e.gyroOn || R.failed || !R.active ? 'off' : R.tracking ? 'on' : 'search';
+    const st = !(e.gyroOn || e.vision) || R.failed || !R.active ? 'off' : R.tracking ? 'on' : 'search';
     if (st === this.roomState) return;
     this.roomState = st; this.ov.dataset.room = st;
     if (st === 'off') return;
@@ -873,7 +991,8 @@ export class TrailsAR {
     const s = e.video, mm = e.map, rm = e.room;
     const lines = [
       `room ${rm.active ? (rm.tracking ? 'tracking' : 'searching') : rm.failed ? 'failed' : 'off'}  points ${rm.n} used ${rm.inl}  ${(rm.ms || 0).toFixed(0)} ms  cam ${rm.pos.x.toFixed(2)} ${rm.pos.y.toFixed(2)} ${rm.pos.z.toFixed(2)}`,
-      `mode ${this.mode}  gyro ${e.gyroOn ? 'on' : e.badGyro ? 'BAD' : e.motion.count ? 'stale' : 'none'}  worker ${e.useMain ? 'main' : e.worker ? 'yes' : '-'}`,
+      `mode ${this.mode}  gyro ${e.gyroOn ? 'on' : e.badGyro ? 'BAD' : e.vision ? 'NONE (level only, turns from the picture)' : e.motion.count ? 'stale' : 'none'}  worker ${e.useMain ? 'main' : e.worker ? 'yes' : '-'}`,
+      `sensors: orientation ${e.motion.rel} rel / ${e.motion.abs} abs  rotation rate ${e.motion.rate}/${e.motion.dm}  room ${(rm.fps || 0).toFixed(1)} /s${rm.vision ? ' synced' : ''}`,
       `video ${s.videoWidth}×${s.videoHeight}  ${s.paused ? 'PAUSED' : 'playing'}  ready ${s.readyState}`,
       `markers ${st.n}  rms ${st.rms.toFixed(2)}px  detect ${st.ms.toFixed(0)} ms  ${st.fps.toFixed(1)} /s`,
       `fov ${e.fovLong.toFixed(1)}° ${e.calibrated ? '(measured)' : '(guess)'}  samples ${e.fSamples.length}  lum ${e.lum.toFixed(2)}`,
@@ -888,4 +1007,4 @@ export class TrailsAR {
 const easeInOut = u => u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
 const easeOut = u => 1 - Math.pow(1 - u, 3);
 const easeOutBack = u => { const c1 = 1.25, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); };
-TMP.e = new THREE.Euler();
+TMP.e = new THREE.Euler(); TMP.m3 = new THREE.Matrix4(); TMP.q3 = new THREE.Quaternion();
