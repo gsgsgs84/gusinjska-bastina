@@ -3,114 +3,165 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0e0f12">
+<meta name="theme-color" content="#1d1418">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>AR kocka – Gusinjska kulturna baština</title>
-<meta name="description" content="Hold the printed AR cube in front of your phone and see the building models on it.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='5' fill='%23f4f2ee'/%3E%3Crect x='7' y='7' width='8' height='8' fill='%2315161a'/%3E%3Crect x='17' y='7' width='8' height='8' fill='%2315161a'/%3E%3Crect x='7' y='17' width='8' height='8' fill='%2315161a'/%3E%3Crect x='17' y='17' width='8' height='8' fill='%2315161a'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Muzej na kocki · Gusinjska kulturna baština</title>
+<meta name="description" content="Exhibits of the Gusinje museum on a printed AR cube, in your phone's browser (Safari on iPhone, Chrome on Android).">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/kocka.css">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preload" href="css/fonts/Marcellus.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="css/ar-kocka.css">
 <script type="importmap">{"imports":{"three":"./js/vendor/three/three.module.min.js","three/addons/":"./js/vendor/three/addons/"}}</script>
-<script type="module" src="js/kocka.js"></script>
+<script type="module" src="js/kocka/app.js"></script>
 </head>
 <body>
-<video id="cam" playsinline muted autoplay></video>
-<canvas id="gl"></canvas>
-<canvas id="dbg"></canvas>
+<!-- the camera video stays on the page (Safari pauses muted videos that are not); the canvas draws over it -->
+<video id="cam" playsinline muted autoplay disablepictureinpicture></video>
+<canvas id="gl" aria-label="AR"></canvas>
+<canvas id="dbg" aria-hidden="true"></canvas>
+<div id="flash" aria-hidden="true"></div>
 
+<!-- ============ start ============ -->
 <section id="start">
-  <div class="cube3d" aria-hidden="true"><div class="c">
-    <div class="f f1"><i></i><i></i><i></i><i></i></div><div class="f f2"><i></i><i></i><i></i><i></i></div>
-    <div class="f f3"><i></i><i></i><i></i><i></i></div><div class="f f4"><i></i><i></i><i></i><i></i></div>
-    <div class="f f5"><i></i><i></i><i></i><i></i></div><div class="f f6"><i></i><i></i><i></i><i></i></div>
-  </div></div>
-  <h1 data-t="c_title">AR kocka</h1>
-  <p class="lead" data-t="c_lead"></p>
-  <button class="btn primary" id="go" data-t="c_start"></button>
-  <div id="err" role="alert"></div>
-  <div class="start-links">
-    <a href="print/AR_cube_paper_test.pdf" target="_blank" rel="noopener" data-t="c_pdf"></a>
-    <a href="print/AR_cube_70mm_2colour.3mf" download data-t="c_3mf"></a>
-    <a href="print/AR_cube_70mm_STL.zip" download data-t="c_stl"></a>
+  <header class="st-top">
+    <a class="st-logo" href="index.html" aria-label="Gusinjska kulturna baština"><img src="icons/xplore-prokletije-light.svg" alt="Xplore Prokletije" width="118" height="48"></a>
+    <div class="lang" role="group" data-t-aria="language">
+      <button data-l="me">ME</button><button data-l="sq">SQ</button><button data-l="en">EN</button>
+    </div>
+  </header>
+  <div class="st-stage" aria-hidden="true"><span id="stName" class="st-name"></span></div>
+  <div class="st-body">
+    <p class="st-kicker" data-t="kicker"></p>
+    <h1 data-t="title"></h1>
+    <p class="st-lead" data-t="lead"></p>
+    <div id="inapp" class="note warn" hidden>
+      <p data-t="inApp"></p>
+      <div class="row-btns"><a id="openChrome" class="btn ghost" hidden data-t="openChrome"></a><button id="btnCopy" class="btn ghost" data-t="copyLink"></button></div>
+    </div>
+    <button class="btn primary" id="go">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3V19H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg>
+      <span data-t="start"></span>
+    </button>
+    <div id="err" class="note err" role="alert" hidden></div>
+    <div class="st-links">
+      <button id="btnNoCube" class="link" data-t="noCube"></button>
+      <a class="link" href="index.html" data-t="backMuseum"></a>
+    </div>
+    <p class="st-privacy" data-t="privacy"></p>
   </div>
-  <p class="start-note" data-t="c_note"></p>
-  <p class="start-note"><a href="index.html" data-t="c_museum"></a></p>
+  <div class="kilim st-kilim" aria-hidden="true"></div>
 </section>
 
+<!-- ============ AR ============ -->
 <header id="hud" hidden>
-  <div class="pill" id="status" aria-live="polite"><i class="dot"></i><span id="statusText"></span></div>
-  <div class="icons">
-    <button class="ibtn" id="btnCam" hidden aria-label="Kamera">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><path d="M9.5 12.5a3 3 0 0 1 5-1.5M14.5 14.5a3 3 0 0 1-5 1.2"/><path d="M14.7 9.6l.3 1.6-1.6.3M9.3 17.4l-.3-1.6 1.6-.3"/></svg>
-      <b id="camNo" style="position:absolute;margin:24px 0 0 24px;font-size:11px"></b>
-    </button>
-    <button class="ibtn" id="btnHelp" aria-label="Help">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1.1.9-1.1 1.6v.5"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg>
-    </button>
-    <button class="ibtn" id="btnSettings" aria-label="Settings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
-    </button>
+  <a class="rbtn" href="index.html" data-t-aria="museum">
+    <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+  </a>
+  <div id="status" class="pill" aria-live="polite"><i class="dot"></i><span id="statusText"></span></div>
+  <div class="hud-r">
+    <button class="rbtn" id="btnHelp" data-t-aria="how"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.7 9.4a2.4 2.4 0 1 1 3.4 2.2c-.7.3-1.1.9-1.1 1.6v.4"/><path d="M12 16.6v.2"/></svg></button>
+    <button class="rbtn" id="btnSettings" data-t-aria="settings"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
   </div>
 </header>
 
-<div id="zoomRail" hidden role="group" data-t-aria="c_zoomOut">
-  <button data-z="1">1×</button><button data-z="0.7">.7×</button><button data-z="0.5">.5×</button>
+<div id="side" hidden>
+  <button id="btnSpin" class="rbtn act"><i></i></button>
+  <button id="btnPlace" class="rbtn act"><i></i></button>
+  <button id="btnVitrine" class="rbtn act"><i></i></button>
+  <button class="rbtn" id="btnCam" hidden data-t-aria="camera"><svg viewBox="0 0 24 24"><path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3V19H4z"/><path d="M9.6 12.6a2.6 2.6 0 0 1 4.4-1.3M14.4 14.6a2.6 2.6 0 0 1-4.4 1.1"/></svg><b id="camNo"></b></button>
+  <button class="rbtn txt" id="btnZoom" data-t-aria="zoomOut">1×</button>
+  <button id="btnPhoto" class="shutter" data-t-aria="photo"><span></span></button>
 </div>
-<div id="hint" class="off" hidden><div class="frame"></div><div id="hintText" data-t="c_hint"></div></div>
 
-<footer id="dock" hidden>
-  <div class="actions">
-    <a class="btn" id="btnMuseum" href="index.html" data-t="c_back"></a>
-    <button class="btn" id="btnTurn" data-t="c_turn"></button>
-    <button class="btn" id="btnPlace"></button>
-    <button class="btn" id="btnFace" data-t="c_face"></button>
-    <button class="btn" id="btnInfo" data-t="c_about"></button>
+<div id="hint" class="off" aria-hidden="true">
+  <div class="reticle"><svg viewBox="0 0 120 120"><path class="c1" d="M60 16 98 38v44L60 104 22 82V38z"/><path class="c2" d="M22 38l38 22 38-22M60 60v44"/></svg></div>
+  <p id="tip"></p>
+</div>
+
+<button id="stall" class="note warn" hidden data-t="stalled"></button>
+<div id="badge" aria-live="polite"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<section id="panel" hidden>
+  <div id="loadBar" class="kilim" aria-hidden="true"></div>
+  <div class="ex" id="exCard">
+    <button class="nav" id="btnPrev" aria-label="‹"><svg viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></svg></button>
+    <button class="ex-text" id="exText">
+      <span id="exGallery" class="ex-gal"></span>
+      <span id="exName" class="ex-name"></span>
+      <span id="exSub" class="ex-sub"></span>
+    </button>
+    <button class="nav" id="btnNext" aria-label="›"><svg viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></svg></button>
+    <button class="info" id="btnInfo" data-t-aria="info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.2"/></svg></button>
   </div>
-  <nav id="models" aria-label="Models"></nav>
-</footer>
+  <div class="collection">
+    <div class="chips" id="galChips"></div>
+    <div class="strip" id="strip"></div>
+  </div>
+  <button id="btnStrip" class="grab" aria-expanded="true"><span></span></button>
+</section>
 
+<!-- ============ sheets ============ -->
 <div class="scrim" id="scrim"></div>
 
-<section class="sheet" id="sheetSettings" aria-label="Settings">
-  <div class="grab"></div>
-  <h2 data-t="c_settings"></h2>
-  <div class="row"><label><span data-t="c_place"></span><small data-t="c_place2"></small></label>
-    <div class="seg" id="segPlace"><button data-v="top" data-t="c_onTop"></button><button data-v="hand" data-t="c_inHand"></button></div></div>
-  <div class="row"><label><span data-t="c_base"></span><small data-t="c_base2"></small></label>
-    <div class="seg" id="segPlinth"><button data-v="stone" data-t="c_stone"></button><button data-v="grass" data-t="c_grass"></button><button data-v="none" data-t="c_off"></button></div></div>
-  <div class="row"><label><span data-t="c_view"></span><small data-t="c_view2"></small></label>
-    <div class="seg" id="segView"><button data-v="auto" data-t="c_auto"></button><button data-v="fit" data-t="c_whole"></button><button data-v="fill" data-t="c_fill"></button></div></div>
-  <div class="row" id="rowCam" hidden><label><span data-t="c_cam"></span><small data-t="c_cam2"></small></label><div class="seg" id="segCam"></div></div>
-  <div class="row" id="rowZoom" hidden><label for="rngZoom"><span data-t="c_zoom"></span><small id="zoomVal">1.0×</small></label><input type="range" id="rngZoom" min="1" max="2" step="0.1"></div>
-  <div class="row"><label for="rngSize"><span data-t="c_size"></span><small id="sizeVal">1.0×</small></label><input type="range" id="rngSize" min="0.5" max="3" step="0.1"></div>
-  <div class="row"><label for="chkUpright"><span data-t="c_upright"></span><small data-t="c_upright2"></small></label>
-    <span class="switch"><input type="checkbox" id="chkUpright"><span></span></span></div>
-  <div class="row"><label for="chkShadow" data-t="c_shadows"></label><span class="switch"><input type="checkbox" id="chkShadow"><span></span></span></div>
-  <div class="row"><label for="rngFov"><span data-t="c_fov"></span><small id="fovVal">66°</small></label><input type="range" id="rngFov" min="50" max="85" step="1"></div>
-  <div class="row"><label for="chkDebug"><span data-t="c_debug"></span><small data-t="c_debug2"></small></label>
-    <span class="switch"><input type="checkbox" id="chkDebug"><span></span></span></div>
+<section class="sheet" id="sheetInfo" aria-hidden="true">
+  <div class="grip"></div>
+  <div class="info-head">
+    <img id="infoThumb" alt="" width="84" height="84">
+    <div><p id="infoGallery" class="sh-gal"></p><h2 id="infoTitle"></h2><p id="infoSub" class="sh-sub"></p></div>
+  </div>
+  <p id="infoDesc" class="story"></p>
+  <dl id="infoKv" class="kv"></dl>
+  <div class="row-btns"><a id="infoLink" class="btn ghost" data-t="openInMuseum"></a><button class="btn ghost" data-close data-t="close"></button></div>
 </section>
 
-<section class="sheet" id="sheetInfo" aria-label="About this model">
-  <div class="grab"></div>
-  <h2 id="infoTitle">Model</h2>
-  <p class="mdesc" id="infoDesc"></p>
-  <dl class="kv" id="infoKv"></dl>
+<section class="sheet" id="sheetSettings" aria-hidden="true">
+  <div class="grip"></div>
+  <h2 data-t="settings"></h2>
+  <div class="srow"><div><b data-t="language"></b></div><div class="seg lang"><button data-l="me">ME</button><button data-l="sq">SQ</button><button data-l="en">EN</button></div></div>
+  <div class="srow"><div><b data-t="plinth"></b><small data-t="plinth2"></small></div>
+    <div class="seg" id="segPlinth"><button data-v="stone" data-t="stone"></button><button data-v="marble" data-t="marble"></button><button data-v="wood" data-t="wood"></button><button data-v="none" data-t="none"></button></div></div>
+  <div class="srow"><div><b data-t="position"></b><small data-t="position2"></small></div>
+    <div class="seg" id="segPlace"><button data-v="top" data-t="onCube"></button><button data-v="hand" data-t="inHand"></button></div></div>
+  <div class="srow"><label for="chkUpright"><b data-t="upright"></b><small data-t="upright2"></small></label><span class="switch"><input type="checkbox" id="chkUpright"><span></span></span></div>
+  <div class="srow"><label for="chkShadow"><b data-t="shadows"></b></label><span class="switch"><input type="checkbox" id="chkShadow"><span></span></span></div>
+  <div class="srow"><div><b data-t="view"></b><small data-t="view2"></small></div>
+    <div class="seg" id="segView"><button data-v="fill" data-t="fill"></button><button data-v="fit" data-t="whole"></button></div></div>
+  <div class="srow"><div><b data-t="zoomOut"></b></div>
+    <div class="seg" id="segZoom"><button data-v="1">1×</button><button data-v="0.7">.7×</button><button data-v="0.5">.5×</button></div></div>
+  <div class="srow" id="rowCam" hidden><div><b data-t="camera"></b><small data-t="camera2"></small></div><div class="seg wrap" id="segCam"></div></div>
+  <div class="srow"><div><b data-t="fov"></b><small id="fovVal"></small></div><button class="btn ghost sm" id="btnFovReset" data-t="resetFov"></button></div>
+  <div class="srow"><label for="chkDebug"><b data-t="debug"></b><small data-t="debug2"></small></label><span class="switch"><input type="checkbox" id="chkDebug"><span></span></span></div>
+  <p class="foot"><span id="detVal"></span> · v<span id="ver"></span> · <a href="kocka-stara.html" data-t="oldVersion"></a></p>
 </section>
 
-<section class="sheet help" id="sheetHelp" aria-label="Help">
-  <div class="grab"></div>
-  <h2 data-t="c_how"></h2>
-  <ol>
-    <li data-t="c_h1"></li>
-    <li data-t="c_h2"></li>
-    <li data-t="c_h3"></li>
-    <li data-t="c_h4"></li>
-  </ol>
-  <p class="start-note" style="text-align:left"><span data-t="c_private"></span> v<span id="ver"></span></p>
+<section class="sheet" id="sheetHelp" aria-hidden="true">
+  <div class="grip"></div>
+  <h2 data-t="how"></h2>
+  <ol class="steps"><li data-t="h1"></li><li data-t="h2"></li><li data-t="h3"></li><li data-t="h4"></li><li data-t="h5"></li></ol>
+  <div class="row-btns"><button class="btn ghost" onclick="document.getElementById('btnNoCube').click()" data-t="printTitle"></button><button class="btn ghost" data-close data-t="close"></button></div>
+  <p class="foot" data-t="privacy"></p>
 </section>
 
-<div class="toast" id="toast"></div>
+<section class="sheet" id="sheetPrint" aria-hidden="true">
+  <div class="grip"></div>
+  <h2 data-t="printTitle"></h2>
+  <p class="sh-sub" data-t="printLead"></p>
+  <div class="files">
+    <a href="print/AR_cube_paper_test.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><span data-t="pdf"></span></a>
+    <a href="print/AR_cube_70mm_2colour.3mf" download><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg><span data-t="f3mf"></span></a>
+    <a href="print/AR_cube_70mm_STL.zip" download><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg><span data-t="stl"></span></a>
+  </div>
+  <div class="row-btns"><button class="btn ghost" data-close data-t="close"></button></div>
+</section>
+
+<section class="sheet" id="sheetPhoto" aria-hidden="true">
+  <div class="grip"></div>
+  <h2 data-t="photoTitle"></h2>
+  <img id="photoImg" alt="">
+  <div class="row-btns"><button class="btn primary sm" id="photoShare" data-t="share"></button><a class="btn ghost" id="photoSave" data-t="save"></a><button class="btn ghost" data-close data-t="close"></button></div>
+</section>
 </body>
 </html>

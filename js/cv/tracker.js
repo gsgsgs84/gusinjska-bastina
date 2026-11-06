@@ -41,6 +41,13 @@ export class Tracker {
     const t1 = now();
     const markers = det.map(m => ({ id: m.id, hamming: m.hamming, refined: !!m.refined,
       corners: m.corners.map(p => [roi.x0 + p.x / roi.scale, roi.y0 + p.y / roi.scale]) }));
+    const poses = this.solveAll(markers, K, time);
+    return { markers, poses, stats: { detectMs: t1 - t0, totalMs: now() - t0, radius, candidates: this.detector.stats.candidates } };
+  }
+
+  // Poses from markers found elsewhere (e.g. by OpenCV in a background worker).
+  // markers: [{ id, corners: [[x, y] x4] }] in video px. Returns {cube?, card?}
+  solveAll(markers, K, time) {
     const poses = {};
     for (const key of Object.keys(this.targets)) {
       const tg = this.targets[key];
@@ -49,7 +56,7 @@ export class Tracker {
       const p = this._solve(tg, mine, K, this.prev[key] && time - this.prev[key].time < 0.5 ? this.prev[key] : null);
       if (p) { p.time = time; poses[key] = p; this.prev[key] = p; }
     }
-    return { markers, poses, stats: { detectMs: t1 - t0, totalMs: now() - t0, radius, candidates: this.detector.stats.candidates } };
+    return poses;
   }
 
   _solve(tg, mine, K, prior) {

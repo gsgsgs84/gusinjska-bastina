@@ -1,10 +1,13 @@
 // Offline support: the app shell is cached on install; models and thumbnails are cached the first time they are opened.
 // Pages, code and data are fetched from the network first (the cache is the offline fallback), so phones never keep running an old version.
-const VERSION = 'gkb-v1.5.0';
+const VERSION = 'gkb-v1.6.0';
 const SHELL = [
   './', 'index.html', 'kocka.html', 'staze.html', 'soba-test.html', 'css/soba-test.css', 'js/soba-test.js', 'data/soba.json', 'css/staze.css', 'js/staze.js',
   'mace.html', 'css/mace.css', 'js/mace.js', 'js/mace-cat.js', 'js/mace-room.js', 'js/mace-sound.js', 'js/mace-demo.js', 'manifest.webmanifest', 'css/museum.css', 'css/kocka.css',
-  'js/museum.js', 'js/logo.js', 'js/kocka.js', 'js/i18n.js', 'js/cv/detector.js', 'js/cv/pose.js', 'js/cv/tracker.js',
+  'js/museum.js', 'js/logo.js', 'js/kocka.js', 'js/i18n.js', 'js/cv/detector.js', 'js/cv/pose.js', 'js/cv/tracker.js', 'js/cv/calib.js',
+  'kocka-stara.html', 'css/ar-kocka.css', 'css/fonts/Marcellus.woff', 'css/fonts/GolosText-VF.woff',
+  'js/kocka/app.js', 'js/kocka/stage.js', 'js/kocka/tracking.js', 'js/kocka/camera.js', 'js/kocka/strings.js', 'js/kocka/cv-worker.js',
+  'icons/xplore-prokletije-light.svg', 'icons/xplore-prokletije-light.png',
   'js/vendor/three/three.module.min.js', 'js/vendor/three/three.core.min.js',
   'js/vendor/three/addons/loaders/GLTFLoader.js', 'js/vendor/three/addons/utils/BufferGeometryUtils.js', 'js/vendor/three/addons/utils/SkeletonUtils.js',
   'js/vendor/three/addons/libs/meshopt_decoder.module.js', 'js/vendor/three/addons/environments/RoomEnvironment.js',
@@ -26,7 +29,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   e.respondWith(caches.match(e.request, { ignoreSearch: url.pathname.endsWith('.html') || url.pathname.endsWith('/') }).then(hit => hit || fetch(e.request).then(r => {
-    if (r.ok && /\.(glb|png|jpg|webp|js|css|html)$/.test(url.pathname)) { const copy = r.clone(); caches.open(VERSION).then(c => c.put(e.request, copy)); }
+    if (r.ok && /\.(glb|png|jpg|webp|js|css|html|woff2?|svg)$/.test(url.pathname)) { const copy = r.clone(); caches.open(VERSION).then(c => c.put(e.request, copy)); }
     return r;
   })));
 });

@@ -9,13 +9,24 @@ A 3D museum in your hand: buildings and objects of Gusinje and Prokletije that y
   - `#/e/<exhibit>` an exhibit (3D viewer, object card, *On the cube*, *In your room*, *Showcase*, *Share*)
   - `#/vitrina` the showcase, up to 6 exhibits, one per side of the cube
   - `#/kocka` how to get the cube
-- `kocka.html`: the AR cube camera view.
-  - `?id=<exhibit>` shows one exhibit.
+- `kocka.html`: *Muzej na kocki*, the AR cube (see below).
+  - `?id=<exhibit>` starts with that exhibit (the whole collection can still be browsed).
   - `?ids=a,b,c` is the showcase: the side of the cube that points up chooses the exhibit.
+  - `?place=hand|top`, `?lang=me|sq|en`, `?debug` (tracking details), `?det=own` (no OpenCV), `?fov=<deg>` (fix the camera angle).
+- `kocka-stara.html`: the previous cube page (v0.x), kept for comparison; linked at the bottom of the new page's settings.
 - QR codes for physical labels point at `…/#/e/<exhibit>`.
 - `staze.html`: hiking trails around Gusinje in 3D, also in AR in front of you (see below).
 - `soba-test.html`: room test for the *Mladina sehara* escape room (see below).
 - `mace.html`: *Gdje su mace?*, a hide-and-seek game with kittens in your own room (see below). `?demo` opens the test room, `?debug` shows tracking details, points and occluders.
+
+## Muzej na kocki (`kocka.html`, v2)
+The exhibit stands on the printed cube in the phone's own browser: Safari on iPhone and Chrome on Android, no app and no WebXR. Code in `js/kocka/`, styles in `css/ar-kocka.css`.
+- **Tracking:** each camera frame is drawn into one of two buffers; markers are found by OpenCV's ArUco detector (`js/kocka/cv-worker.js`, OpenCV.js 5 WebAssembly in a background worker, `js/vendor/opencv/opencv.js`, 13 MB, about 3.7 MB downloaded the first time); the cube's pose is solved on the page from all visible markers (`js/cv/tracker.js` `solveAll`, `js/cv/pose.js`) and smoothed (One Euro). The frame and the pose found in it are shown together, so the exhibit never lags behind the picture. While OpenCV loads, or if it cannot load or stops answering, the museum's own detector (`js/cv/detector.js`) runs on the page. Search: the whole picture and a sharper centre crop in turn; once found, only the area around the cube at higher resolution. Mirror flips of one face are only accepted when the next frame agrees; poses are judged relative to the cube's size on screen (a paper cube is a little off-square).
+- **Camera** (`js/kocka/camera.js`): 4:3 sensor picture at 1×, continuous focus. The camera's field of view is learned from the cube whenever two faces are in view (`js/cv/calib.js`, from Gusinjska kocka) and saved per camera. If the browser opened a lens narrower than 40° (Chrome on the user's Android opened the telephoto), the next back camera is tried by itself; a lens picked by hand stops the search. On iPhone the plain "Back Camera" is preferred over the virtual dual/triple cameras, which switch lenses by themselves near the cube. If the picture stops (Safari pauses videos; a call or the app switcher ends the camera), the page says so and a tap restarts it; coming back to the page restarts it by itself. In-app browsers (Instagram, Facebook, …) get a note to open the page in Safari/Chrome (and an *Open in Chrome* link on Android).
+- **Scene** (`js/kocka/stage.js`, three.js r184): a pedestal covers the cube (limestone, marble, wood or none) with a dark top slab on whichever side points up (tilt sensor) and a brass name plate on the side facing you (it sinks into the stone and comes out on the other side when you walk around). Optional glass case. The exhibit rises out of the slab with a ring of light (a clipping plane moving up). Light follows the room: the camera picture's average brightness and colour set the strength and tint of the lights. Soft shadow plus a contact shadow. *In hand* puts the exhibit in place of the cube.
+- **Interface:** start screen with the exhibit turning on its pedestal (drag to turn it); camera view with the collection by gallery (swipe the label for the next exhibit), story sheet, settings, help, and a photo of the scene with the exhibit's name (share or save). Drag on the picture turns the exhibit, two fingers enlarge it, a double tap resets, a tap on the exhibit opens its story. ME / SQ / EN (`js/kocka/strings.js`; Albanian to be checked by a native speaker).
+- **Look:** jelek velvet, undyed wool, the madder and indigo of a Gusinje kilim (the woven band is also the loading bar), zlatovez gold. Fonts: Marcellus and Golos Text (SIL OFL, `css/fonts/`, latin subsets as WOFF).
+- **Tests:** `python3 -I tools/tests/cube_video.py OUT.y4m [--fov 23] [--light 0.4 --noise 8] [--dist 1.5]` renders a hand-held cube video with the frame number stamped in the corner and the true pose of every frame; `node tools/tests/kocka2.cjs OUTDIR OUT.y4m "?id=dzezva" 14` runs the page in Chromium on it and logs every tracked frame (`TOUR=1` / `SHEETS=1` take screenshots, `BLOCK_OPENCV=1` tests the fallback); `python3 -I tools/tests/kocka2_report.py OUT.json OUTDIR/log.json` compares the shown poses with the truth.
 
 ## Mladina sehara escape room: room test (`soba-test.html`)
 An AR escape room in the Gusinje ethno room is planned. It uses no room tracking: every station has its own printed card with an ArUco marker (MIP_36h12, the same detector as the AR cube), placed next to its object, plus a 3-digit code to type if the camera fails. Step 0 measures every card spot in the real room before any puzzle is built.
@@ -78,7 +89,7 @@ Data rights: OpenStreetMap (ODbL) and Copernicus DEM (free with credit) are cred
 - *In your room*:
   - Android Chrome: WebXR `immersive-ar` with hit-test. Buildings start as a 1:50 model and can switch to real size.
   - iPhone: AR Quick Look, with a USDZ made on the phone.
-- AR cube: `js/cv/` holds the marker detector and pose solver (ArUco MIP_36h12, 2×2 markers per face). Layout is in `data/layout.json`; print files are in `print/`.
+- AR cube: `js/cv/` holds the museum's own marker detector and the pose solver (ArUco MIP_36h12, 2×2 markers per face); `kocka.html` uses OpenCV.js for detection (see *Muzej na kocki*). Layout is in `data/layout.json`; print files are in `print/`.
 - Offline: `sw.js` caches the app shell, plus each model and thumbnail once it has been opened.
 
 ## Tests (tools/tests)
@@ -87,4 +98,4 @@ Data rights: OpenStreetMap (ODbL) and Copernicus DEM (free with credit) are cred
 - `mace.cjs` plays the kitten game in the test room (each white cat, the grey ones, the black cat's bolt, the fish, the win card).
 - `mace_video.cjs` films the test room as a phone video (`mace_film.html`), feeds it to Chromium as the camera, with matching motion-sensor events, and runs the real room-tracking engine: tracking, scan, hiding spots and cats over the picture.
 
-Third-party code: three.js (MIT); the 8th Wall XR Engine in `external/xr/` (© 2026 Niantic Spatial, Inc., used unmodified under the XR Engine License Agreement in `external/xr/LICENSE`, provided without warranty; it is credited on the trails page and with a "powered by 8th Wall" mark in AR on the trails and kitten pages; update it by copying `dist/` of the npm package `@8thwall/engine-binary`); the marker contour code is adapted from js-aruco / js-aruco2 (MIT, `js/cv/LICENSE-js-aruco.txt`).
+Third-party code: three.js (MIT); OpenCV.js 5 in `js/vendor/opencv/` (Apache 2.0, WebAssembly build from TechStark/opencv-js, licence next to it); fonts Marcellus and Golos Text in `css/fonts/` (SIL Open Font License); the 8th Wall XR Engine in `external/xr/` (© 2026 Niantic Spatial, Inc., used unmodified under the XR Engine License Agreement in `external/xr/LICENSE`, provided without warranty; it is credited on the trails page and with a "powered by 8th Wall" mark in AR on the trails and kitten pages; update it by copying `dist/` of the npm package `@8thwall/engine-binary`); the marker contour code is adapted from js-aruco / js-aruco2 (MIT, `js/cv/LICENSE-js-aruco.txt`).
