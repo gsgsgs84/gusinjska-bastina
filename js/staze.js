@@ -560,7 +560,7 @@ function enterAR(kind) {
   hideCTA(); hideHelp();
   S.xr = { kind, S0: { pos: holder.position.clone(), quat: holder.quaternion.clone(), scale: holder.scale.x } };
   controls.enabled = false;
-  S.arK = 1.9; buildTrails(); hiker.scale.setScalar(2.2);
+  S.arK = 1.9; buildTrails(); hiker.scale.setScalar(3.2);
   const ov = $('#xrOverlay');
   ov.dataset.kind = kind; ov.dataset.mode = kind === 'webxr' ? 'webxr' : 'search'; ov.hidden = false; ov.classList.remove('card-min');
   $('#xrTableBtn').hidden = kind !== 'webxr';

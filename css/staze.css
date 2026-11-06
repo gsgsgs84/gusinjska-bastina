@@ -97,6 +97,7 @@ body.in-ar { overflow: hidden; }
 .ar-status { flex: 1; min-width: 0; height: 44px; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 0 16px;
   border-radius: 999px; font-weight: 650; font-size: 15px; letter-spacing: .005em; }
 .ar-status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.staze-xr #xrMsg { background: none; padding: 0; border-radius: 0; max-width: none; color: inherit; font-size: inherit; }
 .ar-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; background: #e3a33b; animation: arPulse 1.6s infinite; }
 [data-mode="map"] .ar-dot { background: #5ccb8f; box-shadow: 0 0 10px rgba(92, 203, 143, .9); animation: none; }
 [data-mode="free"] .ar-dot { background: #74b6ec; box-shadow: 0 0 10px rgba(116, 182, 236, .8); animation: none; }
