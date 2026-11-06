@@ -133,7 +133,8 @@ body.in-ar { overflow: hidden; }
 .ar-arrow[hidden] { display: none; }
 .ar-arrow svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 
-.ar-dock { margin-top: auto; display: grid; gap: 8px; width: 100%; max-width: 500px; align-self: center; }
+.ar-dock { margin-top: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; width: 100%; max-width: 500px; align-self: center; min-width: 0; }
+.ar-dock > * { min-width: 0; max-width: 100%; }
 .ar-coach { pointer-events: auto; border-radius: 22px; padding: 18px 16px 14px; display: grid; gap: 8px; animation: arUp .5s cubic-bezier(.2, .8, .2, 1); }
 .ar-coach[hidden] { display: none; }
 .ar-coach h2 { font-family: var(--serif); font-size: 23px; color: var(--ink-ar); }
@@ -157,7 +158,8 @@ body.in-ar { overflow: hidden; }
 .ar-trailbar { pointer-events: auto; display: flex; align-items: center; gap: 8px; width: 100%; }
 .ar-chip { flex: 1; min-width: 0; height: 46px; display: flex; align-items: center; justify-content: center; gap: 9px; border-radius: 999px;
   color: var(--ink-ar); font: 600 16px/1.2 var(--serif); padding: 0 16px; cursor: pointer; }
-.ar-chip .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ar-chip .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ar-chip .dot, .ar-trailbar .ar-icon { flex: none; }
 .ar-chip .muted { font: 600 14px/1.2 var(--sans); color: var(--muted-ar); }
 .ar-chip .dot { box-shadow: 0 0 0 2px rgba(255, 255, 255, .85); }
 
