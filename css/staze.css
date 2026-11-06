@@ -101,6 +101,9 @@ body.in-ar { overflow: hidden; }
 .ar-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; background: #e3a33b; animation: arPulse 1.6s infinite; }
 [data-mode="map"] .ar-dot { background: #5ccb8f; box-shadow: 0 0 10px rgba(92, 203, 143, .9); animation: none; }
 [data-mode="free"] .ar-dot { background: #74b6ec; box-shadow: 0 0 10px rgba(116, 182, 236, .8); animation: none; }
+[data-mode="free"][data-room="on"] .ar-dot { background: #5ccb8f; box-shadow: 0 0 10px rgba(92, 203, 143, .9); }
+[data-mode="free"][data-room="search"] .ar-dot { background: #74b6ec; animation: arPulseBlue 1.6s infinite; }
+@keyframes arPulseBlue { 0% { box-shadow: 0 0 0 0 rgba(116, 182, 236, .6); } 70% { box-shadow: 0 0 0 11px rgba(116, 182, 236, 0); } 100% { box-shadow: 0 0 0 0 rgba(116, 182, 236, 0); } }
 [data-mode="held"] .ar-dot { background: #cfc7ba; animation: none; }
 [data-mode="lost"] .ar-dot { background: #ef6b55; }
 [data-kind="webxr"] .ar-dot { background: #74b6ec; animation: none; }

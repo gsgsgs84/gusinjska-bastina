@@ -5,6 +5,8 @@
 //  - Without the map: the relief floats in front of you; the motion sensors keep it in place while you turn the phone.
 // The phone's gyroscope is fused with the marker pose: turning the phone is followed instantly (no camera lag),
 // and the map's position is smoothed in the room instead of on the screen, so the tall mountains don't shake.
+// Without the map, room tracking (js/staze-room-track.js in js/staze-room-worker.js) follows the floor or table under
+// the relief, so it stays in place while you walk around it.
 import * as THREE from 'three';
 import { OneEuro } from './cv/pose.js';
 
@@ -69,6 +71,15 @@ export class CameraAR {
     this.stats = { fps: 0, ms: 0, n: 0, rms: 0, frames: 0, found: 0, mode: '' };
     this.lum = 0.5; this.viewW = 1; this.viewH = 1; this.badGyro = false;
     this.useGyro = !/[?&]nogyro\b/.test(location.search);
+    this.seq = 0; this.mapSeq = -1;
+    this.corr = new THREE.Quaternion();     // correction of the motion sensors' slow heading drift, measured by room tracking
+    this.room = { active: false, ready: false, busy: false, failed: false, tracking: false, pos: new THREE.Vector3(), okRun: 0, badRun: 0,
+      canvas: document.createElement('canvas'), seq: -1, planeY: 0, n: 0, inl: 0 };
+    this.room.g2d = this.room.canvas.getContext('2d', { willReadFrequently: true });
+  }
+  camQ(t, out) {                // camera orientation in the room at time t (ms): sensors, corrected
+    if (!this.gyroOn) return out.identity();
+    return this.motion.at(t, out).premultiply(this.corr);
   }
 
   // container: element the video goes into (behind the 3D canvas). motionAnswer: promise from requestPermission()
@@ -93,7 +104,70 @@ export class CameraAR {
     this.stream && this.stream.getTracks().forEach(t => t.stop());
     this.stream = null; this.video.srcObject = null; this.video.remove();
     if (this.worker) { this.worker.terminate(); this.worker = null; }
+    if (this.room.worker) { this.room.worker.terminate(); this.room.worker = null; }
+    Object.assign(this.room, { active: false, ready: false, busy: false, tracking: false });
     this.map = null; this.busy = false;
+  }
+
+  // ---- room tracking (no map): the floor or table at height planeY (room metres, y up) ----
+  roomStart(planeY) {
+    const R = this.room;
+    if (R.failed || !this.gyroOn) return false;
+    if (!R.worker) {
+      try { R.worker = new Worker(new URL('./staze-room-worker.js', import.meta.url)); }
+      catch { R.failed = true; return false; }
+      R.worker.onmessage = e => { const m = e.data; if (m.type === 'ready') R.ready = true; else if (m.type === 'room') this.roomResult(m); };
+      R.worker.onerror = () => { R.failed = true; R.active = false; R.tracking = false; };
+    }
+    Object.assign(R, { active: true, pending: true, planeY, tracking: false, okRun: 0, badRun: 0, busy: false, corrInit: false });
+    R.pos.set(0, 0, 0);
+    R.fp = new OneEuro(3, 1.4, 12, 1.5);
+    return true;
+  }
+  roomStop() {
+    const R = this.room;
+    if (R.worker) R.worker.postMessage({ type: 'stop' });
+    Object.assign(R, { active: false, tracking: false, busy: false, pending: false });
+    R.pos.set(0, 0, 0);
+  }
+  sendRoom(now) {
+    const R = this.room, v = this.video;
+    const sc = Math.min(1, 640 / Math.max(this.vw, this.vh));
+    const w = Math.round(this.vw * sc), h = Math.round(this.vh * sc);
+    if (R.canvas.width !== w || R.canvas.height !== h) { R.canvas.width = w; R.canvas.height = h; }
+    let img;
+    try { R.g2d.drawImage(v, 0, 0, w, h); img = R.g2d.getImageData(0, 0, w, h); } catch { return; }
+    const f = this.fRel * Math.max(w, h);
+    const K = { fx: f, fy: f, cx: w / 2, cy: h / 2 };
+    const t = now - LATENCY;
+    const qg = this.motion.at(t, new THREE.Quaternion());
+    const q = qg.clone().premultiply(this.corr);
+    const job = R.job = { id: (R.jobId = (R.jobId || 0) + 1), time: now, w, h, sc, qg, tag: window.__synth && window.__synth.idx };
+    R.busy = true; R.seq = this.seq;
+    // the tracker takes the raw sensor rotation (it uses only how it changes); the first frame gets the corrected one
+    const msg = { type: R.pending ? 'start' : 'frame', id: job.id, buf: img.data.buffer, w, h, K, R: quatToCv(R.pending ? q : qg), Rs: quatToCv(qg), time: t / 1000 };
+    if (R.pending) { msg.C = [R.pos.x, R.pos.y, R.pos.z]; msg.planeY = R.planeY; R.pending = false; }
+    R.worker.postMessage(msg, [img.data.buffer]);
+  }
+  roomResult(r) {
+    const R = this.room, job = R.job;
+    R.busy = false;
+    if (!R.active || !job || r.id !== job.id) return;
+    if (r.error && this.debug) console.warn('room', r.error);
+    R.n = r.n || 0; R.inl = r.inl || 0; R.pts = r.pts; R.ptsSc = job.sc; R.ptsAt = performance.now(); R.ms = r.ms;
+    if (window.__roomLog) window.__roomLog.push({ tag: job.tag, t: job.time, ok: r.ok, inl: r.inl, n: r.n, C: r.C, start: r.start });   // tests
+    if (r.start || r.idle) return;
+    if (r.ok) {
+      R.okRun++; R.badRun = 0;
+      // the camera's rotation as seen in the picture vs the sensors: the slow difference is the sensors' drift
+      const qv = cvToQuat(r.R, new THREE.Quaternion());
+      const meas = qv.multiply(job.qg.clone().invert());
+      if (!R.corrInit) { this.corr.copy(meas); R.corrInit = true; } else this.corr.slerp(meas, 0.12);
+      const p = R.fp.filter(r.C, job.time / 1000);
+      R.pos.set(p[0], p[1], p[2]);
+    } else { R.badRun++; R.okRun = 0; }
+    if (R.okRun >= 4) R.tracking = true;
+    else if (R.badRun >= 12) R.tracking = false;
   }
 
   async openCamera(deviceId) {
@@ -203,12 +277,20 @@ export class CameraAR {
     const v = this.video;
     if (v.videoWidth && (v.videoWidth !== this.vw || v.videoHeight !== this.vh)) { this.vw = v.videoWidth; this.vh = v.videoHeight; this.loadFocal(); }
     if (this.projDirty && this.vw) this.projection();
-    const gyro = this.gyroOn;
-    if (gyro) this.motion.at(now - LATENCY, this.camera.quaternion); else this.camera.quaternion.identity();
-    this.camera.position.set(0, 0, 0);
+    this.camQ(now - LATENCY, this.camera.quaternion);
+    if (this.room.active) this.camera.position.copy(this.room.pos); else this.camera.position.set(0, 0, 0);
     this.camera.updateMatrixWorld(true);
     if (this.busy && this.job && now - this.job.time > 1500) this.busy = false;        // a reply got lost: carry on
-    if (this.running && this.ready && !this.busy && v.readyState >= 2 && document.visibilityState === 'visible') this.send(now);
+    if (this.room.busy && this.room.job && now - this.room.job.time > 1500) this.room.busy = false;
+    // count new camera frames (if the browser stops reporting them, carry on at ~30 per second)
+    if (this.rvfc) { if (this.newFrame) { this.seq++; this.newFrame = false; } else if (now - this.frameAt > 200) { this.seq++; this.frameAt = now; } }
+    else if (now - (this.lastTick || 0) >= 30) { this.seq++; this.lastTick = now; }
+    if (this.running && v.readyState >= 2 && document.visibilityState === 'visible') {
+      const R = this.room;
+      if (R.active && R.ready && !R.busy && R.seq !== this.seq) this.sendRoom(now);
+      // while following the room, look for the map in every other frame only
+      if (this.ready && !this.busy && this.mapSeq !== this.seq && (!R.active || this.seq % 2 === 0)) this.send(now);
+    }
     if (this.map) this.map.fresh = now - this.map.seen < 260;
   }
   get gyroOn() { return this.useGyro && !this.badGyro && this.motion.ok; }
@@ -230,11 +312,8 @@ export class CameraAR {
 
   send(now) {
     const v = this.video;
-    // only new camera frames (if the browser stops reporting them, carry on at ~30 per second)
-    if (this.rvfc && !this.newFrame && now - this.frameAt < 200) return;
-    if (!this.rvfc && now - (this.lastSend || 0) < 30) return;
     if (this.useMain && now - (this.lastMain || 0) < 90) return;
-    this.newFrame = false; this.lastSend = now;
+    this.mapSeq = this.seq;
     const long = this.useMain ? 640 : PROC_LONG;
     const sc = Math.min(1, long / Math.max(this.vw, this.vh));
     const w = Math.round(this.vw * sc), h = Math.round(this.vh * sc);
@@ -271,7 +350,7 @@ export class CameraAR {
     const R = r.R, t = r.t;
     const Mcb = TMP.m1.set(R[0], R[1], R[2], t[0], -R[3], -R[4], -R[5], -t[1], -R[6], -R[7], -R[8], -t[2], 0, 0, 0, 1);
     const gyro = this.gyroOn;
-    if (gyro) this.motion.at(job.time - LATENCY, TMP.q); else TMP.q.identity();
+    this.camQ(job.time - LATENCY, TMP.q);
     const Mwb = TMP.m2.makeRotationFromQuaternion(TMP.q).multiply(Mcb);
     Mwb.decompose(TMP.p, TMP.q2, TMP.s);
     this.filter(TMP.p, TMP.q2, r, job.time, gyro);
@@ -314,6 +393,13 @@ export class CameraAR {
     m.matrix.compose(m.p, m.q, TMP.one);
   }
 
+  // tracked surface points in screen pixels (debug view)
+  debugRoom() {
+    const R = this.room, c = this.cover;
+    if (!R.active || !R.pts || !c) return [];
+    return R.pts.map(([x, y, ok]) => [x / R.ptsSc * c.s - c.offx, y / R.ptsSc * c.s - c.offy, ok]);
+  }
+
   // marker outlines in screen pixels (debug view)
   debugMarkers() {
     const lm = this.lastMarkers, c = this.cover;
@@ -322,6 +408,18 @@ export class CameraAR {
   }
 }
 const TMP = { m1: new THREE.Matrix4(), m2: new THREE.Matrix4(), q: new THREE.Quaternion(), q2: new THREE.Quaternion(), p: new THREE.Vector3(), s: new THREE.Vector3(), one: new THREE.Vector3(1, 1, 1) };
+
+// three.js camera orientation (camera -> room) <-> OpenCV rotation (room -> camera, x right, y down, z forward), row-major
+const M3 = new THREE.Matrix4();
+function quatToCv(q) {
+  const e = M3.makeRotationFromQuaternion(q).elements;      // column-major: column j = camera axis j in the room
+  return [e[0], e[1], e[2], -e[4], -e[5], -e[6], -e[8], -e[9], -e[10]];
+}
+function cvToQuat(R, out) {
+  // M = (F R)^T, F = diag(1,-1,-1): column j of M = row j of F R
+  M3.set(R[0], -R[3], -R[6], 0, R[1], -R[4], -R[7], 0, R[2], -R[5], -R[8], 0, 0, 0, 0, 1);
+  return out.setFromRotationMatrix(M3);
+}
 
 function luminance(d) {
   let s = 0, n = 0;
@@ -334,14 +432,16 @@ function luminance(d) {
 // =====================================================================================================
 const TXT = {
   me: {
+    inRoom: 'U prostoru', inRoomSub: 'Teren stoji na podu ili stolu. Obiđite ga, priđite bliže ili dodirnite stazu.',
+    roomSearch: 'Usmjerite kameru na pod ili sto i polako pomjerite telefon: kad uhvati šare na podlozi, teren ostaje na mjestu i dok hodate.',
     scan: 'Tražim AR mapu', scanSub: 'Usmjerite kameru na odštampanu mapu – teren će izrasti iz papira.',
     map: 'Na mapi', mapSub: 'Obiđite mapu, priđite bliže ili dodirnite stazu.',
     front: 'Ispred vas', frontSub: 'Okrećite telefon da ga razgledate. Prevucite prstom da ga okrenete, raširite dva prsta za veličinu.',
     frontNoGyro: 'Prevucite prstom da okrenete teren, raširite dva prsta za veličinu.',
     held: 'Mapa nije u kadru', heldSub: 'Teren drže senzori telefona. Vratite mapu u kadar za tačan položaj.',
     lost: 'Mapa je izgubljena', lostSub: 'Usmjerite kameru na mapu.',
-    coachH: 'Gusinje na vašem stolu', coachP: 'Odštampajte AR mapu i usmjerite kameru na nju: 3D teren izraste iz papira i ostaje na njemu dok ga obilazite. Radi i na iPhoneu i na Androidu.',
-    noMap: 'Nemam mapu – prikaži ispred mene', pdf: 'Mapa za štampu (PDF)', pdfA3: 'A3 za izložbu',
+    coachH: 'Gusinje na vašem stolu', coachP: 'Najstabilnije je na odštampanoj AR mapi: teren izraste iz papira. Bez mape ga postavite na pod ili sto – najbolje radi na površini sa šarama (tepih, drvo, novine).',
+    noMap: 'Bez mape – postavi na pod ili sto', pdf: 'Mapa za štampu (PDF)', pdfA3: 'A3 za izložbu',
     place: 'Ispred mene', toMap: 'Na mapu', height: 'Visina', labels: 'Nazivi', walk: 'Prošetaj', stop: 'Zaustavi', room: 'Prostorni AR', more: 'Još',
     pick: 'Dodirnite stazu na terenu', moreH: 'AR podešavanja', camera: 'Druga kamera', cameraSub: 'Ako je slika previše uvećana, probajte drugu zadnju kameru.',
     quick: 'Quick Look (iPhone)', quickSub: 'Appleov AR prikaz: teren stoji u prostoru, bez naziva i dodira.',
@@ -353,14 +453,16 @@ const TXT = {
     calibrated: 'Kamera izmjerena', here: 'Teren je ovdje',
   },
   sq: {
+    inRoom: 'Në hapësirë', inRoomSub: 'Terreni qëndron në dysheme ose tavolinë. Ecni rreth tij, afrohuni ose prekni një shteg.',
+    roomSearch: 'Drejtojeni kamerën nga dyshemeja ose tavolina dhe lëvizni ngadalë telefonin: kur kap motivet e sipërfaqes, terreni qëndron në vend edhe kur ecni.',
     scan: 'Po kërkoj hartën AR', scanSub: 'Drejtojeni kamerën nga harta e printuar – terreni do të ngrihet nga letra.',
     map: 'Në hartë', mapSub: 'Ecni rreth hartës, afrohuni ose prekni një shteg.',
     front: 'Para jush', frontSub: 'Rrotulloni telefonin për ta parë. Rrëshqitni gishtin për ta kthyer, hapni dy gishta për madhësinë.',
     frontNoGyro: 'Rrëshqitni gishtin për ta kthyer terrenin, hapni dy gishta për madhësinë.',
     held: 'Harta nuk është në kuadër', heldSub: 'Terrenin e mbajnë sensorët e telefonit. Kthejeni hartën në kuadër për vendin e saktë.',
     lost: 'Harta humbi', lostSub: 'Drejtojeni kamerën nga harta.',
-    coachH: 'Gucia në tavolinën tuaj', coachP: 'Printoni hartën AR dhe drejtojeni kamerën nga ajo: terreni 3D ngrihet nga letra dhe qëndron mbi të ndërsa ecni rreth saj. Punon në iPhone dhe në Android.',
-    noMap: 'Nuk kam hartë – shfaqe para meje', pdf: 'Harta për printim (PDF)', pdfA3: 'A3 për ekspozitë',
+    coachH: 'Gucia në tavolinën tuaj', coachP: 'Më e qëndrueshme është mbi hartën AR të printuar: terreni ngrihet nga letra. Pa hartë vendoseni në dysheme ose tavolinë – punon më mirë mbi një sipërfaqe me motive (qilim, dru, gazetë).',
+    noMap: 'Pa hartë – vendose në dysheme ose tavolinë', pdf: 'Harta për printim (PDF)', pdfA3: 'A3 për ekspozitë',
     place: 'Para meje', toMap: 'Në hartë', height: 'Lartësia', labels: 'Emrat', walk: 'Ec', stop: 'Ndalo', room: 'AR në hapësirë', more: 'Më shumë',
     pick: 'Prekni një shteg në terren', moreH: 'Cilësimet AR', camera: 'Kamera tjetër', cameraSub: 'Nëse pamja është shumë e zmadhuar, provoni një kamerë tjetër të pasme.',
     quick: 'Quick Look (iPhone)', quickSub: 'Pamja AR e Apple: terreni qëndron në hapësirë, pa emra dhe pa prekje.',
@@ -372,14 +474,16 @@ const TXT = {
     calibrated: 'Kamera u mat', here: 'Terreni është këtu',
   },
   en: {
+    inRoom: 'In the room', inRoomSub: 'The terrain stands on the floor or table. Walk around it, lean in or tap a trail.',
+    roomSearch: 'Point the camera at the floor or table and move the phone slowly: once it catches the surface’s texture, the terrain stays put even as you walk.',
     scan: 'Looking for the AR map', scanSub: 'Point the camera at the printed map – the terrain will rise out of the paper.',
     map: 'On the map', mapSub: 'Walk around the map, lean in or tap a trail.',
     front: 'In front of you', frontSub: 'Turn the phone to look around it. Drag to rotate it, pinch to resize.',
     frontNoGyro: 'Drag to rotate the terrain, pinch to resize.',
     held: 'Map out of view', heldSub: 'The phone’s motion sensors hold the terrain. Bring the map back into view for the exact position.',
     lost: 'Map lost', lostSub: 'Point the camera at the map.',
-    coachH: 'Gusinje on your table', coachP: 'Print the AR map and point the camera at it: the 3D terrain rises out of the paper and stays on it while you walk around. Works on iPhone and Android.',
-    noMap: 'No map – show it in front of me', pdf: 'Printable map (PDF)', pdfA3: 'A3 for exhibitions',
+    coachH: 'Gusinje on your table', coachP: 'Steadiest on the printed AR map: the terrain rises out of the paper. Without the map, place it on the floor or a table – it works best on a patterned surface (rug, wood, newspaper).',
+    noMap: 'No map – place it on the floor or table', pdf: 'Printable map (PDF)', pdfA3: 'A3 for exhibitions',
     place: 'In front of me', toMap: 'On the map', height: 'Height', labels: 'Names', walk: 'Walk', stop: 'Stop', room: 'Room AR', more: 'More',
     pick: 'Tap a trail on the terrain', moreH: 'AR settings', camera: 'Other camera', cameraSub: 'If the picture looks zoomed in, try another back camera.',
     quick: 'Quick Look (iPhone)', quickSub: 'Apple’s AR view: the terrain stands in the room, without names or taps.',
@@ -472,6 +576,7 @@ export class TrailsAR {
     if (age < 220 && this.mode !== 'map' && !this.detached) this.enterMap(now);
     else if (this.mode === 'map' && age > 650) { this.setMode(e.gyroOn ? 'held' : 'lost'); this.lostAt = now; }
     if (this.mode === 'held' && !e.gyroOn) { this.setMode('lost'); this.lostAt = now; }
+    if (this.mode === 'free') this.roomStatus();
     // where the relief should be
     const H = c.holder;
     if (this.mode === 'map' || this.mode === 'held') {
@@ -508,6 +613,10 @@ export class TrailsAR {
     const c = this.ctx, H = c.holder, first = this.mode === 'search' || this.mode === 'lost';
     clearTimeout(this.freeTimer);
     this.hideCoach();
+    if (this.engine.room.active) {          // the map takes over: back to the camera-centred room the map pose uses
+      H.position.sub(this.engine.room.pos);
+      this.engine.roomStop();
+    }
     this.engine.map.matrix.decompose(this.target.p, this.target.q, TMP.s); this.target.s = MAP_WIDTH;
     if (first) {
       H.position.copy(this.target.p); H.quaternion.copy(this.target.q); H.scale.setScalar(MAP_WIDTH);
@@ -533,7 +642,14 @@ export class TrailsAR {
     const c = this.ctx, H = c.holder, now = performance.now(), wasHidden = this.mode === 'search' || this.mode === 'lost' || !H.visible;
     clearTimeout(this.freeTimer);
     this.hideCoach();
-    if (recenter) this.placeFree();
+    const room = this.engine.room;
+    if (recenter) {
+      if (room.active) this.placeOnPlane();
+      else {
+        this.placeFree();
+        if (this.engine.gyroOn && this.engine.roomStart(this.free.pos.y)) this.roomState = null;
+      }
+    }
     this.freeTarget();
     if (wasHidden) {
       H.position.copy(this.target.p); H.quaternion.copy(this.target.q); H.scale.setScalar(this.target.s);
@@ -557,6 +673,20 @@ export class TrailsAR {
       const dist = this.fitDist(f.scale);
       f.pos.set(0, -0.05 * dist, -dist); f.yaw = 0; f.tilt = 38 * D2R;
     }
+  }
+  // put the relief where the middle of the view meets the tracked floor or table
+  placeOnPlane() {
+    const e = this.engine, cam = e.camera, f = this.free, R = e.room;
+    const o = R.pos, d = new THREE.Vector3(0, 0, -1).applyQuaternion(cam.quaternion);
+    const fh = new THREE.Vector3(d.x, 0, d.z); if (fh.lengthSq() < 1e-4) fh.set(0, 0, -1); fh.normalize();
+    const drop = o.y - R.planeY;
+    if (d.y < -0.2 && drop > 0) {
+      const s = Math.min(drop / -d.y, drop * 6);
+      f.pos.copy(o).addScaledVector(d, s); f.pos.y = R.planeY;
+    } else {                                   // looking ahead: on the surface a little in front
+      f.pos.copy(o).addScaledVector(fh, Math.max(0.05, drop) / Math.tan(30 * D2R)); f.pos.y = R.planeY;
+    }
+    f.yaw = Math.atan2(-fh.x, -fh.z); f.tilt = 0;
   }
   fitDist(scale) {
     const P = this.engine.camera.projectionMatrix.elements;
@@ -584,6 +714,21 @@ export class TrailsAR {
     document.querySelector('#xrScan').hidden = !(mode === 'search' || mode === 'lost');
     const pl = document.querySelector('#xrPlace span');
     if (pl) pl.textContent = this.T(mode === 'free' && this.detached ? 'toMap' : 'place');
+    this.roomState = null;
+    if (mode === 'free') this.roomStatus();
+    else this.ov.dataset.room = '';
+  }
+  roomStatus() {             // free mode: is the floor or table being followed?
+    const e = this.engine, R = e.room;
+    const st = !e.gyroOn || R.failed || !R.active ? 'off' : R.tracking ? 'on' : 'search';
+    if (st === this.roomState) return;
+    this.roomState = st; this.ov.dataset.room = st;
+    if (st === 'off') return;
+    document.querySelector('#xrMsg').textContent = this.T(st === 'on' ? 'inRoom' : 'front');
+    const hint = document.querySelector('#xrHint');
+    hint.textContent = this.T(st === 'on' ? 'inRoomSub' : 'roomSearch');
+    hint.classList.remove('gone'); clearTimeout(this.hintT);
+    this.hintT = setTimeout(() => hint.classList.add('gone'), st === 'on' ? 5200 : 9000);
   }
   paint() {
     const $ = s => document.querySelector(s), T = k => this.T(k);
@@ -724,8 +869,10 @@ export class TrailsAR {
       g.fillStyle = '#ff3b6b'; g.fillRect(m.pts[0][0] - 3, m.pts[0][1] - 3, 6, 6);
       g.fillStyle = '#3df59a'; g.fillText(String(m.id), m.pts[0][0] + 5, m.pts[0][1] - 5);
     }
-    const s = e.video, mm = e.map;
+    for (const [x, y, ok] of e.debugRoom()) { g.fillStyle = ok ? '#3df59a' : '#ff3b6b'; g.fillRect(x - 2, y - 2, 4, 4); }
+    const s = e.video, mm = e.map, rm = e.room;
     const lines = [
+      `room ${rm.active ? (rm.tracking ? 'tracking' : 'searching') : rm.failed ? 'failed' : 'off'}  points ${rm.n} used ${rm.inl}  ${(rm.ms || 0).toFixed(0)} ms  cam ${rm.pos.x.toFixed(2)} ${rm.pos.y.toFixed(2)} ${rm.pos.z.toFixed(2)}`,
       `mode ${this.mode}  gyro ${e.gyroOn ? 'on' : e.badGyro ? 'BAD' : e.motion.count ? 'stale' : 'none'}  worker ${e.useMain ? 'main' : e.worker ? 'yes' : '-'}`,
       `video ${s.videoWidth}×${s.videoHeight}  ${s.paused ? 'PAUSED' : 'playing'}  ready ${s.readyState}`,
       `markers ${st.n}  rms ${st.rms.toFixed(2)}px  detect ${st.ms.toFixed(0)} ms  ${st.fps.toFixed(1)} /s`,

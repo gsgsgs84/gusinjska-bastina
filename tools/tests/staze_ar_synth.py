@@ -7,6 +7,7 @@ defocus and motion blur, noise, uneven light, colour cast, JPEG compression, and
 usage:
   python3 tools/tests/staze_ar_synth.py random OUT N [seed]     -> OUT/f0000.jpg ... + OUT/truth.json (random poses)
   python3 tools/tests/staze_ar_synth.py path OUT                -> OUT/p0000.jpg ... + OUT/path.json (stop-and-go walk around)
+  python3 tools/tests/staze_ar_synth.py room OUT                -> OUT/r0000.jpg ... + OUT/room.json (walk round a desk, no map)
 Frames are portrait 960x1280 (a phone held upright), map frame in metres: x east, y up, z south, origin at map centre.
 """
 import json
@@ -242,9 +243,84 @@ def path_set(out, fps=12, seed=3, fov=63.0):
     print("frames", n, "seconds", total)
 
 
+def desk_texture(rng, size_px=2000):
+    """a desk seen from above: wood, papers, a book, a mug ring, cables and small marks (1.2 mm per pixel)"""
+    img = table_texture(rng, size_px, size_px)
+    for _ in range(int(size_px * size_px / 9000)):               # small marks, dust, wood knots
+        x, y = int(rng.uniform(0, size_px)), int(rng.uniform(0, size_px))
+        c = tuple(int(v) for v in rng.integers(20, 235, 3))
+        if rng.random() < 0.6: cv2.circle(img, (x, y), int(rng.uniform(1, 4)), c, -1)
+        else: cv2.line(img, (x, y), (x + int(rng.normal(0, 14)), y + int(rng.normal(0, 14))), c, 1)
+    for _ in range(6):                                          # cables
+        pts = np.cumsum(rng.normal(0, 40, (12, 2)), 0) + rng.uniform(0, size_px, 2)
+        cv2.polylines(img, [pts.astype(np.int32)], False, (25, 25, 25), 5)
+    return cv2.GaussianBlur(img, (0, 0), 0.6)
+
+
+# a walk round the terrain standing on a desk: (seconds, dist, elev, az, turn) key poses, linear in between
+ROOM_WALK = [(0, 0.55, 48, 0, 0), (1.5, 0.55, 48, 0, 0), (5.5, 0.50, 40, 110, 0), (7.5, 0.30, 52, 140, 0), (9.0, 0.30, 52, 140, 55),
+             (10.5, 0.42, 45, 140, 0), (14.5, 0.55, 35, -40, 0), (16.0, 0.62, 60, -60, 0)]
+
+
+ROOM_WALK2 = [(0, 0.45, 55, 30, 0), (1.0, 0.45, 55, 30, 0), (4.0, 0.40, 45, -60, 0), (6.0, 0.60, 38, -120, -30), (8.5, 0.35, 60, -200, 0),
+              (11.0, 0.50, 42, -260, 0), (13.0, 0.50, 42, -330, 20)]
+
+
+def room_set(out, fps=30, seed=5, fov=66.0, w=480, h=640, variant=1):
+    rng = np.random.default_rng(seed)
+    os.makedirs(out, exist_ok=True)
+    if variant == 2:              # a patterned rug / tablecloth, a different walk
+        tex = table_texture(np.random.default_rng(21), 2000, 2000)
+        yy, xx = np.mgrid[0:2000, 0:2000]
+        patt = ((np.sin(xx / 9.0) * np.sin(yy / 9.0) > 0.35) * 60).astype(np.float32)
+        tex = np.clip(tex.astype(np.float32) - patt[..., None] * np.array([0.3, 0.6, 1.0]), 0, 255).astype(np.uint8)
+        global ROOM_WALK
+        ROOM_WALK = ROOM_WALK2
+    else:
+        tex = desk_texture(np.random.default_rng(11))
+    f = (max(w, h) / 2) / math.tan(math.radians(fov) / 2)
+    K = np.array([[f, 0, w / 2], [0, f, h / 2], [0, 0, 1.0]])
+    ppm = 1000 / 1.2
+    A = np.array([[1 / ppm, 0, -tex.shape[1] / 2 / ppm], [0, 1 / ppm, -tex.shape[0] / 2 / ppm], [0, 0, 1]])
+    frames = []
+    T = ROOM_WALK[-1][0]
+    prev_px = None
+    for i in range(int(T * fps)):
+        tm = i / fps
+        k = max(j for j in range(len(ROOM_WALK)) if ROOM_WALK[j][0] <= tm)
+        k2 = min(k + 1, len(ROOM_WALK) - 1)
+        a, b = ROOM_WALK[k], ROOM_WALK[k2]
+        u = 0 if b[0] == a[0] else (tm - a[0]) / (b[0] - a[0]); u = u * u * (3 - 2 * u)
+        q = [a[j] + (b[j] - a[j]) * u for j in range(1, 5)]
+        dist, elev, az, turn = q
+        # a little hand shake
+        look = (rng.normal(0, 0.002), 0, rng.normal(0, 0.002))
+        R, t = pose_from(dist, elev, az, look, rng.normal(0, 0.4), turn)
+        P = K @ np.column_stack([R[:, 0], R[:, 2], t])
+        img = cv2.warpPerspective(tex, P @ A, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE).astype(np.float32)
+        px = project(R, t, K, [0, 0, 0])
+        if prev_px is not None:                               # motion blur from the movement during the exposure
+            mv = np.array(px) - prev_px; L = float(np.hypot(*mv)) * 0.35
+            if L >= 1:
+                kk = np.zeros((int(L) * 2 + 1, int(L) * 2 + 1), np.float32); c = int(L)
+                d = mv / max(1e-6, np.hypot(*mv))
+                cv2.line(kk, (int(c - d[0] * L), int(c - d[1] * L)), (int(c + d[0] * L), int(c + d[1] * L)), 1.0, 1)
+                img = cv2.filter2D(img, -1, kk / kk.sum())
+        prev_px = np.array(px)
+        yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+        img = img * (0.95 - 0.2 * (((xx - w / 2) / w) ** 2 + ((yy - h / 2) / h) ** 2))[..., None] + rng.normal(0, 3, img.shape)
+        cv2.imwrite(os.path.join(out, f"r{i:04d}.jpg"), np.clip(img, 0, 255).astype(np.uint8), [cv2.IMWRITE_JPEG_QUALITY, 80])
+        C = (-R.T @ t).tolist()
+        frames.append({"t": tm, "R": R.flatten().tolist(), "t_": t.tolist(), "C": C})
+    json.dump({"w": w, "h": h, "fps": fps, "K": [K[0, 0], K[0, 2], K[1, 2]], "fov": fov, "frames": frames, "walk": ROOM_WALK}, open(os.path.join(out, "room.json"), "w"))
+    print("frames", len(frames))
+
+
 if __name__ == "__main__":
     mode, out = sys.argv[1], sys.argv[2]
     if mode == "random":
         random_set(out, int(sys.argv[3]), int(sys.argv[4]) if len(sys.argv) > 4 else 1)
+    elif mode == "room":
+        room_set(out, variant=int(sys.argv[3]) if len(sys.argv) > 3 else 1)
     else:
         path_set(out)

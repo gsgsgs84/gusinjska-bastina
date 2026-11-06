@@ -1,7 +1,9 @@
 // End-to-end test of the trails AR in headless Chrome with a simulated phone: the camera plays the synthetic walk
 // (tools/tests/staze_ar_synth.py path DIR) and matching motion-sensor events are sent, so the AR overlay can be compared
 // with the true position of the printed map on screen. Serve the repo on port 8130 first.
-// usage: node tools/tests/staze_ar_e2e.cjs SYNTH_DIR OUT [gyro|nogyro|free] [me|sq|en]
+// usage: node tools/tests/staze_ar_e2e.cjs SYNTH_DIR OUT [gyro|nogyro|free|room] [me|sq|en]
+//   room: SYNTH_DIR from `staze_ar_synth.py room`; taps "No map" and walks round the desk, checking that the relief
+//   stays on the same spot of the desk.
 // Software WebGL here draws only ~2 frames per second, so the page runs in slow motion: its clock (performance.now and
 // requestAnimationFrame) runs at TIME_K of real time, which gives the app ~12 frames per second of its own time.
 const fs = require('fs');
@@ -9,7 +11,8 @@ const path = require('path');
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const [dir, out, mode = 'gyro', lang = 'me'] = process.argv.slice(2);
 const TIME_K = +(process.env.TIME_K || 0.15);
-const cfg = JSON.parse(fs.readFileSync(path.join(dir, 'path.json')));
+const cfg = JSON.parse(fs.readFileSync(path.join(dir, mode === 'room' ? 'room.json' : 'path.json')));
+if (mode === 'room') for (const f of cfg.frames) f.t_ = f.t_ || f.t;
 fs.mkdirSync(out, { recursive: true });
 
 // runs in the page before its own scripts
@@ -59,7 +62,9 @@ function fakePhone({ cfg, mode, timeK }) {
     return { alpha: ((ey * 180 / Math.PI + YAW0) % 360 + 360) % 360, beta: ex * 180 / Math.PI, gamma: -ez * 180 / Math.PI };
   };
   const imgs = new Array(n);
-  const load = i => { if (!imgs[i]) { imgs[i] = new Image(); imgs[i].src = '/__synth/p' + String(i).padStart(4, '0') + '.jpg'; } return imgs[i]; };
+  const PRE = mode === 'room' ? 'r' : 'p';
+  const load = i => { if (!imgs[i]) { imgs[i] = new Image(); imgs[i].src = '/__synth/' + PRE + String(i).padStart(4, '0') + '.jpg'; } return imgs[i]; };
+  S.walkT0 = mode === 'room' ? Infinity : 0;      // room test: the walk starts when "No map" is tapped
   for (let i = 0; i < Math.min(n, 40); i++) load(i);
   const md = navigator.mediaDevices || (navigator.mediaDevices = {});
   md.enumerateDevices = async () => [{ kind: 'videoinput', deviceId: 'synth', label: 'Synthetic back camera', groupId: 'g' }];
@@ -68,7 +73,7 @@ function fakePhone({ cfg, mode, timeK }) {
     const g = c.getContext('2d');
     g.fillStyle = '#777'; g.fillRect(0, 0, c.width, c.height);
     S.t0 = performance.now(); S.started = true;
-    const frameIdx = t => mode === 'free' ? Math.min(Math.floor(t * cfg.fps), 30) : Math.min(n - 1, Math.floor(t * cfg.fps));
+    const frameIdx = t => mode === 'free' ? Math.min(Math.floor(t * cfg.fps), 30) : Math.max(0, Math.min(n - 1, Math.floor((t - Math.min(t, S.walkT0)) * cfg.fps)));
     setInterval(() => {
       const t = (performance.now() - S.t0) / 1000, i = frameIdx(t);
       for (let k = i; k < Math.min(n, i + 30); k++) load(k);
@@ -76,11 +81,30 @@ function fakePhone({ cfg, mode, timeK }) {
       if (im && im.complete && im.naturalWidth && S.idx !== i) { g.drawImage(im, 0, 0); S.idx = i; S.drawnAt = performance.now(); }
     }, 1000 / cfg.fps / 3 * timeK);
     if (mode !== 'nogyro') setInterval(() => {
-      const t = (performance.now() - S.t0) / 1000 + 0.05 - 0.5 / cfg.fps;      // the app expects the picture 50 ms behind the sensor
+      let t = (performance.now() - S.t0) / 1000 + 0.05 - 0.5 / cfg.fps;      // the app expects the picture 50 ms behind the sensor
+      if (mode === 'room') t = Math.max(0, t - Math.min(t, S.walkT0));
       const o = S.orientation(S.qAt(Math.max(0, t)));
       window.dispatchEvent(new DeviceOrientationEvent('deviceorientation', { alpha: o.alpha, beta: o.beta, gamma: o.gamma, absolute: false }));
     }, 16);
     return c.captureStream(Math.max(4, 30 * timeK));
+  };
+}
+
+// room test helpers: the true camera of the frame on screen
+function roomHelpers() {
+  const cam = () => { const S = window.__synth, f = window.__cfg.frames[S.idx], e = window.__staze.S.ar.engine; return { f, K: window.__cfg.K, cov: e.cover }; };
+  window.__deskPoint = ([x, y]) => {          // screen point -> point on the true desk (y = 0)
+    const { f, K, cov } = cam();
+    const u = (x + cov.offx) / cov.s, v = (y + cov.offy) / cov.s;
+    const m = [(u - K[1]) / K[0], (v - K[2]) / K[0], 1], R = f.R;
+    const d = [R[0] * m[0] + R[3] * m[1] + R[6], R[1] * m[0] + R[4] * m[1] + R[7], R[2] * m[0] + R[5] * m[1] + R[8]];
+    const s = -f.C[1] / d[1];
+    return [f.C[0] + s * d[0], 0, f.C[2] + s * d[2]];
+  };
+  window.__projectTrue = X => {
+    const { f, K, cov } = cam(), R = f.R, a = X[0] - f.C[0], b = X[1] - f.C[1], c = X[2] - f.C[2];
+    const x = R[0] * a + R[1] * b + R[2] * c, y = R[3] * a + R[4] * b + R[5] * c, z = R[6] * a + R[7] * b + R[8] * c;
+    return z > 0 ? [(K[0] * x / z + K[1]) * cov.s - cov.offx, (K[0] * y / z + K[2]) * cov.s - cov.offy] : null;
   };
 }
 
@@ -121,6 +145,8 @@ function sample() {
   await ctx.addInitScript(l => { localStorage.setItem('gkb.lang', JSON.stringify(l)); localStorage.removeItem('gkb.staze.ar.f'); localStorage.setItem('gkb.staze.exag', '1.5'); }, lang);
   await ctx.addInitScript(fakePhone, { cfg, mode, timeK: TIME_K });
   await ctx.addInitScript(c => { window.__cfg = c; }, cfg);
+  await ctx.addInitScript(roomHelpers);
+  if (mode === 'room') await ctx.addInitScript(() => { window.__roomLog = []; });
   await ctx.route('**/__synth/**', r => r.fulfill({ path: path.join(dir, path.basename(new URL(r.request().url()).pathname)), contentType: 'image/jpeg' }));
   const p = await ctx.newPage();
   const logs = []; p.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') logs.push(m.type() + ': ' + m.text()); }); p.on('pageerror', e => logs.push('ERR ' + e.message));
@@ -131,13 +157,33 @@ function sample() {
   await p.tap('#ctaStart');
   const shots = new Set(), samples = [];
   const keys = cfg.keys;
-  const total = mode === 'free' ? 16 : keys[keys.length - 1].t2;
+  const total = mode === 'free' ? 16 : mode === 'room' ? cfg.frames.length / cfg.fps + 2.5 : keys[keys.length - 1].t2;
+  let anchor = null;
   let tapped = false, freeClicked = false;
   for (;;) {
     const s = await p.evaluate(sample);
     if (s) {
       samples.push(s);
-      if (mode === 'free') {
+      if (mode === 'room') {
+        if (!freeClicked && s.coach) {
+          await p.screenshot({ path: `${out}/1_coach.png` }); await p.tap('#coachFree'); freeClicked = true;
+          await p.evaluate(() => { window.__synth.walkT0 = (performance.now() - window.__synth.t0) / 1000 + 0.6; });
+        }
+        // the spot of the real desk under the relief's centre when the walk starts; afterwards the relief must stay on it
+        const walk = await p.evaluate(() => (performance.now() - window.__synth.t0) / 1000 - window.__synth.walkT0);
+        s.walk = walk;
+        if (freeClicked && walk > -0.1 && !anchor && s.center !== 'behind') {
+          anchor = await p.evaluate(c => window.__deskPoint(c), s.center);
+          console.log('anchor on the desk', anchor.map(v => v.toFixed(3)).join(', '));
+        }
+        if (anchor && s.center !== 'behind') {
+          const tr = await p.evaluate(a => window.__projectTrue(a), anchor);
+          s.roomErr = tr ? Math.hypot(tr[0] - s.center[0], tr[1] - s.center[1]) : null;
+        }
+        s.room = await p.evaluate(() => { const e = window.__staze.S.ar.engine, r = e.room, c = e.camera; return { on: r.tracking, n: r.n, inl: r.inl, st: document.querySelector('#xrOverlay').dataset.room,
+          pos: r.pos.toArray(), q: c.quaternion.toArray(), corr: e.corr.toArray(), idx: window.__synth.idx, planeY: r.planeY }; });
+        for (const [at, name] of [[0.4, '2_room_start'], [4.5, '3_room_side'], [7.2, '4_room_close'], [12, '5_room_back'], [15.6, '6_room_end']]) if (walk > at && !shots.has(name)) { shots.add(name); await p.screenshot({ path: `${out}/${name}.png` }); }
+      } else if (mode === 'free') {
         if (!freeClicked && s.coach) { await p.screenshot({ path: `${out}/1_coach.png` }); await p.tap('#coachFree'); freeClicked = true; }
         for (const [at, name] of [[3.5, '2_free'], [6.6, '3_free_turned'], [9.6, '4_free_back'], [12.5, '5_free_other_side']]) if (s.t > at && !shots.has(name)) { shots.add(name); await p.screenshot({ path: `${out}/${name}.png` }); }
       } else {
@@ -165,11 +211,19 @@ function sample() {
   }
   const sel = await p.evaluate(() => window.__staze.S.sel);
   fs.writeFileSync(`${out}/samples.json`, JSON.stringify(samples));
+  if (mode === 'room') fs.writeFileSync(`${out}/roomlog.json`, JSON.stringify(await p.evaluate(() => window.__roomLog)));
   // summary per stop of the walk
   const med = a => { const q = a.slice().sort((x, y) => x - y); return q.length ? q[q.length >> 1] : NaN; };
   const mx = a => a.length ? Math.max(...a) : NaN;
   console.log(`mode ${mode}; ${samples.length} samples; trail tapped at ${tapped ? tapped.map(Math.round) : '-'} -> selected ${sel}`);
-  if (mode !== 'free') for (const k of keys) {
+  if (mode === 'room') {
+    const g = samples.filter(s => s.walk > 0 && s.roomErr != null);
+    const segs = [[0, 1.5], [1.5, 5.5], [5.5, 7.5], [7.5, 9], [9, 10.5], [10.5, 14.5], [14.5, 16.5]];
+    for (const [a, b] of segs) {
+      const q = g.filter(s => s.walk >= a && s.walk < b);
+      if (q.length) console.log(`walk ${a}-${b} s: relief vs desk spot px med ${med(q.map(s => s.roomErr)).toFixed(1)} max ${mx(q.map(s => s.roomErr)).toFixed(1)}  tracking ${q.filter(s => s.room.on).length}/${q.length}  points ${med(q.map(s => s.room.n))}`);
+    }
+  } else if (mode !== 'free') for (const k of keys) {
     const g = samples.filter(s => s.t > k.t1 + 0.9 && s.t < k.t2 && s.visible);
     const all = samples.filter(s => s.t > k.t1 + 0.4 && s.t < k.t2);
     const modes = [...new Set(all.map(s => s.mode))].join('/');
