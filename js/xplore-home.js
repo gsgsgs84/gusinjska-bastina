@@ -10,7 +10,7 @@
   const CSS = '.xp-home{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 13px 0 8px;border-radius:999px;' +
     'background:rgba(255,255,255,.95);color:#17222a;text-decoration:none;font:700 15px/1 "Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;' +
     'letter-spacing:.01em;box-shadow:0 6px 18px -6px rgba(0,0,0,.4),0 0 0 1px rgba(23,34,42,.08);-webkit-tap-highlight-color:transparent;' +
-    'transition:transform .2s ease,box-shadow .2s ease;white-space:nowrap;flex:none}' +
+    'transition:transform .2s ease,box-shadow .2s ease;white-space:nowrap;flex:none;pointer-events:auto}' +
     '.xp-home:hover{transform:translateY(-1px);box-shadow:0 10px 22px -8px rgba(0,0,0,.45),0 0 0 1px rgba(23,34,42,.1)}.xp-home:active{transform:scale(.96)}' +
     '.xp-home:focus-visible{outline:3px solid #005af7;outline-offset:2px}' +
     '.xp-home .xp-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}' +
