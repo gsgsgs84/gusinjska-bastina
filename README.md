@@ -89,6 +89,8 @@ Data rights: OpenStreetMap (ODbL) and Copernicus DEM (free with credit) are cred
 3. Make thumbnails: serve the repo on port 8130 and run `node tools/thumbs/make_thumbs.cjs`.
 4. Bump `VERSION` in `sw.js` so phones refresh their offline copy.
 
+Fixing a model's shape: `gltfpack -i models/<id>.glb -o raw.glb -noq` gives an uncompressed copy (gltfpack built from zeux/meshoptimizer); `tools/models/glbio.py` reads and writes it as numpy arrays; compress again with `gltfpack -i fixed.glb -o models/<id>.glb -noq -cc`, then re-make the thumbnail and bump `VERSION`. Example: `tools/models/dzezva_fix.py` (7 Nov 2026) gave the džezva a pouring spout on the rim, like the user's own džezva (about 100° from the handle, on the left looking from the handle), and sliced the round knob at the end of the handle flat to the bar.
+
 ## How it works
 - The 3D viewer uses three.js r184 (vendored in `js/vendor/three`) with OrbitControls.
 - *In your room*:
